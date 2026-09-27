@@ -140,10 +140,15 @@ def show_login():
         col_idx = i % 3
         with cols[col_idx]:
             with st.container(border=True):
+                img_rendered = False
                 if os.path.exists(c_path):
-                    st.image(c_path, use_container_width=True)
-                else:
-                    st.markdown("<div style='font-size: 32px; text-align: center;'>🌾</div>", unsafe_allow_html=True)
+                    try:
+                        st.image(c_path, use_container_width=True)
+                        img_rendered = True
+                    except Exception:
+                        pass
+                if not img_rendered:
+                    st.markdown("<div style='font-size: 38px; text-align: center; padding: 12px 0;'>🌾</div>", unsafe_allow_html=True)
                 st.markdown(
                     f"<div style='text-align: center; font-weight: 800; font-size: 14px; color: #15803d; margin-top: 4px;'>{c_label}</div>",
                     unsafe_allow_html=True

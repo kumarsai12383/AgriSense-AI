@@ -386,7 +386,10 @@ def show_crop_recommendation():
             if has_img:
                 img_c1, img_c2, img_c3 = st.columns([1, 2, 1])
                 with img_c2:
-                    st.image(crop_img_path, caption=crop_display, use_container_width=True)
+                    try:
+                        st.image(crop_img_path, caption=crop_display, use_container_width=True)
+                    except Exception:
+                        pass
 
             details = CROP_DETAILS.get(crop)
             show_ai_crop_advisor(crop, details)
@@ -401,7 +404,10 @@ def show_crop_recommendation():
                     with top_cols[i]:
                         with st.container(border=True):
                             if os.path.exists(sub_img_path):
-                                st.image(sub_img_path, use_container_width=True)
+                                try:
+                                    st.image(sub_img_path, use_container_width=True)
+                                except Exception:
+                                    pass
                             st.markdown(f"<div style='font-weight: 800; font-size: 15px; color: #15803d; text-align: center; margin-top: 4px;'>{loc_name}</div>", unsafe_allow_html=True)
                             st.markdown(f"<div style='font-size: 13px; font-weight: 700; color: #475569; text-align: center;'>{c_prob:.1f}% Match</div>", unsafe_allow_html=True)
                             st.progress(min(1.0, max(0.05, c_prob / 100.0)))
