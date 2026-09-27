@@ -171,10 +171,16 @@ def analyze_plant_image(
     farm_reading
 ):
     api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        try:
+            if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+                api_key = st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            pass
 
     if not api_key:
         raise RuntimeError(
-            "GEMINI_API_KEY is missing."
+            "GEMINI_API_KEY is missing. Please set GEMINI_API_KEY in your environment or Streamlit Secrets."
         )
 
     client = genai.Client(

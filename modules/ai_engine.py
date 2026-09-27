@@ -14,12 +14,17 @@ MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
 # =========================================================
 
 def get_gemini_client():
-
     api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        try:
+            if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+                api_key = st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            pass
 
     if not api_key:
         raise RuntimeError(
-            "GEMINI_API_KEY is not configured."
+            "GEMINI_API_KEY is not configured. Please set GEMINI_API_KEY in your environment or Streamlit Secrets."
         )
 
     return genai.Client(
