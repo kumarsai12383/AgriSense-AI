@@ -1,3 +1,4 @@
+import sqlite3
 from database.database import connect, DB_PATH
 
 
