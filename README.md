@@ -214,11 +214,15 @@ The project includes a ready-to-use [`render.yaml`](file:///c:/Users/praveenredd
 3. Click **New +** $\rightarrow$ **Blueprint** and connect this repository.
 4. Add your `GEMINI_API_KEY` under Environment Variables.
 
-### 2. Streamlit Community Cloud
-1. Log into [share.streamlit.io](https://share.streamlit.io).
-2. Select your repository `PraveenReddy171/AgriSense-AI`.
-3. Set Main file path to `app.py`.
-4. In Advanced Settings, add your `GEMINI_API_KEY` under Secrets.
+### 2. Self-Hosted Linux / Cloud VM (systemd / Background Daemon)
+To deploy on your own private server (AWS EC2, DigitalOcean, Ubuntu VM, or on-premise):
+```bash
+# Run FastAPI Backend with React SPA as background service
+nohup python server.py > server.log 2>&1 &
+
+# Run Streamlit Frontend (optional)
+nohup streamlit run app.py --server.port 8501 --server.headless true > app.log 2>&1 &
+```
 
 ---
 
