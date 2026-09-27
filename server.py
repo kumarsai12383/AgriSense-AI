@@ -17,6 +17,7 @@ if hasattr(sys.stderr, "reconfigure"):
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types
@@ -109,11 +110,33 @@ class AIRequest(BaseModel):
 
 @app.get("/")
 def root():
+    # If accessed in a web browser, serve the modern React Dashboard directly
+    dashboard_path = os.path.join(os.path.dirname(__file__), "static", "react_dashboard.html")
+    if os.path.exists(dashboard_path):
+        return FileResponse(dashboard_path, media_type="text/html")
     return {
         "name": "AgriSense AI Backend",
         "status": "running",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "dashboard": "/dashboard",
+        "docs": "/docs"
     }
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def get_react_dashboard():
+    dashboard_path = os.path.join(os.path.dirname(__file__), "static", "react_dashboard.html")
+    if os.path.exists(dashboard_path):
+        return FileResponse(dashboard_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Dashboard not found")
+
+
+@app.get("/voice-chat", response_class=HTMLResponse)
+def get_voice_chat():
+    voice_path = os.path.join(os.path.dirname(__file__), "live_voice_chat.html")
+    if os.path.exists(voice_path):
+        return FileResponse(voice_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Voice chat interface not found")
 
 
 @app.get("/health")

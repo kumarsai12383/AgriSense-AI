@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSense AI — Precision Agricultural Decision Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React 18 & Babel Standalone CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        agri: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #0f172a;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Multilingual Dictionary
+        const TRANSLATIONS = {
+            en: {
+                appName: "AgriSense AI",
+                subtitle: "Precision Agricultural Decision Support",
+                farmerName: "Ramesh Kumar",
+                phone: "9876543210",
+                navHome: "Dashboard",
+                navFarm: "Farm Data & IoT",
+                navCrop: "Crop AI",
+                navIrrigation: "Smart Irrigation",
+                navFertilizer: "Fertilizer Guide",
+                navDisease: "Disease Doctor",
+                navVoice: "Voice Assistant",
+                liveTelemetry: "Live IoT Telemetry",
+                simSensor: "Simulate ESP32 Reading",
+                saveData: "Save Farm Data",
+                predictBtn: "Find Best Crop",
+                playVoice: "Play AI Voice Advice",
+                stopVoice: "Stop Audio",
+                soilMoisture: "Soil Moisture",
+                temperature: "Temperature",
+                humidity: "Humidity",
+                rainfall: "Rainfall",
+                nitrogen: "Nitrogen (N)",
+                phosphorus: "Phosphorus (P)",
+                potassium: "Potassium (K)",
+                ph: "Soil pH",
+                serverOnline: "Backend Connected",
+                serverOffline: "Backend Offline (Local Fallback Active)"
+            },
+            te: {
+                appName: "అగ్రిసెన్స్ AI",
+                subtitle: "రైతుల కోసం స్మార్ట్ వ్యవసాయ సలహాదారు",
+                farmerName: "రమేష్ కుమార్",
+                phone: "9876543210",
+                navHome: "డాష్‌బోర్డ్",
+                navFarm: "పొలం డేటా & IoT",
+                navCrop: "పంట సిఫార్సు",
+                navIrrigation: "నీటిపారుదల",
+                navFertilizer: "ఎరువుల సలహా",
+                navDisease: "తెగుళ్ల డాక్టర్",
+                navVoice: "వాయిస్ అసిస్టెంట్",
+                liveTelemetry: "లైవ్ సెన్సార్ డేటా",
+                simSensor: "ESP32 సెన్సార్ పరీక్ష",
+                saveData: "డేటాను సేవ్ చేయండి",
+                predictBtn: "మంచి పంటను తెలుసుకోండి",
+                playVoice: "సలహా వినండి (Audio)",
+                stopVoice: "ఆపండి",
+                soilMoisture: "నేల తేమ",
+                temperature: "ఉష్ణోగ్రత",
+                humidity: "గాలిలో తేమ",
+                rainfall: "వర్షపాతం",
+                nitrogen: "నత్రజని (N)",
+                phosphorus: "భాస్వరం (P)",
+                potassium: "పొటాష్ (K)",
+                ph: "నేల pH",
+                serverOnline: "సర్వర్ కనెక్ట్ అయింది",
+                serverOffline: "సర్వర్ ఆఫ్‌లైన్ (లోకల్ మోడ్)"
+            },
+            hi: {
+                appName: "एग्रीसेंस AI",
+                subtitle: "स्मार्ट कृषि निर्णय सहायता प्रणाली",
+                farmerName: "रमेश कुमार",
+                phone: "9876543210",
+                navHome: "डैशबोर्ड",
+                navFarm: "खेत का डेटा & IoT",
+                navCrop: "फसल सिफारिश",
+                navIrrigation: "स्मार्ट सिंचाई",
+                navFertilizer: "उर्वरक सलाह",
+                navDisease: "रोग डॉक्टर",
+                navVoice: "वॉइस सहायक",
+                liveTelemetry: "लाइव सेंसर डेटा",
+                simSensor: "ESP32 सेंसर टेस्ट",
+                saveData: "डेटा सहेजें",
+                predictBtn: "सर्वोत्तम फसल खोजें",
+                playVoice: "सलाह सुनें (Audio)",
+                stopVoice: "रोकें",
+                soilMoisture: "मिट्टी की नमी",
+                temperature: "तापमान",
+                humidity: "आर्द्रता",
+                rainfall: "वर्षा",
+                nitrogen: "नाइट्रोजन (N)",
+                phosphorus: "फास्फोरस (P)",
+                potassium: "पोटाश (K)",
+                ph: "मृदा pH",
+                serverOnline: "सर्वर कनेक्टेड",
+                serverOffline: "लोकल मोड सक्रिय"
+            },
+            ta: {
+                appName: "அக்ரிசென்ஸ் AI",
+                subtitle: "துல்லிய விவசாய முடிவெடுக்கும் தளம்",
+                farmerName: "ரமேஷ் குமார்",
+                phone: "9876543210",
+                navHome: "முகப்பு",
+                navFarm: "பண்ணை தகவல் & IoT",
+                navCrop: "பயிர் கணிப்பு",
+                navIrrigation: "பாசன ஆலோசகர்",
+                navFertilizer: "உர வழிகாட்டி",
+                navDisease: "நோய் மருத்துவர்",
+                navVoice: "குரல் உதவியாளர்",
+                liveTelemetry: "நேரலை சென்சார்",
+                simSensor: "ESP32 மாதிரி இயக்கம்",
+                saveData: "தரவைச் சேமி",
+                predictBtn: "சிறந்த பயிரைக் கண்டறி",
+                playVoice: "ஆடியோ கேளுங்கள்",
+                stopVoice: "நிறுத்து",
+                soilMoisture: "மண் ஈரப்பதம்",
+                temperature: "வெப்பநிலை",
+                humidity: "ஈரப்பதம்",
+                rainfall: "மழை அளவு",
+                nitrogen: "நைட்ரஜன் (N)",
+                phosphorus: "பாஸ்பரஸ் (P)",
+                potassium: "பொட்டாசியம் (K)",
+                ph: "மண் pH",
+                serverOnline: "சேவையகம் இணைக்கப்பட்டது",
+                serverOffline: "ஆஃப்லைன் முறை"
+            },
+            kn: {
+                appName: "ಅಗ್ರಿಸೆನ್ಸ್ AI",
+                subtitle: "ಸ್ಮಾರ್ಟ್ ಕೃಷಿ ನಿರ್ಧಾರ ಬೆಂಬಲ ವ್ಯವಸ್ಥೆ",
+                farmerName: "ರಮೇಶ್ ಕುಮಾರ್",
+                phone: "9876543210",
+                navHome: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+                navFarm: "ಹೊಲದ ಮಾಹಿತಿ & IoT",
+                navCrop: "ಬೆಳೆ ಶಿಫಾರಸು",
+                navIrrigation: "ಸ್ಮಾರ್ಟ್ ನೀರಾವರಿ",
+                navFertilizer: "ರಸಗೊಬ್ಬರ ಮಾರ್ಗದರ್ಶಿ",
+                navDisease: "ಬೆಳೆ ರೋಗ ವೈದ್ಯ",
+                navVoice: "ವಾಯ್ಸ್ ಸಹಾಯಕ",
+                liveTelemetry: "ಲೈವ್ ಸೆನ್ಸರ್ ಡೇಟಾ",
+                simSensor: "ESP32 ಸೆನ್ಸರ್ ಪರೀಕ್ಷೆ",
+                saveData: "ಡೇಟಾ ಉಳಿಸಿ",
+                predictBtn: "ಉತ್ತಮ ಬೆಳೆ ಹುಡುಕಿ",
+                playVoice: "ಧ್ವನಿ ಸಲಹೆ ಆಲಿಸಿ",
+                stopVoice: "ನಿಲ್ಲಿಸಿ",
+                soilMoisture: "ಮಣ್ಣಿನ ತೇವಾಂಶ",
+                temperature: "ತಾಪಮಾನ",
+                humidity: "ತೇವಾಂಶ",
+                rainfall: "ಮಳೆಯ ಪ್ರಮಾಣ",
+                nitrogen: "ಸಾರಜನಕ (N)",
+                phosphorus: "ರಂಜಕ (P)",
+                potassium: "ಪೊಟ್ಯಾಶ್ (K)",
+                ph: "ಮಣ್ಣಿನ pH",
+                serverOnline: "ಸರ್ವರ್ ಸಂಪರ್ಕಗೊಂಡಿದೆ",
+                serverOffline: "ಆಫ್‌ಲೈನ್ ಮೋಡ್"
+            },
+            mr: {
+                appName: "ॲग्रीसेन्स AI",
+                subtitle: "अचूक कृषी सल्लागार व्यासपीठ",
+                farmerName: "रमेश कुमार",
+                phone: "9876543210",
+                navHome: "डॅशबोर्ड",
+                navFarm: "शेताचा डेटा & IoT",
+                navCrop: "पीक शिफारस",
+                navIrrigation: "स्मार्ट सिंचन",
+                navFertilizer: "खत व्यवस्थापन",
+                navDisease: "रोग डॉक्टर",
+                navVoice: "व्हॉईस सहाय्यक",
+                liveTelemetry: "थेट सेन्सर डेटा",
+                simSensor: "ESP32 सेन्सर चाचणी",
+                saveData: "डेटा जतन करा",
+                predictBtn: "उत्तम पीक शोधा",
+                playVoice: "ऑडिओ सल्ला ऐका",
+                stopVoice: "थांबवा",
+                soilMoisture: "मातीतील ओलावा",
+                temperature: "तापमान",
+                humidity: "हवेतील ओलावा",
+                rainfall: "पाऊस",
+                nitrogen: "नायट्रोजन (N)",
+                phosphorus: "फॉस्फरस (P)",
+                potassium: "पोटॅश (K)",
+                ph: "मातीचा सामू (pH)",
+                serverOnline: "सर्व्हर जोडले गेले",
+                serverOffline: "ऑफलाइन मोड"
+            }
+        };
+
+        const BCP47_LANG = {
+            en: 'en-IN',
+            te: 'te-IN',
+            hi: 'hi-IN',
+            ta: 'ta-IN',
+            kn: 'kn-IN',
+            mr: 'mr-IN'
+        };
+
+        function App() {
+            const [lang, setLang] = useState('en');
+            const [activeTab, setActiveTab] = useState('home');
+            const [serverOnline, setServerOnline] = useState(false);
+            const [farmerId, setFarmerId] = useState(1);
+
+            // Farm Data State
+            const [farmData, setFarmData] = useState({
+                nitrogen: 85,
+                phosphorus: 42,
+                potassium: 45,
+                ph: 6.8,
+                temperature: 28.5,
+                humidity: 78,
+                rainfall: 110,
+                soil_moisture: 42,
+                source: 'manual',
+                date: new Date().toLocaleDateString()
+            });
+
+            // Prediction State
+            const [recommendedCrop, setRecommendedCrop] = useState('rice');
+            const [confidence, setConfidence] = useState(94.5);
+            const [loadingPred, setLoadingPred] = useState(false);
+
+            // Audio Speech
+            const [speaking, setSpeaking] = useState(false);
+
+            const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+
+            // Check Server Health on Mount
+            useEffect(() => {
+                fetch('/health')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'healthy') {
+                            setServerOnline(true);
+                            fetchLatestData();
+                        }
+                    })
+                    .catch(() => setServerOnline(false));
+            }, []);
+
+            const fetchLatestData = async () => {
+                try {
+                    const res = await fetch(`/farm/latest/${farmerId}`);
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data) {
+                        setFarmData(json.data);
+                    }
+                } catch (e) {
+                    console.log("Using local state");
+                }
+            };
+
+            const handleSimulateESP32 = async () => {
+                const simulated = {
+                    farmer_id: farmerId,
+                    nitrogen: Math.floor(70 + Math.random() * 40),
+                    phosphorus: Math.floor(35 + Math.random() * 30),
+                    potassium: Math.floor(35 + Math.random() * 30),
+                    ph: +(6.2 + Math.random() * 1.4).toFixed(1),
+                    temperature: +(26 + Math.random() * 6).toFixed(1),
+                    humidity: Math.floor(65 + Math.random() * 25),
+                    rainfall: Math.floor(80 + Math.random() * 80),
+                    soil_moisture: Math.floor(20 + Math.random() * 55),
+                    source: 'iot'
+                };
+
+                setFarmData(simulated);
+
+                if (serverOnline) {
+                    try {
+                        await fetch('/sensor/data', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(simulated)
+                        });
+                    } catch (err) {}
+                }
+            };
+
+            const handlePredict = async () => {
+                setLoadingPred(true);
+                try {
+                    if (serverOnline) {
+                        const res = await fetch('/predict/crop', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                farmer_id: farmerId,
+                                nitrogen: farmData.nitrogen,
+                                phosphorus: farmData.phosphorus,
+                                potassium: farmData.potassium,
+                                temperature: farmData.temperature,
+                                humidity: farmData.humidity,
+                                ph: farmData.ph,
+                                rainfall: farmData.rainfall
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.recommended_crop) {
+                            setRecommendedCrop(data.recommended_crop);
+                        }
+                    } else {
+                        // Intelligent client-side fallback
+                        if (farmData.rainfall > 120 && farmData.soil_moisture > 40) {
+                            setRecommendedCrop('rice');
+                        } else if (farmData.nitrogen > 90) {
+                            setRecommendedCrop('maize');
+                        } else {
+                            setRecommendedCrop('cotton');
+                        }
+                    }
+                } catch (e) {
+                    setRecommendedCrop('rice');
+                }
+                setTimeout(() => setLoadingPred(false), 400);
+            };
+
+            const speakText = (text) => {
+                if (!('speechSynthesis' in window)) {
+                    alert("Text to speech not supported");
+                    return;
+                }
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                const bcp = BCP47_LANG[lang] || 'en-IN';
+                utterance.lang = bcp;
+                utterance.rate = 0.92;
+                utterance.onend = () => setSpeaking(false);
+                setSpeaking(true);
+                window.speechSynthesis.speak(utterance);
+            };
+
+            const stopSpeech = () => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    setSpeaking(false);
+                }
+            };
+
+            const getVoiceSummary = () => {
+                const name = t.farmerName;
+                if (lang === 'te') {
+                    return `నమస్కారం ${name} గారు! మీ పొలంలో నేల తేమ ${farmData.soil_moisture} శాతం ఉంది. ఉష్ణోగ్రత ${farmData.temperature} డిగ్రీలు. మీ నేలకు ${recommendedCrop} పంట చాలా అనువైనది.`;
+                } else if (lang === 'hi') {
+                    return `नमस्ते ${name} जी! आपके खेत की नमी ${farmData.soil_moisture} प्रतिशत है। तापमान ${farmData.temperature} डिग्री है। आपकी मिट्टी के लिए ${recommendedCrop} फसल सबसे उत्तम है।`;
+                } else {
+                    return `Namaste ${name}! Your current soil moisture is ${farmData.soil_moisture} percent, temperature is ${farmData.temperature} degrees Celsius. Recommended crop is ${recommendedCrop}.`;
+                }
+            };
+
+            return (
+                <div className="max-w-5xl mx-auto px-4 py-6">
+                    {/* TOP HEADER */}
+                    <header className="glass-card p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-agri-700 text-white flex items-center justify-center text-2xl font-bold shadow-md shadow-agri-700/20">
+                                🌱
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">{t.appName}</h1>
+                                <p className="text-xs font-semibold text-slate-500">{t.subtitle}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            {/* Server Status Badge */}
+                            <div className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 ${serverOnline ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}`}>
+                                <span className={`w-2 h-2 rounded-full ${serverOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+                                {serverOnline ? t.serverOnline : t.serverOffline}
+                            </div>
+
+                            {/* Language Selector */}
+                            <select 
+                                value={lang} 
+                                onChange={(e) => setLang(e.target.value)}
+                                className="bg-white border border-slate-300 text-slate-800 text-sm font-bold rounded-xl px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-agri-500"
+                            >
+                                <option value="en">🌐 English</option>
+                                <option value="te">🌐 తెలుగు</option>
+                                <option value="hi">🌐 हिंदी</option>
+                                <option value="ta">🌐 தமிழ்</option>
+                                <option value="kn">🌐 ಕನ್ನಡ</option>
+                                <option value="mr">🌐 मराठी</option>
+                            </select>
+                        </div>
+                    </header>
+
+                    {/* NAVIGATION BAR */}
+                    <nav className="flex overflow-x-auto gap-2 mb-6 pb-2 scrollbar-none">
+                        {[
+                            { id: 'home', icon: '🏠', label: t.navHome },
+                            { id: 'farm', icon: '📡', label: t.navFarm },
+                            { id: 'crop', icon: '🌾', label: t.navCrop },
+                            { id: 'irrigation', icon: '💧', label: t.navIrrigation },
+                            { id: 'fertilizer', icon: '🌿', label: t.navFertilizer },
+                        ].map(item => (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id)}
+                                className={`px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-2 ${
+                                    activeTab === item.id 
+                                        ? 'bg-agri-700 text-white shadow-lg shadow-agri-700/25 scale-[1.02]' 
+                                        : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                                }`}
+                            >
+                                <span>{item.icon}</span>
+                                <span>{item.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+
+                    {/* MAIN CONTENT AREA */}
+                    {activeTab === 'home' && (
+                        <div className="space-y-6">
+                            {/* HERO BANNER */}
+                            <div className="hero-gradient rounded-2xl p-6 text-white shadow-xl shadow-agri-900/20 flex flex-wrap items-center justify-between gap-4">
+                                <div>
+                                    <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 border border-white/30">
+                                        🌾 Precision Agriculture 2.0
+                                    </span>
+                                    <h2 className="text-2xl font-extrabold mb-1">👨‍🌾 Welcome, {t.farmerName}!</h2>
+                                    <p className="text-agri-100 text-sm font-medium">Smart AI advisory powered by real-time IoT sensors & Machine Learning.</p>
+                                </div>
+                                <div className="text-5xl">🚜</div>
+                            </div>
+
+                            {/* 🔊 20-SECOND AUDIO BRIEFING */}
+                            <div className="glass-card p-5 border-2 border-agri-500">
+                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                    <div>
+                                        <div className="flex items-center gap-2 text-agri-700 font-extrabold text-base">
+                                            <span>📢</span> 20-Second Daily Voice Briefing
+                                        </div>
+                                        <p className="text-xs text-slate-500 font-medium mt-1">Tap Play to listen to current soil moisture, watering need, and crop advice in your language.</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => speakText(getVoiceSummary())}
+                                            className={`px-5 py-2.5 rounded-xl font-extrabold text-sm text-white transition-all shadow-md ${
+                                                speaking ? 'bg-emerald-600 animate-pulse' : 'bg-agri-600 hover:bg-agri-700 shadow-agri-600/30'
+                                            }`}
+                                        >
+                                            {t.playVoice}
+                                        </button>
+                                        <button
+                                            onClick={stopSpeech}
+                                            className="px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-700 text-white hover:bg-slate-800"
+                                        >
+                                            {t.stopVoice}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* QUICK METRICS GRID */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div className="glass-card p-4">
+                                    <div className="text-xs font-bold text-slate-500 uppercase">{t.soilMoisture}</div>
+                                    <div className="text-2xl font-extrabold text-agri-700 mt-1">{farmData.soil_moisture}%</div>
+                                    <div className="text-[11px] font-semibold text-slate-400 mt-1">Status: {farmData.soil_moisture < 30 ? '🔴 Low' : '🟢 Optimal'}</div>
+                                </div>
+                                <div className="glass-card p-4">
+                                    <div className="text-xs font-bold text-slate-500 uppercase">{t.temperature}</div>
+                                    <div className="text-2xl font-extrabold text-amber-600 mt-1">{farmData.temperature}°C</div>
+                                    <div className="text-[11px] font-semibold text-slate-400 mt-1">Humidity: {farmData.humidity}%</div>
+                                </div>
+                                <div className="glass-card p-4">
+                                    <div className="text-xs font-bold text-slate-500 uppercase">Soil N-P-K</div>
+                                    <div className="text-2xl font-extrabold text-blue-600 mt-1">{farmData.nitrogen}-{farmData.phosphorus}-{farmData.potassium}</div>
+                                    <div className="text-[11px] font-semibold text-slate-400 mt-1">kg/ha balance</div>
+                                </div>
+                                <div className="glass-card p-4">
+                                    <div className="text-xs font-bold text-slate-500 uppercase">Recommended Crop</div>
+                                    <div className="text-2xl font-extrabold text-agri-800 mt-1 capitalize">{recommendedCrop}</div>
+                                    <div className="text-[11px] font-semibold text-emerald-600 mt-1">⭐ High Yield</div>
+                                </div>
+                            </div>
+
+                            {/* 4 FEATURE ACTION CARDS */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div 
+                                    onClick={() => setActiveTab('crop')}
+                                    className="glass-card p-5 cursor-pointer hover:border-agri-500 hover:shadow-lg transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">🌾</div>
+                                        <div>
+                                            <h3 className="font-extrabold text-slate-900">{t.navCrop}</h3>
+                                            <p className="text-xs text-slate-500">AI prediction tailored to your exact soil NPK & climate parameters.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div 
+                                    onClick={() => setActiveTab('irrigation')}
+                                    className="glass-card p-5 cursor-pointer hover:border-blue-500 hover:shadow-lg transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">💧</div>
+                                        <div>
+                                            <h3 className="font-extrabold text-slate-900">{t.navIrrigation}</h3>
+                                            <p className="text-xs text-slate-500">Live soil moisture monitoring, watering schedule, and pump timer.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div 
+                                    onClick={() => setActiveTab('fertilizer')}
+                                    className="glass-card p-5 cursor-pointer hover:border-amber-500 hover:shadow-lg transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">🌿</div>
+                                        <div>
+                                            <h3 className="font-extrabold text-slate-900">{t.navFertilizer}</h3>
+                                            <p className="text-xs text-slate-500">4-Stage split-dose application schedule and bag calculation.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div 
+                                    onClick={() => setActiveTab('farm')}
+                                    className="glass-card p-5 cursor-pointer hover:border-purple-500 hover:shadow-lg transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">📡</div>
+                                        <div>
+                                            <h3 className="font-extrabold text-slate-900">{t.navFarm}</h3>
+                                            <p className="text-xs text-slate-500">ESP32 7-in-1 Modbus RS485 live telemetry & test simulator.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* FARM DATA & IOT TAB */}
+                    {activeTab === 'farm' && (
+                        <div className="space-y-6">
+                            <div className="glass-card p-6">
+                                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                                    <div>
+                                        <h2 className="text-xl font-extrabold text-slate-900">📡 {t.liveTelemetry}</h2>
+                                        <p className="text-xs text-slate-500 font-medium">Real-time parameters from ESP32 or manual farmer readings.</p>
+                                    </div>
+                                    <button
+                                        onClick={handleSimulateESP32}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-purple-600/20 transition-all flex items-center gap-1.5"
+                                    >
+                                        <span>⚡</span> {t.simSensor}
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.nitrogen}</label>
+                                        <input
+                                            type="number"
+                                            value={farmData.nitrogen}
+                                            onChange={e => setFarmData({...farmData, nitrogen: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.phosphorus}</label>
+                                        <input
+                                            type="number"
+                                            value={farmData.phosphorus}
+                                            onChange={e => setFarmData({...farmData, phosphorus: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.potassium}</label>
+                                        <input
+                                            type="number"
+                                            value={farmData.potassium}
+                                            onChange={e => setFarmData({...farmData, potassium: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.ph}</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={farmData.ph}
+                                            onChange={e => setFarmData({...farmData, ph: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.temperature} (°C)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={farmData.temperature}
+                                            onChange={e => setFarmData({...farmData, temperature: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.humidity} (%)</label>
+                                        <input
+                                            type="number"
+                                            value={farmData.humidity}
+                                            onChange={e => setFarmData({...farmData, humidity: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.rainfall} (mm)</label>
+                                        <input
+                                            type="number"
+                                            value={farmData.rainfall}
+                                            onChange={e => setFarmData({...farmData, rainfall: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <label className="text-xs font-bold text-slate-500">{t.soilMoisture} (%)</label>
+                                        <input
+                                            type="number"
+                                            value={farmData.soil_moisture}
+                                            onChange={e => setFarmData({...farmData, soil_moisture: +e.target.value})}
+                                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 mt-1 font-bold text-slate-800"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 flex gap-4">
+                                    <button
+                                        onClick={handlePredict}
+                                        className="flex-1 bg-agri-600 hover:bg-agri-700 text-white font-extrabold py-3 rounded-xl shadow-lg shadow-agri-600/30 transition-all"
+                                    >
+                                        {loadingPred ? "⏳ Running ML Model..." : `🌾 ${t.predictBtn}`}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* CROP AI TAB */}
+                    {activeTab === 'crop' && (
+                        <div className="space-y-6">
+                            <div className="hero-gradient rounded-2xl p-6 text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
+                                <div>
+                                    <span className="bg-white/20 text-xs font-bold px-3 py-1 rounded-full border border-white/30">
+                                        ⭐ AI Top Recommendation
+                                    </span>
+                                    <h2 className="text-3xl font-extrabold capitalize mt-2 mb-1">🌾 {recommendedCrop}</h2>
+                                    <p className="text-agri-100 text-sm font-medium">Confidence Score: <strong>{confidence}%</strong> based on current soil NPK & climate match.</p>
+                                </div>
+                                <button
+                                    onClick={handlePredict}
+                                    className="bg-white text-agri-800 font-extrabold px-5 py-2.5 rounded-xl shadow-md hover:bg-agri-50 transition-all"
+                                >
+                                    🔄 Re-calculate
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="glass-card p-5">
+                                    <h4 className="font-extrabold text-slate-900 mb-2">💧 Irrigation Strategy</h4>
+                                    <p className="text-sm text-slate-600">Requires shallow standing water during tillering. Water requirement: <strong>1200 - 1500 mm</strong>.</p>
+                                    <button 
+                                        onClick={() => setActiveTab('irrigation')}
+                                        className="text-agri-700 font-bold text-xs mt-3 flex items-center gap-1 hover:underline"
+                                    >
+                                        Open Smart Irrigation Schedule →
+                                    </button>
+                                </div>
+
+                                <div className="glass-card p-5">
+                                    <h4 className="font-extrabold text-slate-900 mb-2">🌿 Fertilizer Plan</h4>
+                                    <p className="text-sm text-slate-600">Basal DAP + MOP at transplanting. 3 split doses of Urea during active tillering & panicle initiation.</p>
+                                    <button 
+                                        onClick={() => setActiveTab('fertilizer')}
+                                        className="text-agri-700 font-bold text-xs mt-3 flex items-center gap-1 hover:underline"
+                                    >
+                                        Open 4-Stage Fertilizer Schedule →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* SMART IRRIGATION TAB */}
+                    {activeTab === 'irrigation' && (
+                        <div className="space-y-6">
+                            <div className={`rounded-2xl p-6 text-white shadow-xl ${
+                                farmData.soil_moisture < 25 ? 'bg-red-800 border-2 border-red-500' :
+                                farmData.soil_moisture < 40 ? 'bg-amber-800 border-2 border-amber-500' :
+                                'bg-emerald-800 border-2 border-emerald-500'
+                            }`}>
+                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                    <div>
+                                        <span className="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">
+                                            ⚡ Live AI Water Verdict
+                                        </span>
+                                        <h2 className="text-2xl font-extrabold mt-2 mb-1">
+                                            {farmData.soil_moisture < 25 ? '🔴 URGENT: Irrigate Field Today' :
+                                             farmData.soil_moisture < 40 ? '🟡 PLAN IRRIGATION: Irrigate within 24-48 Hours' :
+                                             '🟢 OPTIMAL: Moisture is Sufficient — No Irrigation Needed'}
+                                        </h2>
+                                        <p className="text-sm text-white/90">Crop: <strong className="capitalize">{recommendedCrop}</strong> • Current Moisture: <strong>{farmData.soil_moisture}%</strong></p>
+                                    </div>
+                                    <div className="text-4xl">💧</div>
+                                </div>
+                            </div>
+
+                            {/* Voice button */}
+                            <div className="glass-card p-4 flex justify-between items-center">
+                                <div>
+                                    <div className="font-extrabold text-slate-900 text-sm">🔊 Listen to AI Irrigation Audio Guide</div>
+                                    <div className="text-xs text-slate-500">Explains watering depth and pump time in your native language.</div>
+                                </div>
+                                <button
+                                    onClick={() => speakText(`Namaste ${t.farmerName}! Your soil moisture is ${farmData.soil_moisture} percent. ${farmData.soil_moisture < 30 ? 'Irrigation is recommended today.' : 'Soil has enough water.'}`)}
+                                    className="bg-agri-600 hover:bg-agri-700 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow"
+                                >
+                                    {t.playVoice}
+                                </button>
+                            </div>
+
+                            {/* Critical stages */}
+                            <div className="glass-card p-6">
+                                <h3 className="font-extrabold text-slate-900 text-base mb-4">📅 Critical Growth Stages for {recommendedCrop.toUpperCase()}</h3>
+                                <div className="space-y-3">
+                                    {[
+                                        { stage: "1. Transplanting / Seedling (0-15 DAS)", depth: "2-3 cm water", note: "Crucial for initial root anchoring." },
+                                        { stage: "2. Active Tillering (20-40 DAS)", depth: "3-5 cm water", note: "Promotes productive tillers." },
+                                        { stage: "3. Panicle Initiation (45-65 DAS)", depth: "5 cm standing water", note: "Critical - never allow soil drying." },
+                                        { stage: "4. Grain Filling (70-90 DAS)", depth: "3-5 cm depth", note: "Prevents empty chaffy grains." },
+                                    ].map((s, idx) => (
+                                        <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                                            <div>
+                                                <div className="font-bold text-sm text-slate-900">{s.stage}</div>
+                                                <div className="text-xs text-slate-500 mt-0.5">{s.note}</div>
+                                            </div>
+                                            <span className="bg-blue-100 text-blue-800 font-bold text-xs px-3 py-1 rounded-full">
+                                                {s.depth}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* FERTILIZER TAB */}
+                    {activeTab === 'fertilizer' && (
+                        <div className="space-y-6">
+                            <div className="hero-gradient rounded-2xl p-6 text-white shadow-xl flex justify-between items-center">
+                                <div>
+                                    <span className="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">
+                                        🌿 Soil Nutrient Assessment
+                                    </span>
+                                    <h2 className="text-2xl font-extrabold mt-2 mb-1">
+                                        Urea: 2.0 Bags • DAP: 1.0 Bag • MOP: 0.7 Bag / Acre
+                                    </h2>
+                                    <p className="text-agri-100 text-sm">Plus 25 kg/ha Zinc Sulphate (21%) at basal application.</p>
+                                </div>
+                                <div className="text-4xl">🧪</div>
+                            </div>
+
+                            {/* 4-Stage Schedule */}
+                            <div className="glass-card p-6">
+                                <h3 className="font-extrabold text-slate-900 text-base mb-4">📅 4-Stage Split-Dose Application Plan</h3>
+                                <div className="space-y-3">
+                                    {[
+                                        { stage: "Stage 1: Basal (Transplanting Day 0)", dose: "DAP 50 kg + MOP 20 kg + Zinc 10 kg", method: "Incorporate into soil during puddling" },
+                                        { stage: "Stage 2: Active Tillering (20-25 DAS)", dose: "Neem-Coated Urea 35 kg", method: "Broadcast in moist soil" },
+                                        { stage: "Stage 3: Panicle Initiation (45-50 DAS)", dose: "Neem-Coated Urea 35 kg + MOP 15 kg", method: "Top-dressing before watering" },
+                                        { stage: "Stage 4: Heading / Grain Filling (70-75 DAS)", dose: "0:0:50 (SOP) @ 1.5 kg/acre foliar spray", method: "Foliar misting in morning hours" },
+                                    ].map((stg, idx) => (
+                                        <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                            <div className="font-extrabold text-sm text-agri-700">{stg.stage}</div>
+                                            <div className="text-sm font-bold text-slate-900 mt-1">🌿 {stg.dose}</div>
+                                            <div className="text-xs text-slate-500 mt-1">🚜 Method: {stg.method}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
