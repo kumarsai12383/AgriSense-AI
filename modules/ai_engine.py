@@ -199,19 +199,37 @@ def ask_agrisense_stream(
     client = get_gemini_client()
     farm_context, crop_context = build_farm_context(farmer_id)
 
+    # Strict Multilingual Script & Vocabulary Enforcement Rules
+    lang_rules = {
+        "Telugu": "CRITICAL RULE: The farmer has selected TELUGU (తెలుగు). You MUST write your ENTIRE response ONLY in Telugu script (తెలుగు లిపి). Do NOT write sentences in English. Use simple, warm, everyday Telugu agricultural vocabulary suitable for Andhra & Telangana farmers.",
+        "తెలుగు": "CRITICAL RULE: The farmer has selected TELUGU (తెలుగు). You MUST write your ENTIRE response ONLY in Telugu script (తెలుగు లిపి). Do NOT write sentences in English. Use simple, warm, everyday Telugu agricultural vocabulary suitable for Andhra & Telangana farmers.",
+        "Hindi": "CRITICAL RULE: The farmer has selected HINDI (हिन्दी). You MUST write your ENTIRE response ONLY in Hindi Devanagari script (हिन्दी / देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Hindi words that an Indian farmer easily understands.",
+        "हिंदी": "CRITICAL RULE: The farmer has selected HINDI (हिन्दी). You MUST write your ENTIRE response ONLY in Hindi Devanagari script (हिन्दी / देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Hindi words that an Indian farmer easily understands.",
+        "Tamil": "CRITICAL RULE: The farmer has selected TAMIL (தமிழ்). You MUST write your ENTIRE response ONLY in Tamil script (தமிழ் எழுத்துரு). Do NOT write sentences in English. Use simple, practical Tamil suitable for a Tamil Nadu farmer.",
+        "தமிழ்": "CRITICAL RULE: The farmer has selected TAMIL (தமிழ்). You MUST write your ENTIRE response ONLY in Tamil script (தமிழ் எழுத்துரு). Do NOT write sentences in English. Use simple, practical Tamil suitable for a Tamil Nadu farmer.",
+        "Kannada": "CRITICAL RULE: The farmer has selected KANNADA (ಕನ್ನಡ). You MUST write your ENTIRE response ONLY in Kannada script (ಕನ್ನಡ ಲಿಪಿ). Do NOT write sentences in English. Use simple, clear Kannada words suitable for a Karnataka farmer.",
+        "ಕನ್ನಡ": "CRITICAL RULE: The farmer has selected KANNADA (ಕನ್ನಡ). You MUST write your ENTIRE response ONLY in Kannada script (ಕನ್ನಡ ಲಿಪಿ). Do NOT write sentences in English. Use simple, clear Kannada words suitable for a Karnataka farmer.",
+        "Marathi": "CRITICAL RULE: The farmer has selected MARATHI (मराठी). You MUST write your ENTIRE response ONLY in Marathi Devanagari script (मराठी देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Marathi words suitable for a Maharashtra farmer.",
+        "मराठी": "CRITICAL RULE: The farmer has selected MARATHI (मराठी). You MUST write your ENTIRE response ONLY in Marathi Devanagari script (मराठी देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Marathi words suitable for a Maharashtra farmer.",
+        "English": "Respond in simple, clear, practical, farmer-friendly Indian English with bullet points."
+    }
+
+    selected_lang_rule = lang_rules.get(language, f"CRITICAL RULE: You MUST write your ENTIRE response in {language}. Do not write in English.")
+
     prompt = f"""You are AgriSense AI, an expert, friendly agricultural assistant for Indian farmers.
 
-Farmer ID: {farmer_id} | Language: {language}
+Farmer ID: {farmer_id} | Selected Language: {language}
 Latest Farm Data:
 {farm_context}
 Recommended Crop: {crop_context}
 
 Farmer's Question: {question}
 
-Instructions:
-- Respond in {language} in a warm, practical, farmer-friendly tone.
-- Use the farmer's real soil/weather data when relevant.
-- Keep the response clear, structured (using bullet points), actionable, and concise.
+Language & Tone Enforcement:
+- {selected_lang_rule}
+- Use the farmer's real soil/weather measurements when relevant.
+- Keep the response structured (bullet points), actionable, highly encouraging, and concise.
+- Provide practical solutions for crops, fertilizers, irrigation timing, or diseases.
 """
 
     candidate_models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.8-flash", "gemini-3.7-flash"]

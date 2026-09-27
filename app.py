@@ -405,17 +405,27 @@ MENUS_BY_LANG = {
 }
 
 NAV_TITLE = {
-    "en": "🧭 Quick Navigation",
-    "te": "🧭 నావిగేషన్ మెను",
-    "hi": "🧭 मुख्य मेनू",
-    "ta": "🧭 வழிசெலுத்தல் பட்டி",
-    "kn": "🧭 ನ್ಯಾವಿಗೇಷನ್ ಮೆನು",
-    "mr": "🧭 नेव्हिगेशन मेनू"
+    "en": "🧭 Quick Menu & Navigation",
+    "te": "🧭 నావిగేషన్ మెను & పేజీలు",
+    "hi": "🧭 मुख्य नेविगेशन मेनू",
+    "ta": "🧭 முதன்மை மெனு",
+    "kn": "🧭 ಮುಖ್ಯ ನ್ಯಾವಿಗೇಷನ್",
+    "mr": "🧭 मुख्य नेव्हिगेशन"
+}
+
+HELP_BTN_LABEL = {
+    "en": "❓ Farmer Help Center",
+    "te": "❓ రైతు సహాయ కేంద్రం",
+    "hi": "❓ किसान सहायता केंद्र",
+    "ta": "❓ உதவி மையம்",
+    "kn": "❓ ಸಹಾಯ ಕೇಂದ್ರ",
+    "mr": "❓ शेतकरी मदत केंद्र"
 }
 
 lang_code = st.session_state.language_code
 CURRENT_MENU = MENUS_BY_LANG.get(lang_code, MENUS_BY_LANG["en"])
-nav_prompt = NAV_TITLE.get(lang_code, "🧭 Quick Navigation")
+nav_prompt = NAV_TITLE.get(lang_code, "🧭 Quick Menu & Navigation")
+help_btn_text = HELP_BTN_LABEL.get(lang_code, "❓ Farmer Help Center")
 
 PAGE_TO_LABEL = {v: k for k, v in CURRENT_MENU.items()}
 page_values = list(CURRENT_MENU.values())
@@ -426,10 +436,81 @@ if current_page not in page_values:
     current_page = "home"
     st.session_state.page = "home"
 
+# =========================================================
+# TOP NAVIGATION HEADER BAR (FARMER PROFILE, HELP & LANGUAGE)
+# =========================================================
+
+current_lang = st.session_state.selected_language
+f_name = farmer.get('name', 'Farmer')
+f_phone = farmer.get('phone', '')
+
+# Top Header Container
+with st.container():
+    st.markdown(
+        f"""
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 10px 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1.5px solid #86efac;">
+                        👨‍🌾
+                    </div>
+                    <div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 15px; line-height: 1.2;">
+                            {f_name}
+                            <span style="font-size: 11px; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 9999px; margin-left: 6px; font-weight: 700; border: 1px solid #86efac;">
+                                🟢 IoT Active
+                            </span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">📞 {f_phone or 'Farmer Mobile'} &nbsp;•&nbsp; 🌐 {current_lang}</div>
+                    </div>
+                </div>
+                <div style="font-size: 13px; font-weight: 800; color: #15803d; letter-spacing: -0.2px;">
+                    🌱 AgriSense AI
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Action Row: Help Center Quick Button | Language Switcher | Logout
+head_col1, head_col2, head_col3 = st.columns([3, 2, 1])
+
+with head_col1:
+    # Prominent Help Center Direct Action Button - Always 1 Tap away
+    is_on_help = (current_page == "help")
+    if st.button(help_btn_text, key="top_help_center_btn", use_container_width=True, type="primary" if is_on_help else "secondary"):
+        st.session_state.page = "help"
+        st.rerun()
+
+with head_col2:
+    lang_keys = list(LANGUAGES_MAP.keys())
+    c_idx = lang_keys.index(current_lang) if current_lang in lang_keys else 0
+    header_lang = st.selectbox(
+        "🌐 Language / భాష",
+        lang_keys,
+        index=c_idx,
+        key="header_language_select",
+        label_visibility="collapsed"
+    )
+    if header_lang != current_lang:
+        st.session_state.selected_language = header_lang
+        st.session_state.language_code = LANGUAGES_MAP[header_lang]
+        if isinstance(st.session_state.get("farmer"), dict):
+            st.session_state.farmer["language"] = header_lang
+        if farmer.get("id"):
+            update_farmer_language(farmer["id"], header_lang)
+        st.rerun()
+
+with head_col3:
+    if st.button("🚪 Logout", key="logout_top", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
+
+# Primary Dropdown Navigation Menu
 target_label = PAGE_TO_LABEL.get(current_page, page_keys[0])
 nav_key = f"nav_select_{lang_code}"
 
-# Synchronize selectbox widget state with the active page state
 if nav_key in st.session_state and CURRENT_MENU.get(st.session_state[nav_key]) != current_page:
     st.session_state[nav_key] = target_label
 
@@ -448,56 +529,26 @@ st.selectbox(
     on_change=on_nav_change
 )
 
+# Responsive Quick Navigation Pills (Instant Access to Major Modules)
+pill_cols = st.columns(6)
+quick_navs = [
+    ("🏠 Home", "home"),
+    ("🌾 Crop", "crop"),
+    ("💧 Water", "water"),
+    ("🌿 Fertilizer", "fertilizer"),
+    ("🦠 Disease", "disease"),
+    ("🤖 Voice AI", "voice")
+]
 
-# =========================================================
-# TOP FARMER PROFILE BAR WITH INSTANT LANGUAGE SWITCHER
-# =========================================================
+for p_idx, (p_label, p_target) in enumerate(quick_navs):
+    with pill_cols[p_idx]:
+        is_active = (current_page == p_target)
+        btn_type = "primary" if is_active else "secondary"
+        if st.button(p_label, key=f"pnav_{p_target}_{p_idx}", use_container_width=True, type=btn_type):
+            st.session_state.page = p_target
+            st.rerun()
 
-current_lang = st.session_state.selected_language
-
-profile_col1, profile_col2, profile_col3 = st.columns([3, 2, 1])
-
-with profile_col1:
-    f_name = farmer.get('name', 'Farmer')
-    f_phone = farmer.get('phone', '')
-    st.markdown(
-        f"""
-        <div style="display: flex; align-items: center; gap: 10px; padding: 4px 0;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                👨‍🌾
-            </div>
-            <div>
-                <div style="font-weight: 700; color: #0f172a; font-size: 16px; line-height: 1.2;">{f_name}</div>
-                <div style="font-size: 12px; color: #64748b;">📞 {f_phone}</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with profile_col2:
-    lang_keys = list(LANGUAGES_MAP.keys())
-    c_idx = lang_keys.index(current_lang) if current_lang in lang_keys else 0
-    header_lang = st.selectbox(
-        "🌐 Language / భాష",
-        lang_keys,
-        index=c_idx,
-        key="header_language_select"
-    )
-    if header_lang != current_lang:
-        st.session_state.selected_language = header_lang
-        st.session_state.language_code = LANGUAGES_MAP[header_lang]
-        if isinstance(st.session_state.get("farmer"), dict):
-            st.session_state.farmer["language"] = header_lang
-        if farmer.get("id"):
-            update_farmer_language(farmer["id"], header_lang)
-        st.rerun()
-
-with profile_col3:
-    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
-    if st.button("🚪 Logout", key="logout_top"):
-        st.session_state.clear()
-        st.rerun()
+st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 

@@ -865,12 +865,25 @@ def ai_ask(data: AIRequest):
             api_key=api_key
         )
 
-        prompt = f"""
-You are AgriSense AI, a friendly farming assistant
-for an Indian farmer.
+        lang_rules = {
+            "Telugu": "CRITICAL RULE: The farmer has selected TELUGU (తెలుగు). You MUST write your ENTIRE response ONLY in Telugu script (తెలుగు లిపి). Do NOT write sentences in English. Use simple, warm, everyday Telugu agricultural vocabulary suitable for Andhra & Telangana farmers.",
+            "తెలుగు": "CRITICAL RULE: The farmer has selected TELUGU (తెలుగు). You MUST write your ENTIRE response ONLY in Telugu script (తెలుగు లిపి). Do NOT write sentences in English. Use simple, warm, everyday Telugu agricultural vocabulary suitable for Andhra & Telangana farmers.",
+            "Hindi": "CRITICAL RULE: The farmer has selected HINDI (हिन्दी). You MUST write your ENTIRE response ONLY in Hindi Devanagari script (हिन्दी / देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Hindi words that an Indian farmer easily understands.",
+            "हिंदी": "CRITICAL RULE: The farmer has selected HINDI (हिन्दी). You MUST write your ENTIRE response ONLY in Hindi Devanagari script (हिन्दी / देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Hindi words that an Indian farmer easily understands.",
+            "Tamil": "CRITICAL RULE: The farmer has selected TAMIL (தமிழ்). You MUST write your ENTIRE response ONLY in Tamil script (தமிழ் எழுத்துரு). Do NOT write sentences in English. Use simple, practical Tamil suitable for a Tamil Nadu farmer.",
+            "தமிழ்": "CRITICAL RULE: The farmer has selected TAMIL (தமிழ்). You MUST write your ENTIRE response ONLY in Tamil script (தமிழ் எழுத்துரு). Do NOT write sentences in English. Use simple, practical Tamil suitable for a Tamil Nadu farmer.",
+            "Kannada": "CRITICAL RULE: The farmer has selected KANNADA (ಕನ್ನಡ). You MUST write your ENTIRE response ONLY in Kannada script (ಕನ್ನಡ ಲಿಪಿ). Do NOT write sentences in English. Use simple, clear Kannada words suitable for a Karnataka farmer.",
+            "ಕನ್ನಡ": "CRITICAL RULE: The farmer has selected KANNADA (ಕನ್ನಡ). You MUST write your ENTIRE response ONLY in Kannada script (ಕನ್ನಡ ಲಿಪಿ). Do NOT write sentences in English. Use simple, clear Kannada words suitable for a Karnataka farmer.",
+            "Marathi": "CRITICAL RULE: The farmer has selected MARATHI (मराठी). You MUST write your ENTIRE response ONLY in Marathi Devanagari script (मराठी देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Marathi words suitable for a Maharashtra farmer.",
+            "मराठी": "CRITICAL RULE: The farmer has selected MARATHI (मराठी). You MUST write your ENTIRE response ONLY in Marathi Devanagari script (मराठी देवनागरी लिपि). Do NOT write sentences in English. Use simple, clear Marathi words suitable for a Maharashtra farmer.",
+            "English": "Respond in simple, clear, practical, farmer-friendly Indian English with bullet points."
+        }
+        selected_rule = lang_rules.get(data.language, f"CRITICAL RULE: Write ENTIRE answer in {data.language}. Do NOT use English.")
 
-Speak in:
-{data.language}
+        prompt = f"""You are AgriSense AI, an expert, friendly agricultural assistant for an Indian farmer.
+
+SELECTED LANGUAGE: {data.language}
+LANGUAGE RULE: {selected_rule}
 
 LATEST FARM DATA:
 {farm_data}
@@ -882,13 +895,13 @@ FARMER QUESTION:
 {data.question}
 
 Rules:
-- Use simple language.
+- {selected_rule}
 - Use actual farm data when relevant.
 - Never invent measurements.
 - Never claim a disease without sufficient evidence.
 - Give practical farming guidance.
 - If information is unavailable, say so clearly.
-- Keep the answer reasonably concise.
+- Keep the answer structured (bullet points), encouraging, and concise.
 """
 
         candidate_models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.8-flash", "gemini-3.7-flash"]
