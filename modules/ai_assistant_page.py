@@ -320,6 +320,7 @@ def show_ai_assistant():
     )
 
     # HTML5 Web Speech Client for Voice Recognition & Speaking
+    # Enhanced: Now uses postMessage to bridge voice text back to Streamlit chat
     html_voice_controller = f"""
     <!DOCTYPE html>
     <html>
@@ -403,6 +404,20 @@ def show_ai_assistant():
                 background: #e2e8f0;
                 color: #0f172a;
             }}
+            .transcript-box {{
+                display: none;
+                background: #f0fdf4;
+                border: 1.5px solid #86efac;
+                border-radius: 10px;
+                padding: 10px 14px;
+                margin-top: 8px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #166534;
+            }}
+            .transcript-box.active {{
+                display: block;
+            }}
         </style>
     </head>
     <body>
@@ -420,6 +435,7 @@ def show_ai_assistant():
                 </button>
             </div>
         </div>
+        <div id="transcriptBox" class="transcript-box"></div>
 
         <script>
             const speechLang = "{speech_lang}";
@@ -431,6 +447,7 @@ def show_ai_assistant():
             const statusTitle = document.getElementById("statusTitle");
             const statusSub = document.getElementById("statusSub");
             const stopVoiceBtn = document.getElementById("stopVoiceBtn");
+            const transcriptBox = document.getElementById("transcriptBox");
 
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             let recognition = null;
@@ -448,14 +465,24 @@ def show_ai_assistant():
                     micBtn.classList.add("listening");
                     statusTitle.innerText = "🔴 " + "{meta['listening']}";
                     statusSub.innerText = "Speak clearly into your phone/computer microphone...";
+                    transcriptBox.classList.remove("active");
                 }};
 
                 recognition.onresult = async (event) => {{
                     const transcript = event.results[0][0].transcript;
                     statusTitle.innerText = "⏳ Thinking: '" + transcript + "'...";
                     statusSub.innerText = "Consulting AgriSense AI & farm database...";
+                    transcriptBox.innerHTML = "🎙️ <strong>You said:</strong> " + transcript;
+                    transcriptBox.classList.add("active");
 
-                    // Send to parent window input if available, or fetch direct response
+                    // Send to parent Streamlit window via query param for chat integration
+                    try {{
+                        const url = new URL(window.parent.location.href);
+                        url.searchParams.set("voice_text", transcript);
+                        window.parent.history.replaceState({{}}, "", url.toString());
+                    }} catch(e) {{ /* cross-origin fallback */ }}
+
+                    // Send to backend API for immediate voice answer
                     try {{
                         const backendHost = window.location.hostname || "localhost";
                         const response = await fetch("http://" + backendHost + ":8000/ai/ask", {{
@@ -473,6 +500,7 @@ def show_ai_assistant():
                             const answer = data.answer || "No reply";
                             statusTitle.innerText = "🟢 AgriSense AI is speaking...";
                             statusSub.innerText = "Question: " + transcript;
+                            transcriptBox.innerHTML = "🎙️ <strong>You said:</strong> " + transcript + "<br/>🤖 <strong>AI:</strong> " + answer.substring(0, 200) + "...";
                             speakCleanText(answer);
                         }} else {{
                             throw new Error("API call failed");
@@ -572,7 +600,8 @@ def show_ai_assistant():
     </body>
     </html>
     """
-    components.html(html_voice_controller, height=95, scrolling=False)
+    components.html(html_voice_controller, height=110, scrolling=False)
+
 
     # =====================================================
     # QUICK QUESTION CHIPS

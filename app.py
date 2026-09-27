@@ -335,6 +335,7 @@ MENUS_BY_LANG = {
         "🦠 Plant Disease Doctor": "disease",
         "🤖🎙️ AgriSense AI Chat & Voice": "voice",
         "⚡ Gemini Live Call Mode": "voice_live",
+        "📊 Market Prices & Gov Policies": "market",
         "❓ Farmer Help Center & Guide": "help",
     },
     "te": {
@@ -348,6 +349,7 @@ MENUS_BY_LANG = {
         "🦠 పంట వ్యాధి డాక్టర్": "disease",
         "🤖🎙️ అగ్రిసెన్స్ AI చాట్ & వాయిస్": "voice",
         "⚡ లైవ్ కాల్ మోడ్": "voice_live",
+        "📊 మార్కెట్ ధరలు & పథకాలు": "market",
         "❓ సహాయ కేంద్రం & గైడ్": "help",
     },
     "hi": {
@@ -361,6 +363,7 @@ MENUS_BY_LANG = {
         "🦠 फसल रोग डॉक्टर": "disease",
         "🤖🎙️ एग्रीसेंस AI चैट और वॉइस": "voice",
         "⚡ लाइव वॉइस कॉल": "voice_live",
+        "📊 बाज़ार भाव & सरकारी योजनाएं": "market",
         "❓ किसान सहायता केंद्र": "help",
     },
     "ta": {
@@ -374,6 +377,7 @@ MENUS_BY_LANG = {
         "🦠 பயிர் நோய் மருத்துவர்": "disease",
         "🤖🎙️ அக்ரிசென்ஸ் AI அரட்டை & குரல்": "voice",
         "⚡ நேரலை அழைப்பு முறை": "voice_live",
+        "📊 சந்தை விலைகள் & அரசு திட்டங்கள்": "market",
         "❓ உதவி மையம் & வழிகாட்டி": "help",
     },
     "kn": {
@@ -387,6 +391,7 @@ MENUS_BY_LANG = {
         "🦠 ಬೆಳೆ ರೋಗ ವೈದ್ಯ": "disease",
         "🤖🎙️ ಅಗ್ರಿಸೆನ್ಸ್ AI ಚಾಟ್ ಮತ್ತು ವಾಯ್ಸ್": "voice",
         "⚡ ಲೈವ್ ಕಾಲ್ ಮೋಡ್": "voice_live",
+        "📊 ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು & ಯೋಜನೆಗಳು": "market",
         "❓ ರೈತ ಸಹಾಯ ಕೇಂದ್ರ": "help",
     },
     "mr": {
@@ -400,6 +405,7 @@ MENUS_BY_LANG = {
         "🦠 पीक रोग डॉक्टर": "disease",
         "🤖🎙️ ॲग्रीसेन्स AI चॅट व व्हॉईस": "voice",
         "⚡ थेट व्हॉईस कॉल": "voice_live",
+        "📊 बाजार भाव & सरकारी योजना": "market",
         "❓ शेतकरी मदत केंद्र": "help",
     }
 }
@@ -530,14 +536,15 @@ st.selectbox(
 )
 
 # Responsive Quick Navigation Pills (Instant Access to Major Modules)
-pill_cols = st.columns(6)
+pill_cols = st.columns(7)
 quick_navs = [
     ("🏠 Home", "home"),
     ("🌾 Crop", "crop"),
     ("💧 Water", "water"),
     ("🌿 Fertilizer", "fertilizer"),
     ("🦠 Disease", "disease"),
-    ("🤖 Voice AI", "voice")
+    ("🤖 Voice AI", "voice"),
+    ("📊 Market", "market")
 ]
 
 for p_idx, (p_label, p_target) in enumerate(quick_navs):
@@ -661,6 +668,17 @@ elif st.session_state.page == "voice_live":
     from modules.live_voice_page import show_live_voice
 
     show_live_voice()
+
+
+# =========================================================
+# MARKET PRICES & GOVERNMENT POLICIES
+# =========================================================
+
+elif st.session_state.page == "market":
+
+    from modules.market_policy import show_market_policy
+
+    show_market_policy()
 
 
 # =========================================================
