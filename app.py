@@ -453,7 +453,7 @@ MENUS_BY_LANG = {
         "🦠 Plant Disease Doctor": "disease",
         "🤖🎙️ AgriSense AI Chat & Voice": "voice",
         "⚡ Gemini Live Call Mode": "voice_live",
-        "📊 Market Prices & Gov Policies": "market",
+        "📊 Mandi Prices & e-NAM": "market",
         "❓ Farmer Help Center & Guide": "help",
     },
     "te": {
@@ -467,7 +467,7 @@ MENUS_BY_LANG = {
         "🦠 పంట వ్యాధి డాక్టర్": "disease",
         "🤖🎙️ అగ్రిసెన్స్ AI చాట్ & వాయిస్": "voice",
         "⚡ లైవ్ కాల్ మోడ్": "voice_live",
-        "📊 మార్కెట్ ధరలు & పథకాలు": "market",
+        "📊 మండి ధరలు & e-NAM": "market",
         "❓ సహాయ కేంద్రం & గైడ్": "help",
     },
     "hi": {
@@ -481,7 +481,7 @@ MENUS_BY_LANG = {
         "🦠 फसल रोग डॉक्टर": "disease",
         "🤖🎙️ एग्रीसेंस AI चैट और वॉइस": "voice",
         "⚡ लाइव वॉइस कॉल": "voice_live",
-        "📊 बाज़ार भाव & सरकारी योजनाएं": "market",
+        "📊 मंडी भाव & e-NAM": "market",
         "❓ किसान सहायता केंद्र": "help",
     },
     "ta": {
@@ -495,7 +495,7 @@ MENUS_BY_LANG = {
         "🦠 பயிர் நோய் மருத்துவர்": "disease",
         "🤖🎙️ அக்ரிசென்ஸ் AI அரட்டை & குரல்": "voice",
         "⚡ நேரலை அழைப்பு முறை": "voice_live",
-        "📊 சந்தை விலைகள் & அரசு திட்டங்கள்": "market",
+        "📊 மண்டி விலைகள் & e-NAM": "market",
         "❓ உதவி மையம் & வழிகாட்டி": "help",
     },
     "kn": {
@@ -509,7 +509,7 @@ MENUS_BY_LANG = {
         "🦠 ಬೆಳೆ ರೋಗ ವೈದ್ಯ": "disease",
         "🤖🎙️ ಅಗ್ರಿಸೆನ್ಸ್ AI ಚಾಟ್ ಮತ್ತು ವಾಯ್ಸ್": "voice",
         "⚡ ಲೈವ್ ಕಾಲ್ ಮೋಡ್": "voice_live",
-        "📊 ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು & ಯೋಜನೆಗಳು": "market",
+        "📊 ಮಂಡಿ ದರಗಳು & e-NAM": "market",
         "❓ ರೈತ ಸಹಾಯ ಕೇಂದ್ರ": "help",
     },
     "mr": {
@@ -523,7 +523,7 @@ MENUS_BY_LANG = {
         "🦠 पीक रोग डॉक्टर": "disease",
         "🤖🎙️ ॲग्रीसेन्स AI चॅट व व्हॉईस": "voice",
         "⚡ थेट व्हॉईस कॉल": "voice_live",
-        "📊 बाजार भाव & सरकारी योजना": "market",
+        "📊 मंडी भाव & e-NAM": "market",
         "❓ शेतकरी मदत केंद्र": "help",
     }
 }
@@ -628,14 +628,14 @@ BOTTOM_NAV_LABELS = {
     "en": {
         "farm": "Farm Data", "crop": "Predicted Crop", "schemes": "Governments", "voice": "AI",
         "more": "More", "more_title": "All Modules & Features",
-        "home": "Home Dashboard", "market": "Market Prices", "soil": "Soil Health & NPK",
+        "home": "Home Dashboard", "market": "Mandi Prices", "soil": "Soil Health & NPK",
         "water": "Smart Irrigation", "fertilizer": "Fertilizer Schedule", "disease": "Crop Disease Doctor",
         "progress": "Prediction History", "voice_live": "Gemini Live Call", "help": "Farmer Help Center"
     },
     "te": {
         "farm": "పొలం డేటా", "crop": "పంట సిఫార్సు", "schemes": "ప్రభుత్వ పథకాలు", "voice": "AI",
         "more": "మరిన్ని", "more_title": "అన్ని విభాగాలు & సాధనాలు",
-        "home": "హోమ్ డ్యాష్‌బోర్డ్", "market": "మార్కెట్ ధరలు", "soil": "నేల ఆరోగ్యం & NPK",
+        "home": "హోమ్ డ్యాష్‌బోర్డ్", "market": "మండి ధరలు", "soil": "నేల ఆరోగ్యం & NPK",
         "water": "స్మార్ట్ నీటిపారుదల", "fertilizer": "ఎరువుల సలహా", "disease": "వ్యాధి నివారణ",
         "progress": "మునుపటి రికార్డులు", "voice_live": "లైవ్ కాల్ మోడ్", "help": "సహాయ కేంద్రం"
     },
@@ -649,21 +649,21 @@ BOTTOM_NAV_LABELS = {
     "ta": {
         "farm": "பண்ணை தகவல்", "crop": "பயிர் பரிந்துரை", "schemes": "அரசு திட்டங்கள்", "voice": "AI",
         "more": "மேலும்", "more_title": "அனைத்து சேவைகள்",
-        "home": "முகப்பு", "market": "சந்தை விலைகள்", "soil": "மண் ஆரோக்கியம்",
+        "home": "முகப்பு", "market": "மண்டி விலைகள்", "soil": "மண் ஆரோக்கியம்",
         "water": "பாசன மேலாண்மை", "fertilizer": "உர வழிகாட்டி", "disease": "நோய் மருத்துவர்",
         "progress": "வரலாறு", "voice_live": "நேரலை அழைப்பு", "help": "உதவி மையம்"
     },
     "kn": {
         "farm": "ಹೊಲ ಮಾಹಿತಿ", "crop": "ಬೆಳೆ ಶಿಫಾರಸು", "schemes": "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು", "voice": "AI",
         "more": "ಇನ್ನಷ್ಟು", "more_title": "ಎಲ್ಲಾ ಆಯ್ಕೆಗಳು",
-        "home": "ಮುಖಪುಟ", "market": "ಮಾರುಕಟ್ಟೆ ದರಗಳು", "soil": "ಮಣ್ಣಿನ ಆರೋಗ್ಯ",
+        "home": "ಮುಖಪುಟ", "market": "ಮಂಡಿ ದರಗಳು", "soil": "ಮಣ್ಣಿನ ಆರೋಗ್ಯ",
         "water": "ನೀರಾವರಿ", "fertilizer": "ಗೊಬ್ಬರ ಸಲಹೆ", "disease": "ರೋಗ ವೈದ್ಯ",
         "progress": "ದಾಖಲೆಗಳು", "voice_live": "ಲೈವ್ ಕಾಲ್", "help": "ಸಹಾಯ ಕೇಂದ್ರ"
     },
     "mr": {
         "farm": "शेत डेटा", "crop": "पीक शिफारस", "schemes": "शासकीय योजना", "voice": "AI",
         "more": "अजून", "more_title": "सर्व साधने",
-        "home": "मुख्य पृष्ठ", "market": "बाजार भाव", "soil": "माती परीक्षण & NPK",
+        "home": "मुख्य पृष्ठ", "market": "मंडी भाव", "soil": "माती परीक्षण & NPK",
         "water": "सिंचन व्यवस्थापन", "fertilizer": "खत व्यवस्थापन", "disease": "रोग निदान",
         "progress": "मागील निकाल", "voice_live": "लाइव्ह कॉल", "help": "मदत केंद्र"
     },

@@ -504,7 +504,47 @@ def show_government_schemes():
         unsafe_allow_html=True
     )
 
-    # 3. Main Navigation Tabs: National Schemes | State Schemes | AI Eligibility Checker
+    # 3. Proactive AgriSense AI Scheme Guidance Card
+    st.markdown(
+        f"""
+        <div style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%); border-radius: 16px; padding: 18px 20px; margin-bottom: 18px; color: #ffffff; box-shadow: 0 6px 18px rgba(4, 120, 87, 0.25); border: 1.5px solid #86efac;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                <span style="font-size:28px;">🤖</span>
+                <div>
+                    <div style="font-size:16px;font-weight:800;color:#ffffff;">Not Sure Which Government Schemes You Qualify For?</div>
+                    <div style="font-size:12.5px;color:#d1fae5;">Ask AgriSense AI! Tap below to get instant personalized scheme recommendations, required documents, and subsidy calculation in your language.</div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    ai_sch_c1, ai_sch_c2, ai_sch_c3 = st.columns(3)
+    with ai_sch_c1:
+        if st.button("🌾 PM-KISAN & Cash Grant", key="btn_sch_ai_1", use_container_width=True):
+            st.session_state.gov_quick_ai_prompt = "Explain PM-KISAN eligibility, how to complete e-KYC, and how small/marginal farmers can claim ₹6,000 yearly directly in their bank account."
+    with ai_sch_c2:
+        if st.button("☀️ Solar Pump 60-80% Subsidy", key="btn_sch_ai_2", use_container_width=True):
+            st.session_state.gov_quick_ai_prompt = "How can a farmer apply for PM-KUSUM solar agricultural pump subsidy? What documents and portal should be used to get 60% to 80% government grant?"
+    with ai_sch_c3:
+        if st.button("🛡️ PMFBY Crop Damage Claim", key="btn_sch_ai_3", use_container_width=True):
+            st.session_state.gov_quick_ai_prompt = "How can a farmer report crop damage due to drought, unseasonal rain, or pests within 72 hours under PMFBY to claim insurance compensation?"
+
+    if "gov_quick_ai_prompt" in st.session_state and st.session_state.gov_quick_ai_prompt:
+        q_prompt = st.session_state.gov_quick_ai_prompt
+        st.session_state.gov_quick_ai_prompt = None
+        st.markdown("<div style='background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px;margin:12px 0;'>", unsafe_allow_html=True)
+        st.markdown("**🤖 AgriSense AI Official Scheme Advisor:**")
+        with st.spinner("Consulting Ministry of Agriculture guidelines..."):
+            try:
+                stream = ask_agrisense_stream(farmer_id=farmer_id, question=q_prompt, language=current_lang)
+                st.write_stream(stream)
+            except Exception as e:
+                st.warning("⚠️ Live AI connection busy. Farmer Welfare Toll-Free Helpline: 155261 / 1800-180-1551.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # 4. Main Navigation Tabs: National Schemes | State Schemes | AI Eligibility Checker
     tab_featured, tab_state, tab_ai = st.tabs([
         t["tab_featured"],
         t["tab_state"],
@@ -547,7 +587,7 @@ def show_government_schemes():
             if selected_cat == "all" or s["category"] == selected_cat
         ]
 
-        st.caption(f"Showing {len(filtered_schemes)} official schemes")
+        st.caption(f"Showing {len(filtered_schemes)} verified official government schemes")
 
         for scheme in filtered_schemes:
             st.markdown(
@@ -557,8 +597,8 @@ def show_government_schemes():
                         <div style="font-size:18px;font-weight:800;color:#0f172a;">
                             <span style="margin-right:6px;">{scheme['icon']}</span>{scheme['name']}
                         </div>
-                        <span style="background:{scheme['badge_bg']};color:{scheme['badge_color']};font-size:11px;font-weight:700;padding:3px 10px;border-radius:9999px;">
-                            Verified Govt Scheme
+                        <span style="background:{scheme['badge_bg']};color:{scheme['badge_color']};font-size:11px;font-weight:800;padding:3px 10px;border-radius:9999px;border:1px solid {scheme['badge_color']}40;">
+                            🛡️ Official Govt Portal (.gov.in)
                         </span>
                     </div>
                     <div class="gov-benefit-tag">
@@ -575,7 +615,7 @@ def show_government_schemes():
                             📞 Helpline: <span style="color:#166534;font-weight:700;">{scheme['helpline']}</span>
                         </span>
                         <a href="{scheme['portal']}" target="_blank" style="text-decoration:none;background:#15803d;color:#ffffff;font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;display:inline-block;">
-                            🌐 Visit Official Portal ↗
+                            🌐 Visit Official Portal (.gov.in) ↗
                         </a>
                     </div>
                 </div>
