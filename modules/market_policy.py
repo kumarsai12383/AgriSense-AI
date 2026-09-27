@@ -1,16 +1,15 @@
 """
-AgriSense AI — Government Policy & Live Market Prices Module
+AgriSense AI — Live Mandi Market Prices & Cost Estimator Module
 ==============================================================
 Provides:
-  1. Government Agricultural Schemes & Subsidies (AI-powered, localized)
-  2. Live Mandi Market Prices (Estimated crop prices via AI intelligence)
-  3. Cost Estimation Calculator (Input-based yield/profit estimator)
+  1. Today's Estimated Mandi Crop Prices (state-wise & crop-wise AI intelligence)
+  2. Farming Cost & Profit Estimator (input-based yield & net profit calculator)
+  3. Direct connection to the standalone Government Schemes portal
 
-Architecturally independent — does NOT modify any other module.
+Architecturally independent, clean, and presentation-grade.
 """
 
 import os
-import json
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -18,7 +17,6 @@ except ImportError:
     pass
 
 import streamlit as st
-import streamlit.components.v1 as components
 from modules.ai_engine import ask_agrisense_stream
 
 
@@ -28,46 +26,38 @@ from modules.ai_engine import ask_agrisense_stream
 
 MARKET_TEXT = {
     "en": {
-        "page_title": "📊 Market Prices & Government Policies",
-        "page_subtitle": "Live crop prices, government schemes & cost estimator for smart farming decisions",
-        "tab_market": "📈 Live Market Prices",
-        "tab_policy": "🏛️ Government Schemes",
-        "tab_cost": "💰 Cost Estimator",
+        "page_title": "📊 Live Mandi Prices & Farm Cost Estimator",
+        "page_subtitle": "Real-time crop prices, mandi rate intelligence & farm profitability calculations",
+        "tab_market": "📈 Live Mandi Prices",
+        "tab_cost": "💰 Farming Cost & Profit Estimator",
+        "gov_banner_title": "🏛️ Need Government Agricultural Schemes & Subsidies?",
+        "gov_banner_desc": "Explore PM-KISAN, crop insurance, solar pumps & state welfare grants on our dedicated portal.",
+        "gov_banner_btn": "Go to Government Schemes Portal ➔",
 
         # Market Tab
-        "market_title": "📈 Today's Estimated Crop Market Prices",
-        "market_desc": "AI-estimated mandi prices based on current season, region & demand trends",
+        "market_title": "📈 Today's Estimated Mandi Crop Prices",
+        "market_desc": "AI-estimated mandi rates based on current season, state arrivals & market demand",
         "select_state": "🌍 Select Your State",
         "select_crop": "🌾 Select Crop",
-        "get_prices": "📊 Get Market Prices",
+        "get_prices": "📊 Get Live Mandi Prices",
         "price_loading": "⏳ Fetching latest market intelligence...",
 
-        # Policy Tab
-        "policy_title": "🏛️ Government Agricultural Schemes & Subsidies",
-        "policy_desc": "Find schemes you are eligible for — subsidies, loans, insurance & support programs",
-        "select_scheme_type": "📋 Scheme Category",
-        "scheme_types": ["All Schemes", "Crop Insurance", "Subsidies & Grants", "Farm Loans", "Soil Health", "Irrigation Support", "MSP & Price Support"],
-        "get_schemes": "🔍 Find Government Schemes",
-        "policy_loading": "⏳ Searching government agricultural schemes...",
-
         # Cost Tab
-        "cost_title": "💰 Farming Cost & Profit Estimator",
-        "cost_desc": "Estimate your farming costs, expected yield & potential profit",
+        "cost_title": "💰 Farm Cost & Profit Calculator",
+        "cost_desc": "Estimate your farming investment, expected yield & potential net profit",
         "input_crop": "🌾 Crop Name",
         "input_area": "📐 Farm Area (acres)",
         "input_season": "🗓️ Season",
         "seasons": ["Kharif (Monsoon)", "Rabi (Winter)", "Zaid (Summer)"],
-        "calculate": "💰 Calculate Estimate",
-        "cost_loading": "⏳ Calculating farming costs & profit estimate...",
+        "calculate": "💰 Calculate Profit Estimate",
+        "cost_loading": "⏳ Calculating farm investment and profit forecast...",
 
-        # States
         "states": [
             "Andhra Pradesh", "Telangana", "Karnataka", "Tamil Nadu",
             "Maharashtra", "Madhya Pradesh", "Uttar Pradesh", "Punjab",
             "Haryana", "Rajasthan", "Gujarat", "Bihar",
             "West Bengal", "Odisha", "Kerala", "Assam"
         ],
-        # Common crops
         "crops": [
             "Rice (Paddy)", "Wheat", "Maize (Corn)", "Cotton",
             "Sugarcane", "Soybean", "Groundnut", "Tomato",
@@ -76,33 +66,28 @@ MARKET_TEXT = {
         ],
     },
     "te": {
-        "page_title": "📊 మార్కెట్ ధరలు & ప్రభుత్వ పథకాలు",
-        "page_subtitle": "తాజా పంట ధరలు, ప్రభుత్వ సబ్సిడీలు & వ్యయ అంచనా",
-        "tab_market": "📈 మార్కెట్ ధరలు",
-        "tab_policy": "🏛️ ప్రభుత్వ పథకాలు",
-        "tab_cost": "💰 వ్యయ అంచనా",
+        "page_title": "📊 లైవ్ మార్కెట్ ధరలు & వ్యవసాయ వ్యయ అంచనా",
+        "page_subtitle": "తాజా పంట ధరలు, మండి సమాచారం & లాభాల గణన",
+        "tab_market": "📈 లైవ్ మార్కెట్ ధరలు",
+        "tab_cost": "💰 వ్యవసాయ వ్యయ & లాభ అంచనా",
+        "gov_banner_title": "🏛️ ప్రభుత్వ వ్యవసాయ పథకాలు & సబ్సిడీలు కావాలా?",
+        "gov_banner_desc": "PM-కిసాన్, పంట బీమా, సోలార్ పంపులు & రాష్ట్ర సంక్షేమ పథకాలను మా ప్రత్యేక పోర్టల్‌లో చూడండి.",
+        "gov_banner_btn": "ప్రభుత్వ పథకాల పోర్టల్‌కు వెళ్లండి ➔",
 
-        "market_title": "📈 నేటి పంట మార్కెట్ ధరల అంచనా",
-        "market_desc": "ప్రస్తుత సీజన్, ప్రాంతం & డిమాండ్ ట్రెండ్ల ఆధారంగా AI అంచనా ధరలు",
+        "market_title": "📈 నేటి పంట మండి ధరల అంచనా",
+        "market_desc": "ప్రస్తుత సీజన్, ప్రాంతం & డిమాండ్ ఆధారంగా AI అంచనా ధరలు",
         "select_state": "🌍 మీ రాష్ట్రం ఎంచుకోండి",
         "select_crop": "🌾 పంట ఎంచుకోండి",
         "get_prices": "📊 మార్కెట్ ధరలు చూడండి",
         "price_loading": "⏳ తాజా మార్కెట్ సమాచారం తెస్తున్నాము...",
 
-        "policy_title": "🏛️ ప్రభుత్వ వ్యవసాయ పథకాలు & సబ్సిడీలు",
-        "policy_desc": "మీకు అర్హత ఉన్న పథకాలను కనుగొనండి — సబ్సిడీలు, రుణాలు, బీమా & మద్దతు కార్యక్రమాలు",
-        "select_scheme_type": "📋 పథక వర్గం",
-        "scheme_types": ["అన్ని పథకాలు", "పంట బీమా", "సబ్సిడీలు & గ్రాంట్లు", "వ్యవసాయ రుణాలు", "నేల ఆరోగ్యం", "నీటిపారుదల మద్దతు", "MSP & ధర మద్దతు"],
-        "get_schemes": "🔍 ప్రభుత్వ పథకాలు చూడండి",
-        "policy_loading": "⏳ ప్రభుత్వ వ్యవసాయ పథకాలను వెతుకుతున్నాము...",
-
-        "cost_title": "💰 వ్యవసాయ వ్యయ & లాభ అంచనా",
-        "cost_desc": "మీ వ్యవసాయ ఖర్చులు, ఊహించిన దిగుబడి & సంభావ్య లాభాన్ని అంచనా వేయండి",
+        "cost_title": "💰 వ్యవసాయ ఖర్చులు & లాభాల కాలిక్యులేటర్",
+        "cost_desc": "మీ పెట్టుబడి, ఊహించిన దిగుబడి & లాభాన్ని సులభంగా లెక్కించండి",
         "input_crop": "🌾 పంట పేరు",
         "input_area": "📐 పొలం విస్తీర్ణం (ఎకరాలు)",
         "input_season": "🗓️ సీజన్",
         "seasons": ["ఖరీఫ్ (వర్షాకాలం)", "రబీ (శీతాకాలం)", "జైద్ (వేసవి)"],
-        "calculate": "💰 అంచనా లెక్కించండి",
+        "calculate": "💰 లాభం లెక్కించండి",
         "cost_loading": "⏳ వ్యవసాయ వ్యయాలు & లాభ అంచనా లెక్కిస్తున్నాము...",
 
         "states": [
@@ -119,34 +104,29 @@ MARKET_TEXT = {
         ],
     },
     "hi": {
-        "page_title": "📊 बाज़ार भाव & सरकारी योजनाएं",
-        "page_subtitle": "ताज़ा फसल भाव, सरकारी सब्सिडी & लागत अनुमान",
-        "tab_market": "📈 बाज़ार भाव",
-        "tab_policy": "🏛️ सरकारी योजनाएं",
-        "tab_cost": "💰 लागत अनुमान",
+        "page_title": "📊 लाइव मंडी भाव और खेती लागत अनुमान",
+        "page_subtitle": "ताज़ा फसल भाव, मंडी इंटेलिजेंस और संभावित मुनाफा कैलकुलेटर",
+        "tab_market": "📈 लाइव मंडी भाव",
+        "tab_cost": "💰 खेती लागत और मुनाफा कैलकुलेटर",
+        "gov_banner_title": "🏛️ क्या आपको सरकारी कृषि योजनाएं और सब्सिडी चाहिए?",
+        "gov_banner_desc": "पीएम-किसान, फसल बीमा, सोलर पंप और राज्य अनुदान योजनाओं के लिए समर्पित पोर्टल देखें।",
+        "gov_banner_btn": "सरकारी योजनाएं पोर्टल पर जाएं ➔",
 
-        "market_title": "📈 आज की फसल बाज़ार भाव",
-        "market_desc": "वर्तमान सीजन, क्षेत्र और मांग के आधार पर AI अनुमानित भाव",
+        "market_title": "📈 आज के अनुमानित मंडी फसल भाव",
+        "market_desc": "वर्तमान सीजन, आवक और मांग के आधार पर AI अनुमानित मंडी दरें",
         "select_state": "🌍 अपना राज्य चुनें",
         "select_crop": "🌾 फसल चुनें",
-        "get_prices": "📊 बाज़ार भाव देखें",
-        "price_loading": "⏳ ताज़ा बाज़ार जानकारी ला रहे हैं...",
+        "get_prices": "📊 मंडी भाव देखें",
+        "price_loading": "⏳ ताज़ा मंडी जानकारी लाई जा रही है...",
 
-        "policy_title": "🏛️ सरकारी कृषि योजनाएं और सब्सिडी",
-        "policy_desc": "आप किन योजनाओं के पात्र हैं — सब्सिडी, ऋण, बीमा और सहायता कार्यक्रम",
-        "select_scheme_type": "📋 योजना श्रेणी",
-        "scheme_types": ["सभी योजनाएं", "फसल बीमा", "सब्सिडी और अनुदान", "कृषि ऋण", "मिट्टी स्वास्थ्य", "सिंचाई सहायता", "MSP और मूल्य समर्थन"],
-        "get_schemes": "🔍 सरकारी योजनाएं खोजें",
-        "policy_loading": "⏳ सरकारी कृषि योजनाएं खोज रहे हैं...",
-
-        "cost_title": "💰 खेती लागत और मुनाफा अनुमान",
-        "cost_desc": "अपनी खेती की लागत, अनुमानित उपज और संभावित मुनाफे का अनुमान लगाएं",
+        "cost_title": "💰 खेती लागत और लाभ कैलकुलेटर",
+        "cost_desc": "खेती का निवेश, अनुमानित उपज और शुद्ध लाभ का सटीक हिसाब लगाएं",
         "input_crop": "🌾 फसल का नाम",
         "input_area": "📐 खेत का क्षेत्रफल (एकड़)",
         "input_season": "🗓️ मौसम",
         "seasons": ["खरीफ (बरसात)", "रबी (सर्दी)", "जायद (गर्मी)"],
-        "calculate": "💰 अनुमान निकालें",
-        "cost_loading": "⏳ खेती लागत और मुनाफा अनुमान निकाल रहे हैं...",
+        "calculate": "💰 मुनाफे का अनुमान लगाएं",
+        "cost_loading": "⏳ खेती लागत और मुनाफा अनुमान निकाला जा रहा है...",
 
         "states": [
             "आंध्र प्रदेश", "तेलंगाना", "कर्नाटक", "तमिलनाडु",
@@ -162,182 +142,149 @@ MARKET_TEXT = {
         ],
     },
     "ta": {
-        "page_title": "📊 சந்தை விலைகள் & அரசு திட்டங்கள்",
-        "page_subtitle": "புதிய பயிர் விலைகள், அரசு மானியங்கள் & செலவு மதிப்பீடு",
-        "tab_market": "📈 சந்தை விலைகள்",
-        "tab_policy": "🏛️ அரசு திட்டங்கள்",
-        "tab_cost": "💰 செலவு மதிப்பீடு",
+        "page_title": "📊 நேரலை சந்தை விலை & பண்ணை செலவு மதிப்பீடு",
+        "page_subtitle": "பயிர் சந்தை நிலவரம், விலை போக்குகள் மற்றும் லாப கணக்கீடு",
+        "tab_market": "📈 நேரலை சந்தை விலைகள்",
+        "tab_cost": "💰 பண்ணை செலவு & லாப கால்குலேட்டர்",
+        "gov_banner_title": "🏛️ அரசு திட்டங்கள் மற்றும் மானியங்கள் வேண்டுமா?",
+        "gov_banner_desc": "பிஎம்-கிசான், பயிர் காப்பீடு, சோலார் பம்புகள் மற்றும் அரசு திட்டங்களை எங்கள் தனி போர்ட்டலில் காண்க.",
+        "gov_banner_btn": "அரசு திட்டங்கள் போர்ட்டலுக்கு செல்லவும் ➔",
 
-        "market_title": "📈 இன்றைய பயிர் சந்தை விலைகள்",
-        "market_desc": "தற்போதைய பருவம், பகுதி & தேவை போக்குகளின் அடிப்படையில் AI மதிப்பீடு",
-        "select_state": "🌍 உங்கள் மாநிலத்தை தேர்ந்தெடுக்கவும்",
-        "select_crop": "🌾 பயிரை தேர்ந்தெடுக்கவும்",
-        "get_prices": "📊 சந்தை விலைகளைப் பார்க்கவும்",
-        "price_loading": "⏳ சமீபத்திய சந்தை தகவல்களைப் பெறுகிறது...",
+        "market_title": "📈 இன்றைய உத்தேச சந்தை விலைகள்",
+        "market_desc": "பருவகாலம் மற்றும் தேவைக்கேற்ப AI மதிப்பீடு செய்த சந்தை விலைகள்",
+        "select_state": "🌍 உங்கள் மாநிலம்",
+        "select_crop": "🌾 பயிர்",
+        "get_prices": "📊 சந்தை விலையை காண்க",
+        "price_loading": "⏳ சந்தை தகவல் பெறப்படுகிறது...",
 
-        "policy_title": "🏛️ அரசு வேளாண் திட்டங்கள் & மானியங்கள்",
-        "policy_desc": "நீங்கள் பெறக்கூடிய திட்டங்களைக் கண்டறியுங்கள்",
-        "select_scheme_type": "📋 திட்ட வகை",
-        "scheme_types": ["அனைத்து திட்டங்கள்", "பயிர் காப்பீடு", "மானியங்கள்", "வேளாண் கடன்கள்", "மண் ஆரோக்கியம்", "பாசன ஆதரவு", "MSP & விலை ஆதரவு"],
-        "get_schemes": "🔍 அரசு திட்டங்களைக் கண்டறியுங்கள்",
-        "policy_loading": "⏳ அரசு வேளாண் திட்டங்களைத் தேடுகிறது...",
-
-        "cost_title": "💰 விவசாய செலவு & லாப மதிப்பீடு",
-        "cost_desc": "உங்கள் விவசாய செலவுகள், எதிர்பார்க்கப்படும் விளைச்சல் & சாத்தியமான லாபத்தை மதிப்பிடுங்கள்",
+        "cost_title": "💰 விவசாய முதலீடு மற்றும் லாப கணக்கீடு",
+        "cost_desc": "உங்கள் முதலீடு மற்றும் எதிர்பார்க்கப்படும் நிகர லாபத்தை மதிப்பிடுங்கள்",
         "input_crop": "🌾 பயிர் பெயர்",
-        "input_area": "📐 பண்ணை பரப்பளவு (ஏக்கர்)",
+        "input_area": "📐 பண்ணை பரப்பு (ஏக்கர்)",
         "input_season": "🗓️ பருவம்",
-        "seasons": ["கரிஃப் (பருவமழை)", "ரபி (குளிர்காலம்)", "ஜெய்ட் (கோடைகாலம்)"],
-        "calculate": "💰 மதிப்பீடு கணக்கிடுங்கள்",
-        "cost_loading": "⏳ விவசாய செலவு & லாப மதிப்பீடு கணக்கிடுகிறது...",
+        "seasons": ["காரீப் (மழைக்காலம்)", "ரபி (குளிர்காலம்)", "கோடை"],
+        "calculate": "💰 லாபம் கணக்கிடவும்",
+        "cost_loading": "⏳ மதிப்பீடு கணக்கிடப்படுகிறது...",
 
-        "states": [
-            "ஆந்திரப் பிரதேசம்", "தெலங்கானா", "கர்நாடகா", "தமிழ்நாடு",
-            "மகாராஷ்டிரா", "மத்தியப் பிரதேசம்", "உத்தரப் பிரதேசம்", "பஞ்சாப்",
-            "ஹரியானா", "ராஜஸ்தான்", "குஜராத்", "பீகார்",
-            "மேற்கு வங்காளம்", "ஒடிசா", "கேரளா", "அசாம்"
-        ],
-        "crops": [
-            "நெல்", "கோதுமை", "சோளம்", "பருத்தி",
-            "கரும்பு", "சோயாபீன்", "நிலக்கடலை", "தக்காளி",
-            "வெங்காயம்", "உருளைக்கிழங்கு", "மிளகாய்", "மஞ்சள்",
-            "வாழை", "மாம்பழம்", "சூரியகாந்தி", "ஜோவார்"
-        ],
+        "states": ["Tamil Nadu", "Andhra Pradesh", "Telangana", "Karnataka", "Kerala", "Maharashtra"],
+        "crops": ["Rice (Paddy)", "Cotton", "Sugarcane", "Banana", "Tomato", "Chilli", "Turmeric", "Groundnut"],
     },
     "kn": {
-        "page_title": "📊 ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು & ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು",
-        "page_subtitle": "ಹೊಸ ಬೆಳೆ ಬೆಲೆಗಳು, ಸರ್ಕಾರಿ ಸಬ್ಸಿಡಿಗಳು & ವೆಚ್ಚ ಅಂದಾಜು",
-        "tab_market": "📈 ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು",
-        "tab_policy": "🏛️ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು",
-        "tab_cost": "💰 ವೆಚ್ಚ ಅಂದಾಜು",
+        "page_title": "📊 ಲೈವ್ ಮಾರುಕಟ್ಟೆ ದರಗಳು & ಕೃಷಿ ವೆಚ್ಚ ಅಂದಾಜು",
+        "page_subtitle": "ನೈಜ ಬೆಳೆ ಮಾರುಕಟ್ಟೆ ದರಗಳು ಮತ್ತು ನಿವ್ವಳ ಲಾಭದ ಲೆಕ್ಕಾಚಾರ",
+        "tab_market": "📈 ಲೈವ್ ಮಾರುಕಟ್ಟೆ ದರಗಳು",
+        "tab_cost": "💰 ಕೃಷಿ ವೆಚ್ಚ & ಲಾಭದ ಕ್ಯಾಲ್ಕುಲೇಟರ್",
+        "gov_banner_title": "🏛️ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು ಮತ್ತು ಸಬ್ಸಿಡಿಗಳು ಬೇಕೇ?",
+        "gov_banner_desc": "ಪ್ರಧಾನ ಮಂತ್ರಿ ಕಿಸಾನ್, ಬೆಳೆ ವಿಮೆ ಮತ್ತು ಸೌರ ಪಂಪ್ ಯೋಜನೆಗಳನ್ನು ಪ್ರತ್ಯೇಕ ಪೋರ್ಟಲ್‌ನಲ್ಲಿ ವೀಕ್ಷಿಸಿ.",
+        "gov_banner_btn": "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ಪೋರ್ಟಲ್‌ಗೆ ಹೋಗಿ ➔",
 
-        "market_title": "📈 ಇಂದಿನ ಬೆಳೆ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು",
-        "market_desc": "ಪ್ರಸ್ತುತ ಋತು, ಪ್ರದೇಶ & ಬೇಡಿಕೆ ಪ್ರವೃತ್ತಿಗಳ ಆಧಾರದ ಮೇಲೆ AI ಅಂದಾಜು",
-        "select_state": "🌍 ನಿಮ್ಮ ರಾಜ್ಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+        "market_title": "📈 ಇಂದಿನ ಅಂದಾಜು ಎಪಿಎಂಸಿ ಮಾರುಕಟ್ಟೆ ದರಗಳು",
+        "market_desc": "ಪ್ರಸ್ತುತ ಋತುಮಾನ ಮತ್ತು ಬೇಡಿಕೆಯ ಆಧಾರದ ಮೇಲೆ AI ಅಂದಾಜು ಬೆಲೆಗಳು",
+        "select_state": "🌍 ರಾಜ್ಯ ಆಯ್ಕೆಮಾಡಿ",
         "select_crop": "🌾 ಬೆಳೆ ಆಯ್ಕೆಮಾಡಿ",
-        "get_prices": "📊 ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳನ್ನು ನೋಡಿ",
-        "price_loading": "⏳ ಇತ್ತೀಚಿನ ಮಾರುಕಟ್ಟೆ ಮಾಹಿತಿ ತರುತ್ತಿದ್ದೇವೆ...",
+        "get_prices": "📊 ಮಾರುಕಟ್ಟೆ ಬೆಲೆ ವೀಕ್ಷಿಸಿ",
+        "price_loading": "⏳ ಮಾರುಕಟ್ಟೆ ಮಾಹಿತಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
 
-        "policy_title": "🏛️ ಸರ್ಕಾರಿ ಕೃಷಿ ಯೋಜನೆಗಳು & ಸಬ್ಸಿಡಿಗಳು",
-        "policy_desc": "ನೀವು ಅರ್ಹರಾಗಿರುವ ಯೋಜನೆಗಳನ್ನು ಹುಡುಕಿ",
-        "select_scheme_type": "📋 ಯೋಜನೆ ವರ್ಗ",
-        "scheme_types": ["ಎಲ್ಲಾ ಯೋಜನೆಗಳು", "ಬೆಳೆ ವಿಮೆ", "ಸಬ್ಸಿಡಿಗಳು", "ಕೃಷಿ ಸಾಲಗಳು", "ಮಣ್ಣಿನ ಆರೋಗ್ಯ", "ನೀರಾವರಿ ಬೆಂಬಲ", "MSP & ಬೆಲೆ ಬೆಂಬಲ"],
-        "get_schemes": "🔍 ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ಹುಡುಕಿ",
-        "policy_loading": "⏳ ಸರ್ಕಾರಿ ಕೃಷಿ ಯೋಜನೆಗಳನ್ನು ಹುಡುಕುತ್ತಿದ್ದೇವೆ...",
-
-        "cost_title": "💰 ಕೃಷಿ ವೆಚ್ಚ & ಲಾಭ ಅಂದಾಜು",
-        "cost_desc": "ನಿಮ್ಮ ಕೃಷಿ ವೆಚ್ಚಗಳು, ನಿರೀಕ್ಷಿತ ಇಳುವರಿ & ಸಂಭಾವ್ಯ ಲಾಭವನ್ನು ಅಂದಾಜು ಮಾಡಿ",
+        "cost_title": "💰 ಕೃಷಿ ಹೂಡಿಕೆ ಮತ್ತು ಲಾಭದ ಅಂದಾಜು",
+        "cost_desc": "ಖರ್ಚುಗಳು ಮತ್ತು ನಿರೀಕ್ಷಿತ ಲಾಭವನ್ನು ಸರಳವಾಗಿ ಲೆಕ್ಕಹಾಕಿ",
         "input_crop": "🌾 ಬೆಳೆ ಹೆಸರು",
-        "input_area": "📐 ಹೊಲದ ವಿಸ್ತೀರ್ಣ (ಎಕರೆ)",
+        "input_area": "📐 ಜಮೀನಿನ ವಿಸ್ತೀರ್ಣ (ಎಕರೆ)",
         "input_season": "🗓️ ಋತು",
-        "seasons": ["ಖಾರಿಫ್ (ಮಳೆಗಾಲ)", "ರಬಿ (ಚಳಿಗಾಲ)", "ಜೈದ್ (ಬೇಸಿಗೆ)"],
-        "calculate": "💰 ಅಂದಾಜು ಲೆಕ್ಕ ಹಾಕಿ",
-        "cost_loading": "⏳ ಕೃಷಿ ವೆಚ್ಚ & ಲಾಭ ಅಂದಾಜು ಲೆಕ್ಕ ಹಾಕುತ್ತಿದ್ದೇವೆ...",
+        "seasons": ["ಖಾರೀಫ್", "ರಬಿ", "ಬೇಸಿಗೆ"],
+        "calculate": "💰 ಲಾಭ ಲೆಕ್ಕಿಸಿ",
+        "cost_loading": "⏳ ವೆಚ್ಚ ಮತ್ತು ಲಾಭ ಲೆಕ್ಕಿಸಲಾಗುತ್ತಿದೆ...",
 
-        "states": [
-            "ಆಂಧ್ರ ಪ್ರದೇಶ", "ತೆಲಂಗಾಣ", "ಕರ್ನಾಟಕ", "ತಮಿಳುನಾಡು",
-            "ಮಹಾರಾಷ್ಟ್ರ", "ಮಧ್ಯ ಪ್ರದೇಶ", "ಉತ್ತರ ಪ್ರದೇಶ", "ಪಂಜಾಬ್",
-            "ಹರಿಯಾಣ", "ರಾಜಸ್ಥಾನ", "ಗುಜರಾತ್", "ಬಿಹಾರ",
-            "ಪಶ್ಚಿಮ ಬಂಗಾಳ", "ಒಡಿಶಾ", "ಕೇರಳ", "ಅಸ್ಸಾಂ"
-        ],
-        "crops": [
-            "ಭತ್ತ", "ಗೋಧಿ", "ಮೆಕ್ಕೆಜೋಳ", "ಹತ್ತಿ",
-            "ಕಬ್ಬು", "ಸೋಯಾಬೀನ್", "ಶೇಂಗಾ", "ಟೊಮೆಟೊ",
-            "ಈರುಳ್ಳಿ", "ಆಲೂಗಡ್ಡೆ", "ಮೆಣಸಿನಕಾಯಿ", "ಅರಿಶಿನ",
-            "ಬಾಳೆ", "ಮಾವು", "ಸೂರ್ಯಕಾಂತಿ", "ಜೋಳ"
-        ],
+        "states": ["Karnataka", "Andhra Pradesh", "Telangana", "Tamil Nadu", "Maharashtra"],
+        "crops": ["Rice (Paddy)", "Maize (Corn)", "Cotton", "Sugarcane", "Jowar (Sorghum)", "Tomato", "Onion"],
     },
     "mr": {
-        "page_title": "📊 बाजार भाव & सरकारी योजना",
-        "page_subtitle": "ताज्या पीक भाव, सरकारी अनुदाने & खर्च अंदाज",
-        "tab_market": "📈 बाजार भाव",
-        "tab_policy": "🏛️ सरकारी योजना",
-        "tab_cost": "💰 खर्च अंदाज",
+        "page_title": "📊 थेट बाजार भाव आणि शेती खर्च अंदाज",
+        "page_subtitle": "बाजार भाव, आवक माहिती आणि नफा कॅल्क्युलेटर",
+        "tab_market": "📈 थेट बाजार भाव",
+        "tab_cost": "💰 शेती खर्च व नफा कॅल्क्युलेटर",
+        "gov_banner_title": "🏛️ शासकीय कृषी योजना आणि अनुदान हवे आहे का?",
+        "gov_banner_desc": "पीएम-किसान, पीक विमा आणि सोलर पंप योजनांसाठी समर्पित पोर्टल पहा.",
+        "gov_banner_btn": "शासकीय योजना पोर्टलवर जा ➔",
 
-        "market_title": "📈 आजचे पीक बाजार भाव",
-        "market_desc": "सध्याचा हंगाम, प्रदेश आणि मागणीच्या आधारावर AI अंदाजित भाव",
-        "select_state": "🌍 तुमचे राज्य निवडा",
+        "market_title": "📈 आजचे अंदाजित कृषी उत्पन्न बाजार भाव",
+        "market_desc": "सध्याचा हंगाम व आवक यावर आधारित AI अंदाजित दर",
+        "select_state": "🌍 राज्य निवडा",
         "select_crop": "🌾 पीक निवडा",
         "get_prices": "📊 बाजार भाव पहा",
         "price_loading": "⏳ ताज्या बाजार माहिती आणत आहोत...",
 
-        "policy_title": "🏛️ सरकारी कृषी योजना आणि अनुदाने",
-        "policy_desc": "तुम्ही कोणत्या योजनांसाठी पात्र आहात ते शोधा",
-        "select_scheme_type": "📋 योजना प्रकार",
-        "scheme_types": ["सर्व योजना", "पीक विमा", "अनुदाने", "शेती कर्ज", "माती आरोग्य", "सिंचन सहाय्य", "MSP & किंमत आधार"],
-        "get_schemes": "🔍 सरकारी योजना शोधा",
-        "policy_loading": "⏳ सरकारी कृषी योजना शोधत आहोत...",
-
-        "cost_title": "💰 शेती खर्च व नफा अंदाज",
-        "cost_desc": "तुमचा शेती खर्च, अपेक्षित उत्पादन व संभाव्य नफ्याचा अंदाज लावा",
+        "cost_title": "💰 शेती खर्च आणि नफा अंदाज",
+        "cost_desc": "गुंतवणूक आणि संभाव्य नफ्याचा अचूक अंदाज लावा",
         "input_crop": "🌾 पिकाचे नाव",
         "input_area": "📐 शेत क्षेत्र (एकर)",
         "input_season": "🗓️ हंगाम",
-        "seasons": ["खरीप (पावसाळा)", "रब्बी (हिवाळा)", "उन्हाळी"],
-        "calculate": "💰 अंदाज काढा",
-        "cost_loading": "⏳ शेती खर्च आणि नफा अंदाज काढत आहोत...",
+        "seasons": ["खरीप", "रब्बी", "उन्हाळी"],
+        "calculate": "💰 नफा अंदाज काढा",
+        "cost_loading": "⏳ खर्च आणि नफा अंदाज काढत आहोत...",
 
-        "states": [
-            "आंध्र प्रदेश", "तेलंगणा", "कर्नाटक", "तामिळनाडू",
-            "महाराष्ट्र", "मध्य प्रदेश", "उत्तर प्रदेश", "पंजाब",
-            "हरियाणा", "राजस्थान", "गुजरात", "बिहार",
-            "पश्चिम बंगाल", "ओडिशा", "केरळ", "आसाम"
-        ],
-        "crops": [
-            "भात (तांदूळ)", "गहू", "मका", "कापूस",
-            "ऊस", "सोयाबीन", "भुईमूग", "टोमॅटो",
-            "कांदा", "बटाटा", "मिरची", "हळद",
-            "केळ", "आंबा", "सूर्यफूल", "ज्वारी"
-        ],
-    },
+        "states": ["Maharashtra", "Madhya Pradesh", "Gujarat", "Karnataka", "Telangana", "Andhra Pradesh"],
+        "crops": ["Soybean", "Cotton", "Sugarcane", "Onion", "Tomato", "Wheat", "Gram (Chana)", "Banana"],
+    }
 }
 
 
 # =========================================================
-# MAIN PAGE FUNCTION
+# MAIN FUNCTION
 # =========================================================
 
 def show_market_policy():
-    """Renders the Government Policy & Live Market page."""
+    """Renders the standalone Live Market Prices & Farm Cost Estimator page."""
 
     farmer = st.session_state.get("farmer", {})
     farmer_id = farmer.get("id", 1)
     current_lang = st.session_state.get("selected_language", "English")
 
-    # Get language code for translations
     lang_map = {"English": "en", "తెలుగు": "te", "हिंदी": "hi", "தமிழ்": "ta", "ಕನ್ನಡ": "kn", "मराठी": "mr"}
     lang_code = lang_map.get(current_lang, "en")
     t = MARKET_TEXT.get(lang_code, MARKET_TEXT["en"])
 
-    # =====================================================
-    # PAGE HERO HEADER
-    # =====================================================
+    # 1. Page Header Card
     st.markdown(
         f"""
-        <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #3b82f6 100%); border-radius: 20px; padding: 22px 24px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);">
+        <div style="background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 60%, #3b82f6 100%); border-radius: 20px; padding: 22px 24px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(30, 64, 175, 0.25);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                        <span style="background: rgba(255,255,255,0.20); color: #ffffff; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,255,255,0.35);">
-                            🏛️ Gov Policies & Market Data
-                        </span>
-                    </div>
-                    <h2 style="color: white !important; margin: 0; font-size: 22px; font-weight: 800;">{t['page_title']}</h2>
-                    <p style="color: #bfdbfe; margin: 4px 0 0 0; font-size: 13px; font-weight: 500;">{t['page_subtitle']}</p>
+                    <span style="background: rgba(255,255,255,0.20); color: #ffffff; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,255,255,0.35);">
+                        📈 Mandi Rates & Farm Economics
+                    </span>
+                    <h1 style="color: white !important; margin: 8px 0 4px 0; font-size: 24px; font-weight: 800;">{t['page_title']}</h1>
+                    <p style="color: #bfdbfe; margin: 0; font-size: 13px; font-weight: 500;">{t['page_subtitle']}</p>
                 </div>
-                <div style="font-size: 38px;">📊</div>
+                <div style="font-size: 40px;">📊</div>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # =====================================================
-    # THREE TABS: Market | Policy | Cost Estimator
-    # =====================================================
-    tab_market, tab_policy, tab_cost = st.tabs([
+    # 2. Government Schemes Direct Shortcut Banner
+    st.markdown(
+        f"""
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <div style="font-weight: 800; font-size: 15px; color: #166534;">
+                    {t['gov_banner_title']}
+                </div>
+                <div style="font-size: 12px; color: #334155; margin-top: 2px;">
+                    {t['gov_banner_desc']}
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button(t['gov_banner_btn'], key="btn_jump_to_gov_schemes", use_container_width=True):
+        st.session_state.page = "gov_schemes"
+        st.rerun()
+
+    # 3. Two Dedicated Tabs: Live Mandi Rates | Farming Cost Estimator
+    tab_market, tab_cost = st.tabs([
         t["tab_market"],
-        t["tab_policy"],
         t["tab_cost"]
     ])
 
@@ -381,84 +328,26 @@ def show_market_policy():
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-        # Quick price cards for common crops
+        # Quick price guidance card
         st.markdown("---")
         st.markdown(
             f"""
-            <div style="background: linear-gradient(135deg, #ecfdf5, #f0fdf4); border: 1.5px solid #86efac; border-radius: 14px; padding: 16px; margin: 8px 0;">
-                <div style="font-size: 13px; font-weight: 700; color: #166534; margin-bottom: 8px;">
-                    💡 {"Quick tip: Select your state and crop above, then tap the button to get AI-estimated live market prices!" if lang_code == "en" else "మీ రాష్ట్రం & పంట ఎంచుకుని బటన్ నొక్కండి!" if lang_code == "te" else "अपना राज्य और फसल चुनें!" if lang_code == "hi" else "உங்கள் மாநிலம் & பயிரை தேர்ந்தெடுக்கவும்!" if lang_code == "ta" else "ನಿಮ್ಮ ರಾಜ್ಯ & ಬೆಳೆ ಆಯ್ಕೆಮಾಡಿ!" if lang_code == "kn" else "तुमचे राज्य आणि पीक निवडा!"}
+            <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px; margin: 8px 0;">
+                <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+                    💡 Smart Mandi Selling Tips:
                 </div>
+                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #475569; line-height: 1.6;">
+                    <li>Always check MSP (Minimum Support Price) before selling at private mandis.</li>
+                    <li>Grade and clean your produce to get 10-15% higher modal price.</li>
+                    <li>Utilize e-NAM (National Agriculture Market) for inter-state trading.</li>
+                </ul>
             </div>
             """,
             unsafe_allow_html=True
         )
 
     # -------------------------------------------------
-    # TAB 2: GOVERNMENT SCHEMES & POLICIES
-    # -------------------------------------------------
-    with tab_policy:
-        st.markdown(f"### {t['policy_title']}")
-        st.caption(t["policy_desc"])
-
-        scheme_category = st.selectbox(
-            t["select_scheme_type"],
-            t["scheme_types"],
-            key="policy_scheme_type"
-        )
-
-        if st.button(t["get_schemes"], key="btn_get_gov_schemes", use_container_width=True, type="primary"):
-            with st.spinner(t["policy_loading"]):
-                policy_question = (
-                    f"List the top government agricultural schemes and subsidies available for Indian farmers "
-                    f"under the category: '{scheme_category}'. "
-                    f"For each scheme, provide: "
-                    f"1. Scheme name (official name), "
-                    f"2. What it provides (money/subsidy/insurance amount), "
-                    f"3. Eligibility criteria, "
-                    f"4. How to apply (step-by-step), "
-                    f"5. Official website or helpline number. "
-                    f"Focus on Central Government and State Government schemes. "
-                    f"Include PM-KISAN, PMFBY, KCC, Soil Health Card, PM-KUSUM etc where relevant."
-                )
-                try:
-                    stream_gen = ask_agrisense_stream(
-                        farmer_id=farmer_id,
-                        question=policy_question,
-                        language=current_lang
-                    )
-                    st.write_stream(stream_gen)
-                except Exception as e:
-                    st.error(f"Error: {e}")
-
-        # Key Schemes Quick Cards
-        st.markdown("---")
-
-        schemes_data = [
-            ("🌾 PM-KISAN", "₹6,000/year", "pm-kisan"),
-            ("🛡️ PMFBY", "Crop Insurance", "pmfby"),
-            ("💳 KCC", "Farm Credit Card", "kcc"),
-            ("🧪 Soil Health", "Free Soil Testing", "soil-health"),
-        ]
-
-        scheme_cols = st.columns(4)
-        for idx, (name, benefit, key) in enumerate(schemes_data):
-            with scheme_cols[idx]:
-                colors = ["#dcfce7", "#dbeafe", "#fef3c7", "#fce7f3"]
-                borders = ["#86efac", "#93c5fd", "#fde68a", "#f9a8d4"]
-                text_colors = ["#166534", "#1e40af", "#92400e", "#9d174d"]
-                st.markdown(
-                    f"""
-                    <div style="background: {colors[idx]}; border: 1.5px solid {borders[idx]}; border-radius: 12px; padding: 12px; text-align: center;">
-                        <div style="font-size: 14px; font-weight: 800; color: {text_colors[idx]};">{name}</div>
-                        <div style="font-size: 12px; font-weight: 600; color: {text_colors[idx]}; opacity: 0.8; margin-top: 4px;">{benefit}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-    # -------------------------------------------------
-    # TAB 3: COST ESTIMATOR
+    # TAB 2: COST ESTIMATOR
     # -------------------------------------------------
     with tab_cost:
         st.markdown(f"### {t['cost_title']}")

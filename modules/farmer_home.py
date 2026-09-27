@@ -50,6 +50,12 @@ TEXT = {
 
         "farm": "📊 My Farm",
 
+        "schemes": "🏛️ Govt Schemes",
+        "schemes_caption": "Subsidies, PM-KISAN, crop insurance & grants.",
+
+        "market": "📊 Mandi Prices",
+        "market_caption": "Live market rates, price trends & profit calculator.",
+
         "talk": "🤖 Ask AgriSense AI",
 
         "voice_info":
@@ -104,6 +110,18 @@ TEXT = {
 
         "farm":
             "📊 నా పొలం",
+
+        "schemes":
+            "🏛️ ప్రభుత్వ పథకాలు",
+
+        "schemes_caption":
+            "సబ్సిడీలు, PM-కిసాన్, పంట బీమా & రుణాలు.",
+
+        "market":
+            "📊 మార్కెట్ ధరలు",
+
+        "market_caption":
+            "లైవ్ మండి ధరలు, ట్రెండ్‌లు & లాభాల గణన.",
 
         "talk":
             "🤖 AgriSense AI ని అడగండి",
@@ -161,6 +179,18 @@ TEXT = {
         "farm":
             "📊 मेरा खेत",
 
+        "schemes":
+            "🏛️ सरकारी योजनाएं",
+
+        "schemes_caption":
+            "सब्सिडी, पीएम-किसान, फसल बीमा और ऋण।",
+
+        "market":
+            "📊 मंडी भाव",
+
+        "market_caption":
+            "लाइव मंडी भाव, रुझान और मुनाफा कैलकुलेटर।",
+
         "talk":
             "🤖 AgriSense AI से पूछें",
 
@@ -216,6 +246,18 @@ TEXT = {
 
         "farm":
             "📊 என் பண்ணை",
+
+        "schemes":
+            "🏛️ அரசு திட்டங்கள்",
+
+        "schemes_caption":
+            "மானியங்கள், பிஎம்-கிசான், பயிர் காப்பீடு & கடன்கள்.",
+
+        "market":
+            "📊 சந்தை விலைகள்",
+
+        "market_caption":
+            "நேரலை சந்தை விலைகள் & லாப கால்குலேட்டர்.",
 
         "talk":
             "🤖 AgriSense AI-ஐ கேளுங்கள்",
@@ -273,6 +315,18 @@ TEXT = {
         "farm":
             "📊 ನನ್ನ ಹೊಲ",
 
+        "schemes":
+            "🏛️ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು",
+
+        "schemes_caption":
+            "ಸಬ್ಸಿಡಿಗಳು, ಪಿಎಂ-ಕಿಸಾನ್, ಬೆಳೆ ವಿಮೆ & ಸಾಲಗಳು.",
+
+        "market":
+            "📊 ಮಾರುಕಟ್ಟೆ ದರಗಳು",
+
+        "market_caption":
+            "ಲೈವ್ ಎಪಿಎಂಸಿ ದರಗಳು & ಲಾಭದ ಲೆಕ್ಕಾಚಾರ.",
+
         "talk":
             "🤖 AgriSense AI ಅನ್ನು ಕೇಳಿ",
 
@@ -328,6 +382,18 @@ TEXT = {
 
         "farm":
             "📊 माझे शेत",
+
+        "schemes":
+            "🏛️ सरकारी योजना",
+
+        "schemes_caption":
+            "अनुदाने, पीएम-किसान, पीक विमा आणि शेती कर्ज.",
+
+        "market":
+            "📊 बाजार भाव",
+
+        "market_caption":
+            "थेट बाजार भाव, आवक आणि नफा अंदाज.",
 
         "talk":
             "🤖 AgriSense AI ला विचारा",
@@ -643,6 +709,12 @@ def show_farmer_home():
                 go_to("crop")
 
         with st.container(border=True):
+            st.markdown(f"### {text.get('schemes', '🏛️ Govt Schemes')}")
+            st.caption(text.get("schemes_caption", "PM-KISAN, subsidies, crop insurance & state grants."))
+            if st.button(text.get("schemes", "🏛️ Govt Schemes"), key="btn_home_schemes", use_container_width=True):
+                go_to("gov_schemes")
+
+        with st.container(border=True):
             st.markdown(f"### {text['soil']}")
             st.caption(text.get("soil_caption", "Detailed N-P-K nutrient score, pH check, and fertility report."))
             if st.button(text["soil"], key="btn_soil", use_container_width=True):
@@ -655,6 +727,12 @@ def show_farmer_home():
                 go_to("disease")
 
     with col2:
+        with st.container(border=True):
+            st.markdown(f"### {text.get('market', '📊 Market Prices')}")
+            st.caption(text.get("market_caption", "Live estimated mandi rates & farm profit calculator."))
+            if st.button(text.get("market", "📊 Market Prices"), key="btn_home_market", use_container_width=True):
+                go_to("market")
+
         with st.container(border=True):
             st.markdown(f"### {text['fertilizer']}")
             st.caption(text.get("fertilizer_caption", "Custom NPK dosage calculations & application schedule."))

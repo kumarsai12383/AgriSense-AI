@@ -507,12 +507,12 @@ with settings_c3:
 
 # ---- Sticky Bottom Navigation Bar (App-Style) ----
 BOTTOM_NAV_LABELS = {
-    "en": {"home": "Home", "crop": "Crop", "voice": "AI Chat", "market": "Market", "more": "More"},
-    "te": {"home": "హోమ్", "crop": "పంట", "voice": "AI చాట్", "market": "మార్కెట్", "more": "మరిన్ని"},
-    "hi": {"home": "होम", "crop": "फसल", "voice": "AI चैट", "market": "बाज़ार", "more": "और"},
-    "ta": {"home": "முகப்பு", "crop": "பயிர்", "voice": "AI அரட்டை", "market": "சந்தை", "more": "மேலும்"},
-    "kn": {"home": "ಮುಖಪುಟ", "crop": "ಬೆಳೆ", "voice": "AI ಚಾಟ್", "market": "ಮಾರುಕಟ್ಟೆ", "more": "ಇನ್ನಷ್ಟು"},
-    "mr": {"home": "होम", "crop": "पीक", "voice": "AI चॅट", "market": "बाजार", "more": "अजून"},
+    "en": {"home": "Home", "crop": "Crop", "schemes": "Schemes", "market": "Market", "more": "More"},
+    "te": {"home": "హోమ్", "crop": "పంట", "schemes": "పథకాలు", "market": "మార్కెట్", "more": "మరిన్ని"},
+    "hi": {"home": "होम", "crop": "फसल", "schemes": "योजनाएं", "market": "बाज़ार", "more": "और"},
+    "ta": {"home": "முகப்பு", "crop": "பயிர்", "schemes": "திட்டங்கள்", "market": "சந்தை", "more": "மேலும்"},
+    "kn": {"home": "ಮುಖಪುಟ", "crop": "ಬೆಳೆ", "schemes": "ಯೋಜನೆಗಳು", "market": "ಮಾರುಕಟ್ಟೆ", "more": "ಇನ್ನಷ್ಟು"},
+    "mr": {"home": "होम", "crop": "पीक", "schemes": "योजना", "market": "बाजार", "more": "अजून"},
 }
 
 bnav = BOTTOM_NAV_LABELS.get(lang_code, BOTTOM_NAV_LABELS["en"])
@@ -520,14 +520,14 @@ bnav = BOTTOM_NAV_LABELS.get(lang_code, BOTTOM_NAV_LABELS["en"])
 bottom_nav_items = [
     ("🏠", bnav["home"], "home"),
     ("🌾", bnav["crop"], "crop"),
-    ("🤖", bnav["voice"], "voice"),
+    ("🏛️", bnav["schemes"], "gov_schemes"),
     ("📊", bnav["market"], "market"),
     ("☰", bnav["more"], "__more__"),
 ]
 
 def _active_css(page_id):
     if page_id == "__more__":
-        secondary = {"farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
+        secondary = {"voice", "farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
         is_active = current_page in secondary
     else:
         is_active = current_page == page_id
@@ -537,7 +537,7 @@ def _active_css(page_id):
 
 def _dot(page_id):
     if page_id == "__more__":
-        secondary = {"farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
+        secondary = {"voice", "farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
         if current_page in secondary:
             return '<div style="width:5px;height:5px;border-radius:50%;background:#16a34a;margin-top:2px;"></div>'
         return ""
@@ -568,34 +568,34 @@ for icon, label, pid in bottom_nav_items:
 # Secondary "More" menu items
 MORE_ITEMS = {
     "en": [
-        ("📡", "My Farm Data", "farm"), ("🧪", "Soil & NPK", "soil"), ("📊", "History", "progress"),
-        ("💧", "Irrigation", "water"), ("🌿", "Fertilizer", "fertilizer"), ("🦠", "Disease", "disease"),
-        ("⚡", "Live Voice", "voice_live"), ("❓", "Help Center", "help"),
+        ("🤖", "AI Assistant", "voice"), ("📡", "My Farm Data", "farm"), ("🧪", "Soil & NPK", "soil"),
+        ("📊", "History", "progress"), ("💧", "Irrigation", "water"), ("🌿", "Fertilizer", "fertilizer"),
+        ("🦠", "Disease", "disease"), ("⚡", "Live Voice", "voice_live"), ("❓", "Help Center", "help"),
     ],
     "te": [
-        ("📡", "పొలం డేటా", "farm"), ("🧪", "నేల & NPK", "soil"), ("📊", "రికార్డులు", "progress"),
-        ("💧", "నీటిపారుదల", "water"), ("🌿", "ఎరువులు", "fertilizer"), ("🦠", "వ్యాధి", "disease"),
-        ("⚡", "లైవ్ వాయిస్", "voice_live"), ("❓", "సహాయం", "help"),
+        ("🤖", "AI సహాయకుడు", "voice"), ("📡", "పొలం డేటా", "farm"), ("🧪", "నేల & NPK", "soil"),
+        ("📊", "రికార్డులు", "progress"), ("💧", "నీటిపారుదల", "water"), ("🌿", "ఎరువులు", "fertilizer"),
+        ("🦠", "వ్యాధి", "disease"), ("⚡", "లైవ్ వాయిస్", "voice_live"), ("❓", "సహాయం", "help"),
     ],
     "hi": [
-        ("📡", "खेत डेटा", "farm"), ("🧪", "मिट्टी & NPK", "soil"), ("📊", "इतिहास", "progress"),
-        ("💧", "सिंचाई", "water"), ("🌿", "खाद", "fertilizer"), ("🦠", "रोग", "disease"),
-        ("⚡", "लाइव वॉइस", "voice_live"), ("❓", "सहायता", "help"),
+        ("🤖", "AI सहायक", "voice"), ("📡", "खेत डेटा", "farm"), ("🧪", "मिट्टी & NPK", "soil"),
+        ("📊", "इतिहास", "progress"), ("💧", "सिंचाई", "water"), ("🌿", "खाद", "fertilizer"),
+        ("🦠", "रोग", "disease"), ("⚡", "लाइव वॉइस", "voice_live"), ("❓", "सहायता", "help"),
     ],
     "ta": [
-        ("📡", "பண்ணை தகவல்", "farm"), ("🧪", "மண் & NPK", "soil"), ("📊", "வரலாறு", "progress"),
-        ("💧", "பாசனம்", "water"), ("🌿", "உரம்", "fertilizer"), ("🦠", "நோய்", "disease"),
-        ("⚡", "நேரலை குரல்", "voice_live"), ("❓", "உதவி", "help"),
+        ("🤖", "AI உதவியாளர்", "voice"), ("📡", "பண்ணை தகவல்", "farm"), ("🧪", "மண் & NPK", "soil"),
+        ("📊", "வரலாறு", "progress"), ("💧", "பாசனம்", "water"), ("🌿", "உரம்", "fertilizer"),
+        ("🦠", "நோய்", "disease"), ("⚡", "நேரலை குரல்", "voice_live"), ("❓", "உதவி", "help"),
     ],
     "kn": [
-        ("📡", "ಹೊಲ ಮಾಹಿತಿ", "farm"), ("🧪", "ಮಣ್ಣು & NPK", "soil"), ("📊", "ಇತಿಹಾಸ", "progress"),
-        ("💧", "ನೀರಾವರಿ", "water"), ("🌿", "ಗೊಬ್ಬರ", "fertilizer"), ("🦠", "ರೋಗ", "disease"),
-        ("⚡", "ಲೈವ್ ವಾಯ್ಸ್", "voice_live"), ("❓", "ಸಹಾಯ", "help"),
+        ("🤖", "AI ಸಹಾಯಕ", "voice"), ("📡", "ಹೊಲ ಮಾಹಿತಿ", "farm"), ("🧪", "ಮಣ್ಣು & NPK", "soil"),
+        ("📊", "ಇತಿಹಾಸ", "progress"), ("💧", "ನೀರಾವರಿ", "water"), ("🌿", "ಗೊಬ್ಬರ", "fertilizer"),
+        ("🦠", "ರೋಗ", "disease"), ("⚡", "ಲೈವ್ ವಾಯ್ಸ್", "voice_live"), ("❓", "ಸಹಾಯ", "help"),
     ],
     "mr": [
-        ("📡", "शेत डेटा", "farm"), ("🧪", "माती & NPK", "soil"), ("📊", "इतिहास", "progress"),
-        ("💧", "सिंचन", "water"), ("🌿", "खत", "fertilizer"), ("🦠", "रोग", "disease"),
-        ("⚡", "लाइव्ह व्हॉइस", "voice_live"), ("❓", "मदत", "help"),
+        ("🤖", "AI सहाय्यक", "voice"), ("📡", "शेत डेटा", "farm"), ("🧪", "माती & NPK", "soil"),
+        ("📊", "इतिहास", "progress"), ("💧", "सिंचन", "water"), ("🌿", "खत", "fertilizer"),
+        ("🦠", "रोग", "disease"), ("⚡", "लाइव्ह व्हॉइस", "voice_live"), ("❓", "मदत", "help"),
     ],
 }
 
@@ -780,7 +780,18 @@ elif st.session_state.page == "voice_live":
 
 
 # =========================================================
-# MARKET PRICES & GOVERNMENT POLICIES
+# GOVERNMENT SCHEMES & SUBSIDIES (STANDALONE PAGE)
+# =========================================================
+
+elif st.session_state.page == "gov_schemes":
+
+    from modules.government_schemes import show_government_schemes
+
+    show_government_schemes()
+
+
+# =========================================================
+# LIVE MANDI MARKET PRICES & COST ESTIMATOR
 # =========================================================
 
 elif st.session_state.page == "market":
