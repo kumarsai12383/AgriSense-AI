@@ -705,6 +705,21 @@ def show_help_center():
                     height=44
                 )
 
+                # Visual Screenshot Flow Card with Pointer Arrows
+                step_images = {
+                    "1": "images/step1_login_ui.png",
+                    "2": "images/step2_farm_data_ui.png",
+                    "3": "images/step3_crop_recommendation_ui.png",
+                    "4": "images/step4_irrigation_advisor_ui.png",
+                    "5": "images/step5_fertilizer_advisor_ui.png",
+                    "6": "images/step6_disease_doctor_ui.png",
+                    "7": "images/step7_voice_ai_ui.png"
+                }
+                s_img = step_images.get(str(item["num"]))
+                if s_img and os.path.exists(s_img):
+                    with st.expander(f"🖼️ స్క్రీన్ చిత్రం & ఎక్కడ నొక్కాలో చూడండి (Step {item['num']} Visual Guide)", expanded=True):
+                        st.image(s_img, caption=f"Step {item['num']} Screen & Pointer Arrows (ఎరుపు బాణం సూచించిన చోట నొక్కండి / Tap where red arrow points)", use_container_width=True)
+
             with col_actions:
                 st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
                 if st.button(f"👉 {item['action_btn']}", key=f"btn_step_nav_{item['num']}", use_container_width=True):
