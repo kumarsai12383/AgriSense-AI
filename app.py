@@ -50,7 +50,7 @@ st.markdown(
         padding-top: 1.2rem;
         padding-left: 1.2rem;
         padding-right: 1.2rem;
-        padding-bottom: 80px;
+        padding-bottom: 96px;
     }
 
     /* Headings - Bold, High-Contrast & Presentation Clear */
@@ -83,31 +83,149 @@ st.markdown(
         background: transparent;
     }
 
-    /* Primary Action Buttons - Extra Large Touch Targets for Farmers */
+    /* Primary & Secondary Action Buttons */
     .stButton > button {
         width: 100%;
-        min-height: 52px;
-        border-radius: 14px;
-        font-size: 16px !important;
+        border-radius: 12px;
+        transition: all 0.15s ease-in-out;
+        cursor: pointer;
+    }
+
+    /* Primary Buttons (Green Gradient) */
+    .stButton > button[kind="primary"],
+    .stButton > button[data-testid="baseButton-primary"] {
+        min-height: 48px;
+        font-size: 15px !important;
         font-weight: 800 !important;
         background: linear-gradient(135deg, #15803d 0%, #16a34a 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.30);
-        transition: all 0.2s ease;
-        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.28) !important;
     }
 
-    .stButton > button * {
+    .stButton > button[kind="primary"] *,
+    .stButton > button[data-testid="baseButton-primary"] * {
         color: #ffffff !important;
         font-weight: 800 !important;
-        font-size: 16px !important;
     }
 
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45);
+    .stButton > button[kind="primary"]:hover,
+    .stButton > button[data-testid="baseButton-primary"]:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(22, 163, 74, 0.40) !important;
         background: linear-gradient(135deg, #166534 0%, #15803d 100%) !important;
+    }
+
+    /* Secondary Buttons (Crisp White / Subtle Border) */
+    .stButton > button[kind="secondary"],
+    .stButton > button[data-testid="baseButton-secondary"] {
+        min-height: 44px;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        background: #ffffff !important;
+        color: #1e293b !important;
+        border: 1.5px solid #cbd5e1 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .stButton > button[kind="secondary"] *,
+    .stButton > button[data-testid="baseButton-secondary"] * {
+        color: #1e293b !important;
+        font-weight: 700 !important;
+    }
+
+    .stButton > button[kind="secondary"]:hover,
+    .stButton > button[data-testid="baseButton-secondary"]:hover {
+        background: #f8fafc !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-1px);
+    }
+
+    /* Sticky Bottom Navigation Bar (Native Streamlit) */
+    div[data-testid="stBottom"] {
+        background: #ffffff !important;
+        border-top: 1.5px solid #e2e8f0 !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+        z-index: 9999 !important;
+    }
+
+    div[data-testid="stBottom"] > div {
+        padding: 6px 8px max(10px, env(safe-area-inset-bottom)) 8px !important;
+        max-width: 900px !important;
+        margin: 0 auto !important;
+    }
+
+    div[data-testid="stBottom"] [data-testid="column"] {
+        padding: 0 2px !important;
+    }
+
+    div[data-testid="stBottom"] button,
+    div[data-testid="stBottom"] [data-testid="stPopover"] button {
+        min-height: 42px !important;
+        height: 42px !important;
+        padding: 2px 2px !important;
+        border-radius: 10px !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    div[data-testid="stBottom"] button *,
+    div[data-testid="stBottom"] [data-testid="stPopover"] button * {
+        font-size: 12px !important;
+        letter-spacing: -0.2px !important;
+    }
+
+    /* Active Tab in Bottom Bar */
+    div[data-testid="stBottom"] button[kind="primary"],
+    div[data-testid="stBottom"] button[data-testid="baseButton-primary"] {
+        background: linear-gradient(135deg, #15803d 0%, #16a34a 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35) !important;
+    }
+
+    div[data-testid="stBottom"] button[kind="primary"] *,
+    div[data-testid="stBottom"] button[data-testid="baseButton-primary"] * {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
+
+    /* Inactive Tab in Bottom Bar */
+    div[data-testid="stBottom"] button[kind="secondary"],
+    div[data-testid="stBottom"] button[data-testid="baseButton-secondary"],
+    div[data-testid="stBottom"] [data-testid="stPopover"] button {
+        background: #f1f5f9 !important;
+        color: #334155 !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+    }
+
+    div[data-testid="stBottom"] button[kind="secondary"] *,
+    div[data-testid="stBottom"] button[data-testid="baseButton-secondary"] *,
+    div[data-testid="stBottom"] [data-testid="stPopover"] button * {
+        color: #334155 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Popover Body Styling */
+    [data-testid="stPopoverBody"] {
+        border-radius: 18px !important;
+        border: 1.5px solid #e2e8f0 !important;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12) !important;
+        padding: 12px !important;
+        max-height: 65vh !important;
+    }
+
+    [data-testid="stPopoverBody"] button {
+        min-height: 42px !important;
+        margin-bottom: 5px !important;
+        font-size: 14px !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        padding: 8px 12px !important;
     }
 
     /* Widget Labels */
@@ -505,174 +623,142 @@ with settings_c3:
         st.session_state.clear()
         st.rerun()
 
-# ---- Sticky Bottom Navigation Bar (Mobile App-Style) ----
+# ---- Sticky Bottom Navigation Bar (Native, Blazing-Fast & Mobile-First) ----
 BOTTOM_NAV_LABELS = {
-    "en": {"home": "Home", "crop": "Crop", "voice": "Voice AI", "schemes": "Schemes", "more": "More"},
-    "te": {"home": "హోమ్", "crop": "పంట", "voice": "వాయిస్ AI", "schemes": "పథకాలు", "more": "మరిన్ని"},
-    "hi": {"home": "होम", "crop": "फसल", "voice": "वॉइस AI", "schemes": "योजनाएं", "more": "और"},
-    "ta": {"home": "முகப்பு", "crop": "பயிர்", "voice": "குரல் AI", "schemes": "திட்டங்கள்", "more": "மேலும்"},
-    "kn": {"home": "ಮುಖಪುಟ", "crop": "ಬೆಳೆ", "voice": "ವಾಯ್ಸ್ AI", "schemes": "ಯೋಜನೆಗಳು", "more": "ಇನ್ನಷ್ಟು"},
-    "mr": {"home": "होम", "crop": "पीक", "voice": "व्हॉईस AI", "schemes": "योजना", "more": "अजून"},
+    "en": {
+        "farm": "Farm Data", "crop": "Predicted Crop", "schemes": "Governments", "voice": "AI",
+        "more": "More", "more_title": "All Modules & Features",
+        "home": "Home Dashboard", "market": "Market Prices", "soil": "Soil Health & NPK",
+        "water": "Smart Irrigation", "fertilizer": "Fertilizer Schedule", "disease": "Crop Disease Doctor",
+        "progress": "Prediction History", "voice_live": "Gemini Live Call", "help": "Farmer Help Center"
+    },
+    "te": {
+        "farm": "పొలం డేటా", "crop": "పంట సిఫార్సు", "schemes": "ప్రభుత్వ పథకాలు", "voice": "AI",
+        "more": "మరిన్ని", "more_title": "అన్ని విభాగాలు & సాధనాలు",
+        "home": "హోమ్ డ్యాష్‌బోర్డ్", "market": "మార్కెట్ ధరలు", "soil": "నేల ఆరోగ్యం & NPK",
+        "water": "స్మార్ట్ నీటిపారుదల", "fertilizer": "ఎరువుల సలహా", "disease": "వ్యాధి నివారణ",
+        "progress": "మునుపటి రికార్డులు", "voice_live": "లైవ్ కాల్ మోడ్", "help": "సహాయ కేంద్రం"
+    },
+    "hi": {
+        "farm": "खेत डेटा", "crop": "फसल सिफारिश", "schemes": "सरकारी योजनाएं", "voice": "AI",
+        "more": "और", "more_title": "सभी मॉड्यूल और उपकरण",
+        "home": "होम डैशबोर्ड", "market": "मंडी भाव", "soil": "मिट्टी स्वास्थ्य & NPK",
+        "water": "स्मार्ट सिंचाई", "fertilizer": "खाद प्रबंधन", "disease": "रोग पहचान",
+        "progress": "इतिहास", "voice_live": "लाइव कॉल", "help": "सहायता केंद्र"
+    },
+    "ta": {
+        "farm": "பண்ணை தகவல்", "crop": "பயிர் பரிந்துரை", "schemes": "அரசு திட்டங்கள்", "voice": "AI",
+        "more": "மேலும்", "more_title": "அனைத்து சேவைகள்",
+        "home": "முகப்பு", "market": "சந்தை விலைகள்", "soil": "மண் ஆரோக்கியம்",
+        "water": "பாசன மேலாண்மை", "fertilizer": "உர வழிகாட்டி", "disease": "நோய் மருத்துவர்",
+        "progress": "வரலாறு", "voice_live": "நேரலை அழைப்பு", "help": "உதவி மையம்"
+    },
+    "kn": {
+        "farm": "ಹೊಲ ಮಾಹಿತಿ", "crop": "ಬೆಳೆ ಶಿಫಾರಸು", "schemes": "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು", "voice": "AI",
+        "more": "ಇನ್ನಷ್ಟು", "more_title": "ಎಲ್ಲಾ ಆಯ್ಕೆಗಳು",
+        "home": "ಮುಖಪುಟ", "market": "ಮಾರುಕಟ್ಟೆ ದರಗಳು", "soil": "ಮಣ್ಣಿನ ಆರೋಗ್ಯ",
+        "water": "ನೀರಾವರಿ", "fertilizer": "ಗೊಬ್ಬರ ಸಲಹೆ", "disease": "ರೋಗ ವೈದ್ಯ",
+        "progress": "ದಾಖಲೆಗಳು", "voice_live": "ಲೈವ್ ಕಾಲ್", "help": "ಸಹಾಯ ಕೇಂದ್ರ"
+    },
+    "mr": {
+        "farm": "शेत डेटा", "crop": "पीक शिफारस", "schemes": "शासकीय योजना", "voice": "AI",
+        "more": "अजून", "more_title": "सर्व साधने",
+        "home": "मुख्य पृष्ठ", "market": "बाजार भाव", "soil": "माती परीक्षण & NPK",
+        "water": "सिंचन व्यवस्थापन", "fertilizer": "खत व्यवस्थापन", "disease": "रोग निदान",
+        "progress": "मागील निकाल", "voice_live": "लाइव्ह कॉल", "help": "मदत केंद्र"
+    },
 }
 
 bnav = BOTTOM_NAV_LABELS.get(lang_code, BOTTOM_NAV_LABELS["en"])
 
-bottom_nav_items = [
-    ("🏠", bnav["home"], "home"),
-    ("🌾", bnav["crop"], "crop"),
-    ("🎙️", bnav["voice"], "voice"),
-    ("🏛️", bnav["schemes"], "gov_schemes"),
-    ("☰", bnav["more"], "__more__"),
-]
+with st.bottom:
+    nav_c1, nav_c2, nav_c3, nav_c4, nav_c5 = st.columns(5)
 
-def _active_css(page_id):
-    if page_id == "__more__":
-        secondary = {"market", "farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
-        is_active = current_page in secondary
-    else:
-        is_active = current_page == page_id
-    if is_active:
-        return "color: #16a34a; font-weight: 800;"
-    return "color: #94a3b8; font-weight: 600;"
+    # 1. Farm Data
+    with nav_c1:
+        if st.button(
+            f"📡 {bnav['farm']}",
+            key="nav_btn_farm",
+            use_container_width=True,
+            type="primary" if current_page == "farm" else "secondary"
+        ):
+            st.session_state.page = "farm"
+            st.rerun()
 
-def _dot(page_id):
-    if page_id == "__more__":
-        secondary = {"market", "farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
-        if current_page in secondary:
-            return '<div style="width:5px;height:5px;border-radius:50%;background:#16a34a;margin-top:2px;"></div>'
-        return ""
-    if current_page == page_id:
-        return '<div style="width:5px;height:5px;border-radius:50%;background:#16a34a;margin-top:2px;"></div>'
-    return ""
+    # 2. Predicted Crop
+    with nav_c2:
+        if st.button(
+            f"🌾 {bnav['crop']}",
+            key="nav_btn_crop",
+            use_container_width=True,
+            type="primary" if current_page == "crop" else "secondary"
+        ):
+            st.session_state.page = "crop"
+            st.rerun()
 
-nav_items_html = ""
-for icon, label, pid in bottom_nav_items:
-    nav_items_html += f"""
-    <div style="flex:1; text-align:center; cursor:pointer; padding:6px 0;" onclick="
-        if('{pid}' === '__more__') {{
-            document.getElementById('agri-more-menu').style.display =
-                document.getElementById('agri-more-menu').style.display === 'flex' ? 'none' : 'flex';
-        }} else {{
-            document.getElementById('agri-more-menu').style.display = 'none';
-            const url = new URL(window.location.href);
-            url.searchParams.set('nav_target', '{pid}');
-            window.location.href = url.toString();
-        }}
-    ">
-        <div style="font-size:22px;line-height:1;">{icon}</div>
-        <div style="font-size:10px;margin-top:2px;{_active_css(pid)}">{label}</div>
-        {_dot(pid)}
-    </div>
-    """
+    # 3. Governments
+    with nav_c3:
+        if st.button(
+            f"🏛️ {bnav['schemes']}",
+            key="nav_btn_gov",
+            use_container_width=True,
+            type="primary" if current_page == "gov_schemes" else "secondary"
+        ):
+            st.session_state.page = "gov_schemes"
+            st.rerun()
 
-# Secondary "More" menu items
-MORE_ITEMS = {
-    "en": [
-        ("📊", "Market Prices", "market"), ("📡", "My Farm Data", "farm"), ("🧪", "Soil & NPK", "soil"),
-        ("📈", "Prediction History", "progress"), ("💧", "Smart Irrigation", "water"), ("🌿", "Fertilizer", "fertilizer"),
-        ("🦠", "Disease Doctor", "disease"), ("⚡", "Live Voice Call", "voice_live"), ("❓", "Help Center", "help"),
-    ],
-    "te": [
-        ("📊", "మార్కెట్ ధరలు", "market"), ("📡", "పొలం డేటా", "farm"), ("🧪", "నేల & NPK", "soil"),
-        ("📈", "రికార్డులు", "progress"), ("💧", "నీటిపారుదల", "water"), ("🌿", "ఎరువులు", "fertilizer"),
-        ("🦠", "వ్యాధి డాక్టర్", "disease"), ("⚡", "లైవ్ కాల్", "voice_live"), ("❓", "సహాయం", "help"),
-    ],
-    "hi": [
-        ("📊", "मंडी भाव", "market"), ("📡", "खेत डेटा", "farm"), ("🧪", "मिट्टी & NPK", "soil"),
-        ("📈", "इतिहास", "progress"), ("💧", "सिंचाई", "water"), ("🌿", "खाद", "fertilizer"),
-        ("🦠", "रोग निदान", "disease"), ("⚡", "लाइव कॉल", "voice_live"), ("❓", "सहायता", "help"),
-    ],
-    "ta": [
-        ("📊", "சந்தை விலைகள்", "market"), ("📡", "பண்ணை தகவல்", "farm"), ("🧪", "மண் & NPK", "soil"),
-        ("📈", "வரலாறு", "progress"), ("💧", "பாசனம்", "water"), ("🌿", "உரம்", "fertilizer"),
-        ("🦠", "நோய் மருத்துவர்", "disease"), ("⚡", "நேரலை அழைப்பு", "voice_live"), ("❓", "உதவி", "help"),
-    ],
-    "kn": [
-        ("📊", "ಮಾರುಕಟ್ಟೆ ದರಗಳು", "market"), ("📡", "ಹೊಲ ಮಾಹಿತಿ", "farm"), ("🧪", "ಮಣ್ಣು & NPK", "soil"),
-        ("📈", "ಇತಿಹಾಸ", "progress"), ("💧", "ನೀರಾವರಿ", "water"), ("🌿", "ಗೊಬ್ಬರ", "fertilizer"),
-        ("🦠", "ರೋಗ ವೈದ್ಯ", "disease"), ("⚡", "ಲೈವ್ ಕಾಲ್", "voice_live"), ("❓", "ಸಹಾಯ", "help"),
-    ],
-    "mr": [
-        ("📊", "बाजार भाव", "market"), ("📡", "शेत डेटा", "farm"), ("🧪", "माती & NPK", "soil"),
-        ("📈", "इतिहास", "progress"), ("💧", "सिंचन", "water"), ("🌿", "खत", "fertilizer"),
-        ("🦠", "रोग डॉक्टर", "disease"), ("⚡", "लाइव्ह कॉल", "voice_live"), ("❓", "मदत", "help"),
-    ],
-}
+    # 4. AI
+    with nav_c4:
+        if st.button(
+            f"🤖 {bnav['voice']}",
+            key="nav_btn_voice",
+            use_container_width=True,
+            type="primary" if current_page == "voice" else "secondary"
+        ):
+            st.session_state.page = "voice"
+            st.rerun()
 
-more_items = MORE_ITEMS.get(lang_code, MORE_ITEMS["en"])
-more_html = ""
-for m_icon, m_label, m_pid in more_items:
-    is_active_more = current_page == m_pid
-    active_bg = "background: #dcfce7; border-color: #86efac;" if is_active_more else "background: #ffffff; border-color: #e2e8f0;"
-    active_color = "color: #166534; font-weight: 800;" if is_active_more else "color: #334155; font-weight: 600;"
-    more_html += f"""
-    <div onclick="
-        document.getElementById('agri-more-menu').style.display='none';
-        const url = new URL(window.location.href);
-        url.searchParams.set('nav_target', '{m_pid}');
-        window.location.href = url.toString();
-    " style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;cursor:pointer;border:1.5px solid #e2e8f0;{active_bg}transition:all 0.15s;">
-        <span style="font-size:20px;">{m_icon}</span>
-        <span style="font-size:14px;{active_color}">{m_label}</span>
-    </div>
-    """
+    # 5. More (All other options)
+    with nav_c5:
+        with st.popover(f"☰ {bnav['more']}", use_container_width=True):
+            st.markdown(f"<div style='font-size:14px;font-weight:800;color:#0f172a;margin-bottom:8px;'>☰ {bnav['more_title']}</div>", unsafe_allow_html=True)
 
-st.markdown(
-    f"""
-    <!-- Sticky Bottom Navigation Bar -->
-    <div id="agri-bottom-nav" style="
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        background: #ffffff;
-        border-top: 1.5px solid #e2e8f0;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        padding: 4px 0 max(6px, env(safe-area-inset-bottom));
-    ">
-        {nav_items_html}
-    </div>
+            if st.button(f"🏠 {bnav['home']}", key="pop_btn_home", use_container_width=True, type="primary" if current_page == "home" else "secondary"):
+                st.session_state.page = "home"
+                st.rerun()
 
-    <!-- More Menu (Slide-Up Panel) -->
-    <div id="agri-more-menu" style="
-        display: none;
-        position: fixed;
-        bottom: 64px;
-        left: 8px;
-        right: 8px;
-        z-index: 9998;
-        background: #ffffff;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 20px 20px 0 0;
-        box-shadow: 0 -8px 32px rgba(0,0,0,0.10);
-        padding: 16px;
-        flex-direction: column;
-        gap: 8px;
-        max-height: 55vh;
-        overflow-y: auto;
-    ">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <span style="font-size:15px;font-weight:800;color:#0f172a;">☰ {bnav['more']}</span>
-            <span onclick="document.getElementById('agri-more-menu').style.display='none';" style="font-size:20px;cursor:pointer;color:#94a3b8;padding:4px 8px;">✕</span>
-        </div>
-        {more_html}
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+            if st.button(f"📊 {bnav['market']}", key="pop_btn_market", use_container_width=True, type="primary" if current_page == "market" else "secondary"):
+                st.session_state.page = "market"
+                st.rerun()
 
-# ---- Handle Bottom Bar Navigation via Query Params ----
-nav_target = st.query_params.get("nav_target")
-if nav_target and nav_target != current_page:
-    st.session_state.page = nav_target
-    st.query_params.clear()
-    st.rerun()
-elif nav_target:
-    st.query_params.clear()
+            if st.button(f"🧪 {bnav['soil']}", key="pop_btn_soil", use_container_width=True, type="primary" if current_page == "soil" else "secondary"):
+                st.session_state.page = "soil"
+                st.rerun()
+
+            if st.button(f"💧 {bnav['water']}", key="pop_btn_water", use_container_width=True, type="primary" if current_page == "water" else "secondary"):
+                st.session_state.page = "water"
+                st.rerun()
+
+            if st.button(f"🌿 {bnav['fertilizer']}", key="pop_btn_fert", use_container_width=True, type="primary" if current_page == "fertilizer" else "secondary"):
+                st.session_state.page = "fertilizer"
+                st.rerun()
+
+            if st.button(f"🦠 {bnav['disease']}", key="pop_btn_disease", use_container_width=True, type="primary" if current_page == "disease" else "secondary"):
+                st.session_state.page = "disease"
+                st.rerun()
+
+            if st.button(f"📈 {bnav['progress']}", key="pop_btn_progress", use_container_width=True, type="primary" if current_page == "progress" else "secondary"):
+                st.session_state.page = "progress"
+                st.rerun()
+
+            if st.button(f"⚡ {bnav['voice_live']}", key="pop_btn_voice_live", use_container_width=True, type="primary" if current_page == "voice_live" else "secondary"):
+                st.session_state.page = "voice_live"
+                st.rerun()
+
+            if st.button(f"❓ {bnav['help']}", key="pop_btn_help", use_container_width=True, type="primary" if current_page == "help" else "secondary"):
+                st.session_state.page = "help"
+                st.rerun()
+
 
 
 if st.session_state.page == "home":

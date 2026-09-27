@@ -22,9 +22,10 @@ from modules.ai_engine import ask_agrisense_stream
 
 
 # =========================================================
-# HELPER: LOAD BACKGROUND IMAGE AS BASE64
+# HELPER: LOAD BACKGROUND IMAGE AS BASE64 (CACHED FOR INSTANT SPEED)
 # =========================================================
 
+@st.cache_data
 def _get_bg_base64():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     img_path = os.path.join(base_dir, "images", "gov_schemes_bg.jpg")
