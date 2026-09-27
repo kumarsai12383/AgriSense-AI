@@ -50,7 +50,7 @@ st.markdown(
         padding-top: 1.2rem;
         padding-left: 1.2rem;
         padding-right: 1.2rem;
-        padding-bottom: 96px;
+        padding-bottom: 120px !important;
     }
 
     /* Headings - Bold, High-Contrast & Presentation Clear */
@@ -141,18 +141,25 @@ st.markdown(
         transform: translateY(-1px);
     }
 
-    /* Sticky Bottom Navigation Bar (Native Streamlit) */
+    /* Sticky Bottom Navigation Bar (Ultra-Clean, Sleek Mobile-First Dock) */
     div[data-testid="stBottom"] {
-        background: #ffffff !important;
-        border-top: 1.5px solid #e2e8f0 !important;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
-        z-index: 9999 !important;
+        background: transparent !important;
+        pointer-events: none !important;
+        z-index: 999 !important;
     }
 
     div[data-testid="stBottom"] > div {
-        padding: 6px 8px max(10px, env(safe-area-inset-bottom)) 8px !important;
-        max-width: 900px !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-bottom: none !important;
+        border-radius: 20px 20px 0 0 !important;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.10) !important;
+        padding: 5px 8px max(6px, env(safe-area-inset-bottom)) 8px !important;
+        max-width: 460px !important;
         margin: 0 auto !important;
+        pointer-events: auto !important;
     }
 
     div[data-testid="stBottom"] [data-testid="column"] {
@@ -163,19 +170,19 @@ st.markdown(
     div[data-testid="stBottom"] [data-testid="stPopover"] button {
         min-height: 42px !important;
         height: 42px !important;
-        padding: 2px 2px !important;
-        border-radius: 10px !important;
+        padding: 0 !important;
+        border-radius: 12px !important;
         margin: 0 !important;
-        line-height: 1.2 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.15s ease-in-out !important;
     }
 
     div[data-testid="stBottom"] button *,
     div[data-testid="stBottom"] [data-testid="stPopover"] button * {
-        font-size: 12px !important;
-        letter-spacing: -0.2px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
     }
 
     /* Active Tab in Bottom Bar */
@@ -184,13 +191,14 @@ st.markdown(
         background: linear-gradient(135deg, #15803d 0%, #16a34a 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35) !important;
+        box-shadow: 0 2px 10px rgba(22, 163, 74, 0.40) !important;
+        transform: translateY(-2px);
     }
 
     div[data-testid="stBottom"] button[kind="primary"] *,
     div[data-testid="stBottom"] button[data-testid="baseButton-primary"] * {
         color: #ffffff !important;
-        font-weight: 800 !important;
+        font-size: 22px !important;
     }
 
     /* Inactive Tab in Bottom Bar */
@@ -207,14 +215,14 @@ st.markdown(
     div[data-testid="stBottom"] button[data-testid="baseButton-secondary"] *,
     div[data-testid="stBottom"] [data-testid="stPopover"] button * {
         color: #334155 !important;
-        font-weight: 700 !important;
+        font-size: 20px !important;
     }
 
     /* Popover Body Styling */
     [data-testid="stPopoverBody"] {
         border-radius: 18px !important;
         border: 1.5px solid #e2e8f0 !important;
-        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12) !important;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.14) !important;
         padding: 12px !important;
         max-height: 65vh !important;
     }
@@ -226,6 +234,10 @@ st.markdown(
         text-align: left !important;
         justify-content: flex-start !important;
         padding: 8px 12px !important;
+    }
+
+    [data-testid="stPopoverBody"] button * {
+        font-size: 14px !important;
     }
 
     /* Widget Labels */
@@ -674,53 +686,57 @@ bnav = BOTTOM_NAV_LABELS.get(lang_code, BOTTOM_NAV_LABELS["en"])
 with st.bottom:
     nav_c1, nav_c2, nav_c3, nav_c4, nav_c5 = st.columns(5)
 
-    # 1. Farm Data
+    # 1. Farm Data (Icon Only)
     with nav_c1:
         if st.button(
-            f"📡 {bnav['farm']}",
+            "📡",
             key="nav_btn_farm",
+            help=f"📡 {bnav['farm']}",
             use_container_width=True,
             type="primary" if current_page == "farm" else "secondary"
         ):
             st.session_state.page = "farm"
             st.rerun()
 
-    # 2. Predicted Crop
+    # 2. Predicted Crop (Icon Only)
     with nav_c2:
         if st.button(
-            f"🌾 {bnav['crop']}",
+            "🌾",
             key="nav_btn_crop",
+            help=f"🌾 {bnav['crop']}",
             use_container_width=True,
             type="primary" if current_page == "crop" else "secondary"
         ):
             st.session_state.page = "crop"
             st.rerun()
 
-    # 3. Governments
+    # 3. Governments (Icon Only)
     with nav_c3:
         if st.button(
-            f"🏛️ {bnav['schemes']}",
+            "🏛️",
             key="nav_btn_gov",
+            help=f"🏛️ {bnav['schemes']}",
             use_container_width=True,
             type="primary" if current_page == "gov_schemes" else "secondary"
         ):
             st.session_state.page = "gov_schemes"
             st.rerun()
 
-    # 4. AI
+    # 4. AI (Icon Only)
     with nav_c4:
         if st.button(
-            f"🤖 {bnav['voice']}",
+            "🤖",
             key="nav_btn_voice",
+            help=f"🤖 {bnav['voice']}",
             use_container_width=True,
             type="primary" if current_page == "voice" else "secondary"
         ):
             st.session_state.page = "voice"
             st.rerun()
 
-    # 5. More (All other options)
+    # 5. More (Icon Only with Popover Menu)
     with nav_c5:
-        with st.popover(f"☰ {bnav['more']}", use_container_width=True):
+        with st.popover("☰", help=f"☰ {bnav['more']}", use_container_width=True):
             st.markdown(f"<div style='font-size:14px;font-weight:800;color:#0f172a;margin-bottom:8px;'>☰ {bnav['more_title']}</div>", unsafe_allow_html=True)
 
             if st.button(f"🏠 {bnav['home']}", key="pop_btn_home", use_container_width=True, type="primary" if current_page == "home" else "secondary"):

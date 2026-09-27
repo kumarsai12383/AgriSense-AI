@@ -520,29 +520,54 @@ def show_crop_recommendation():
         ai_c1, ai_c2, ai_c3, ai_c4 = st.columns(4)
         with ai_c1:
             if st.button("🗓️ Sowing Date & Seed Rate", key="btn_crop_ai_sow", use_container_width=True):
-                st.session_state.crop_ai_quick_prompt = f"What is the ideal sowing month, seed rate per acre, and seed treatment method for growing {crop} in India?"
+                st.session_state.crop_ai_topic = "sow"
+                st.session_state.crop_ai_prompt = f"What is the ideal sowing month, seed rate per acre, and seed treatment method for growing {crop} in India?"
         with ai_c2:
             if st.button("🌿 Fertilizer Split Doses", key="btn_crop_ai_fert", use_container_width=True):
-                st.session_state.crop_ai_quick_prompt = f"Give me the complete stage-by-stage fertilizer schedule (Urea, DAP, Potash) for {crop} across its 4 growth stages."
+                st.session_state.crop_ai_topic = "fert"
+                st.session_state.crop_ai_prompt = f"Give me the complete stage-by-stage fertilizer schedule (Urea, DAP, Potash) for {crop} across its 4 growth stages."
         with ai_c3:
             if st.button("💧 Water & Irrigation Tips", key="btn_crop_ai_water", use_container_width=True):
-                st.session_state.crop_ai_quick_prompt = f"What are the critical irrigation stages for {crop}? How often should I water to maximize harvest yield?"
+                st.session_state.crop_ai_topic = "water"
+                st.session_state.crop_ai_prompt = f"What are the critical irrigation stages for {crop}? How often should I water to maximize harvest yield?"
         with ai_c4:
             if st.button("🐛 Common Pest Prevention", key="btn_crop_ai_pest", use_container_width=True):
-                st.session_state.crop_ai_quick_prompt = f"What are the most common pests and diseases in {crop}? What organic and chemical treatments should I apply?"
+                st.session_state.crop_ai_topic = "pest"
+                st.session_state.crop_ai_prompt = f"What are the most common pests and diseases in {crop}? What organic and chemical treatments should I apply?"
 
-        if "crop_ai_quick_prompt" in st.session_state and st.session_state.crop_ai_quick_prompt:
-            c_prompt = st.session_state.crop_ai_quick_prompt
-            st.session_state.crop_ai_quick_prompt = None
-            st.markdown("<div style='background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px;margin:12px 0;'>", unsafe_allow_html=True)
-            st.markdown(f"**🤖 AgriSense AI Agronomist for {crop_display}:**")
+        if st.session_state.get("crop_ai_topic") or st.session_state.get("crop_ai_prompt"):
+            c_topic = st.session_state.get("crop_ai_topic")
+            c_prompt = st.session_state.get("crop_ai_prompt")
+            
+            FALLBACK_CROP_ADVICE = {
+                "sow": f"### 🗓️ Ideal Sowing & Seed Rate for {crop_display}\n* **Optimal Sowing Window:** Kharif Season (June 15 – July 15) or Rabi Season (October 15 – November 15) depending on regional monsoon.\n* **Seed Rate:** 20–25 kg per acre for standard varieties; 8–10 kg per acre for hybrid varieties.\n* **Seed Treatment:** Treat seeds with *Trichoderma viride* @ 4g/kg seed or Carbendazim @ 2g/kg seed to prevent seed-borne wilt and root rot diseases.",
+                "fert": f"### 🌿 Fertilizer Dosage & Schedule for {crop_display}\n* **Basal Application (At Sowing):** 50 kg DAP + 25 kg MOP + 10 kg Zinc Sulphate per acre.\n* **First Top Dressing (Vegetative / Tillering Stage, 25-30 days):** 25-30 kg Urea per acre.\n* **Second Top Dressing (Flowering / Booting Stage, 45-55 days):** 20 kg Urea + 10 kg Potash per acre for bold grains and fruit quality.\n* **Micronutrient Spray:** Foliar spray of 19:19:19 NPK (1%) at flowering stage boosts yield by 15-20%.",
+                "water": f"### 💧 Water & Critical Irrigation Stages for {crop_display}\n* **Stage 1 (Establishment):** First light irrigation immediately after sowing or transplanting.\n* **Stage 2 (Vegetative / Tillering):** Irrigate every 7-10 days depending on soil moisture.\n* **Stage 3 (Flowering & Grain/Fruit Formation):** Critical stage; do not allow soil to dry out as moisture stress causes flower drop.\n* **Water Saving Tip:** Adopt drip or sprinkler irrigation to save up to 40% water and qualify for 55% PMKSY government subsidy.",
+                "pest": f"### 🐛 Common Pest & Disease Management for {crop_display}\n* **Preventive Organic Protection:** Spray Neem Seed Kernel Extract (NSKE 5%) or 1500 ppm Neem Oil (3 ml/litre water) at first sign of sucking pests.\n* **Biocontrol:** Install 4-5 pheromone traps and yellow sticky traps per acre for early insect detection.\n* **Fungal Leaf Spots:** Spray Mancozeb (2.5 g/L) or Copper Oxychloride (3 g/L) at early leaf symptom onset."
+            }
+
+            st.markdown("<div style='background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:18px;margin:14px 0;'>", unsafe_allow_html=True)
+            c_h1, c_h2 = st.columns([5, 1])
+            with c_h1:
+                st.markdown(f"**🤖 AgriSense AI Agronomist for {crop_display}:**")
+            with c_h2:
+                if st.button("✖ Close", key="btn_close_crop_ai", use_container_width=True):
+                    st.session_state.crop_ai_topic = None
+                    st.session_state.crop_ai_prompt = None
+                    st.rerun()
+
             with st.spinner("Consulting agricultural research database..."):
+                ai_ok = False
                 try:
                     from modules.ai_engine import ask_agrisense_stream
                     stream = ask_agrisense_stream(farmer_id=farmer["id"], question=c_prompt, language=current_lang)
                     st.write_stream(stream)
-                except Exception as e:
-                    st.info(f"💡 Recommendation for {crop_display}: Ensure good soil drainage, test seed germination before sowing, and apply balanced NPK.")
+                    ai_ok = True
+                except Exception:
+                    pass
+
+                if not ai_ok and c_topic in FALLBACK_CROP_ADVICE:
+                    st.markdown(FALLBACK_CROP_ADVICE[c_topic])
             st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("---")
