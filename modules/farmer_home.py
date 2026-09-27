@@ -702,6 +702,28 @@ def show_farmer_home():
                 go_to("voice_live")
 
     # =====================================================
+    # ❓ FARMER HELP CENTER & USER GUIDE HERO CARD
+    # =====================================================
+    with st.container(border=True):
+        h_col1, h_col2 = st.columns([3, 1])
+        with h_col1:
+            st.markdown(
+                """
+                <div style="font-weight: 800; font-size: 16px; color: #15803d; display: flex; align-items: center; gap: 8px;">
+                    <span>❓</span> Farmer Help Center & Step-by-Step Guide
+                </div>
+                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">
+                    New to AgriSense AI? Learn how to use all features step-by-step with voice guidance.
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        with h_col2:
+            st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            if st.button("📖 Open Guide", key="btn_home_to_help", use_container_width=True, type="primary"):
+                go_to("help")
+
+    # =====================================================
     # LANGUAGE SWITCHER FOOTER
     # =====================================================
 

@@ -335,6 +335,7 @@ MENUS_BY_LANG = {
         "🦠 Plant Disease Doctor": "disease",
         "🤖🎙️ AgriSense AI Chat & Voice": "voice",
         "⚡ Gemini Live Call Mode": "voice_live",
+        "❓ Farmer Help Center & Guide": "help",
     },
     "te": {
         "🏠 డాష్‌బోర్డ్ హోమ్": "home",
@@ -347,6 +348,7 @@ MENUS_BY_LANG = {
         "🦠 పంట వ్యాధి డాక్టర్": "disease",
         "🤖🎙️ అగ్రిసెన్స్ AI చాట్ & వాయిస్": "voice",
         "⚡ లైవ్ కాల్ మోడ్": "voice_live",
+        "❓ సహాయ కేంద్రం & గైడ్": "help",
     },
     "hi": {
         "🏠 डैशबोर्ड होम": "home",
@@ -359,6 +361,7 @@ MENUS_BY_LANG = {
         "🦠 फसल रोग डॉक्टर": "disease",
         "🤖🎙️ एग्रीसेंस AI चैट और वॉइस": "voice",
         "⚡ लाइव वॉइस कॉल": "voice_live",
+        "❓ किसान सहायता केंद्र": "help",
     },
     "ta": {
         "🏠 முகப்பு பக்கம்": "home",
@@ -371,6 +374,7 @@ MENUS_BY_LANG = {
         "🦠 பயிர் நோய் மருத்துவர்": "disease",
         "🤖🎙️ அக்ரிசென்ஸ் AI அரட்டை & குரல்": "voice",
         "⚡ நேரலை அழைப்பு முறை": "voice_live",
+        "❓ உதவி மையம் & வழிகாட்டி": "help",
     },
     "kn": {
         "🏠 ಮುಖಪುಟ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್": "home",
@@ -383,6 +387,7 @@ MENUS_BY_LANG = {
         "🦠 ಬೆಳೆ ರೋಗ ವೈದ್ಯ": "disease",
         "🤖🎙️ ಅಗ್ರಿಸೆನ್ಸ್ AI ಚಾಟ್ ಮತ್ತು ವಾಯ್ಸ್": "voice",
         "⚡ ಲೈವ್ ಕಾಲ್ ಮೋಡ್": "voice_live",
+        "❓ ರೈತ ಸಹಾಯ ಕೇಂದ್ರ": "help",
     },
     "mr": {
         "🏠 मुख्य डॅशबोर्ड": "home",
@@ -395,6 +400,7 @@ MENUS_BY_LANG = {
         "🦠 पीक रोग डॉक्टर": "disease",
         "🤖🎙️ ॲग्रीसेन्स AI चॅट व व्हॉईस": "voice",
         "⚡ थेट व्हॉईस कॉल": "voice_live",
+        "❓ शेतकरी मदत केंद्र": "help",
     }
 }
 
@@ -604,3 +610,14 @@ elif st.session_state.page == "voice_live":
     from modules.live_voice_page import show_live_voice
 
     show_live_voice()
+
+
+# =========================================================
+# HELP CENTER
+# =========================================================
+
+elif st.session_state.page == "help":
+
+    from modules.help_center import show_help_center
+
+    show_help_center()
