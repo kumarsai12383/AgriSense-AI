@@ -14,9 +14,9 @@ LANGUAGES_LOGIN = {
         "login_card_title": "👨‍🌾 Farmer Login / Registration",
         "login_card_sub": "Enter your name and mobile number to access personalized farm advisory",
         "name_label": "👤 Farmer Name",
-        "name_placeholder": "e.g. Ramesh Kumar / Praveen",
+        "name_placeholder": "e.g. Ramesh Kumar / Kisan",
         "phone_label": "📱 Mobile Number (10 Digits)",
-        "phone_placeholder": "e.g. 7095984500",
+        "phone_placeholder": "e.g. 9876543210",
         "submit_btn": "🚜 Enter Dashboard",
         "name_error": "⚠️ Please enter your name.",
         "phone_error": "⚠️ Please enter a valid 10-digit mobile number.",
@@ -41,9 +41,9 @@ LANGUAGES_LOGIN = {
         "login_card_title": "👨‍🌾 రైతు లాగిన్ / నమోదు",
         "login_card_sub": "వ్యక్తిగత వ్యవసాయ సలహాలు పొందడానికి మీ వివరాలు నమోదు చేయండి",
         "name_label": "👤 రైతు పేరు",
-        "name_placeholder": "ఉదా: రమేష్ కుమార్ / ప్రవీణ్",
+        "name_placeholder": "ఉదా: రమేష్ కుమార్ / రైతు",
         "phone_label": "📱 మొబైల్ నంబర్ (10 అంకెలు)",
-        "phone_placeholder": "ఉదా: 7095984500",
+        "phone_placeholder": "ఉదా: 9876543210",
         "submit_btn": "🚜 డ్యాష్‌బోర్డ్‌లోకి ప్రవేశించండి",
         "name_error": "⚠️ దయచేసి మీ పేరును నమోదు చేయండి.",
         "phone_error": "⚠️ దయచేసి సరైన 10 అంకెల మొబైల్ నంబర్‌ను నమోదు చేయండి.",
@@ -68,9 +68,9 @@ LANGUAGES_LOGIN = {
         "login_card_title": "👨‍🌾 किसान लॉगिन / पंजीकरण",
         "login_card_sub": "व्यक्तिगत कृषि सलाह प्राप्त करने के लिए अपना नाम और मोबाइल नंबर दर्ज करें",
         "name_label": "👤 किसान का नाम",
-        "name_placeholder": "उदा: रमेश कुमार / प्रवीण",
+        "name_placeholder": "उदा: रमेश कुमार / किसान",
         "phone_label": "📱 मोबाइल नंबर (10 अंक)",
-        "phone_placeholder": "उदा: 7095984500",
+        "phone_placeholder": "उदा: 9876543210",
         "submit_btn": "🚜 डैशबोर्ड में प्रवेश करें",
         "name_error": "⚠️ कृपया अपना नाम दर्ज करें।",
         "phone_error": "⚠️ कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।",
@@ -97,7 +97,7 @@ LANGUAGES_LOGIN = {
         "name_label": "👤 விவசாயி பெயர்",
         "name_placeholder": "எ.கா: ரமேஷ் குமார்",
         "phone_label": "📱 அலைபேசி எண் (10 இலக்கங்கள்)",
-        "phone_placeholder": "எ.கா: 7095984500",
+        "phone_placeholder": "எ.கா: 9876543210",
         "submit_btn": "🚜 டேஷ்போர்டைத் திறக்கவும்",
         "name_error": "⚠️ உங்கள் பெயரை உள்ளிடவும்.",
         "phone_error": "⚠️ சரியான 10 இலக்க அலைபேசி எண்ணை உள்ளிடவும்.",
@@ -124,7 +124,7 @@ LANGUAGES_LOGIN = {
         "name_label": "👤 ರೈತರ ಹೆಸರು",
         "name_placeholder": "ಉದಾ: ರಮೇಶ್ ಕುಮಾರ್",
         "phone_label": "📱 ಮೊಬೈಲ್ ಸಂಖ್ಯೆ (10 ಅಂಕಿಗಳು)",
-        "phone_placeholder": "ಉದಾ: 7095984500",
+        "phone_placeholder": "ಉದಾ: 9876543210",
         "submit_btn": "🚜 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಪ್ರವೇಶಿಸಿ",
         "name_error": "⚠️ ದಯವಿಟ್ಟು ನಿಮ್ಮ ಹೆಸರನ್ನು ನಮೂದಿಸಿ.",
         "phone_error": "⚠️ ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ 10 ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.",
@@ -151,7 +151,7 @@ LANGUAGES_LOGIN = {
         "name_label": "👤 शेतकऱ्याचे नाव",
         "name_placeholder": "उदा: रमेश कुमार",
         "phone_label": "📱 मोबाईल नंबर (10 अंक)",
-        "phone_placeholder": "उदा: 7095984500",
+        "phone_placeholder": "उदा: 9876543210",
         "submit_btn": "🚜 डॅशबोर्ड उघडा",
         "name_error": "⚠️ कृपया आपले नाव प्रविष्ट करा.",
         "phone_error": "⚠️ कृपया 10 अंकी वैध मोबाईल नंबर प्रविष्ट करा.",
@@ -299,6 +299,7 @@ def show_login():
             st.session_state.selected_language = chosen_lang
             st.session_state.language_code = ui["code"]
             st.session_state.language_selected = True
+            st.session_state.page = "home"
             st.rerun()
 
     # -------------------------------------------------------------

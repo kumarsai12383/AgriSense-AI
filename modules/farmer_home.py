@@ -707,6 +707,19 @@ def show_farmer_home():
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-    if st.button("🌐 Switch Language / భాష మార్చండి", key="btn_lang", use_container_width=True):
-        st.session_state.language_selected = False
-        st.rerun()
+    with st.expander("🌐 Switch App Language / భాష మార్చండి", expanded=False):
+        c_lang = st.session_state.get("selected_language", "English")
+        lang_keys = list(LANGUAGES.keys())
+        c_i = lang_keys.index(c_lang) if c_lang in lang_keys else 0
+        new_l = st.selectbox("🌐 Select Your Language", lang_keys, index=c_i, key="footer_lang_select")
+        if new_l != c_lang:
+            st.session_state.selected_language = new_l
+            st.session_state.language_code = LANGUAGES[new_l]
+            if farmer:
+                st.session_state.farmer["language"] = new_l
+                try:
+                    from database.farmers import update_farmer_language
+                    update_farmer_language(farmer["id"], new_l)
+                except Exception:
+                    pass
+            st.rerun()

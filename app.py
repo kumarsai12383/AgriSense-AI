@@ -295,7 +295,7 @@ if "farmer" not in st.session_state or not st.session_state.farmer:
 # FARMER & LANGUAGE INITIALIZATION
 # =========================================================
 
-farmer = st.session_state.farmer
+farmer = st.session_state.get("farmer", {})
 
 LANGUAGES_MAP = {
     "English": "en",
@@ -415,25 +415,32 @@ PAGE_TO_LABEL = {v: k for k, v in CURRENT_MENU.items()}
 page_values = list(CURRENT_MENU.values())
 page_keys = list(CURRENT_MENU.keys())
 
-current_page = st.session_state.page
+current_page = st.session_state.get("page", "home")
 if current_page not in page_values:
     current_page = "home"
     st.session_state.page = "home"
 
-current_label = PAGE_TO_LABEL.get(current_page, page_keys[0])
-current_index = page_keys.index(current_label) if current_label in page_keys else 0
+target_label = PAGE_TO_LABEL.get(current_page, page_keys[0])
+nav_key = f"nav_select_{lang_code}"
 
-selected_menu = st.selectbox(
+# Synchronize selectbox widget state with the active page state
+if nav_key in st.session_state and CURRENT_MENU.get(st.session_state[nav_key]) != current_page:
+    st.session_state[nav_key] = target_label
+
+def on_nav_change():
+    selected = st.session_state.get(nav_key)
+    if selected and selected in CURRENT_MENU:
+        st.session_state.page = CURRENT_MENU[selected]
+
+current_index = page_keys.index(target_label) if target_label in page_keys else 0
+
+st.selectbox(
     nav_prompt,
     page_keys,
     index=current_index,
-    key=f"nav_select_{lang_code}"
+    key=nav_key,
+    on_change=on_nav_change
 )
-
-new_page = CURRENT_MENU.get(selected_menu, "home")
-if new_page != st.session_state.page:
-    st.session_state.page = new_page
-    st.rerun()
 
 
 # =========================================================
@@ -445,6 +452,8 @@ current_lang = st.session_state.selected_language
 profile_col1, profile_col2, profile_col3 = st.columns([3, 2, 1])
 
 with profile_col1:
+    f_name = farmer.get('name', 'Farmer')
+    f_phone = farmer.get('phone', '')
     st.markdown(
         f"""
         <div style="display: flex; align-items: center; gap: 10px; padding: 4px 0;">
@@ -452,8 +461,8 @@ with profile_col1:
                 👨‍🌾
             </div>
             <div>
-                <div style="font-weight: 700; color: #0f172a; font-size: 16px; line-height: 1.2;">{farmer['name']}</div>
-                <div style="font-size: 12px; color: #64748b;">📞 {farmer.get('phone', '')}</div>
+                <div style="font-weight: 700; color: #0f172a; font-size: 16px; line-height: 1.2;">{f_name}</div>
+                <div style="font-size: 12px; color: #64748b;">📞 {f_phone}</div>
             </div>
         </div>
         """,
@@ -472,8 +481,10 @@ with profile_col2:
     if header_lang != current_lang:
         st.session_state.selected_language = header_lang
         st.session_state.language_code = LANGUAGES_MAP[header_lang]
-        st.session_state.farmer["language"] = header_lang
-        update_farmer_language(farmer["id"], header_lang)
+        if isinstance(st.session_state.get("farmer"), dict):
+            st.session_state.farmer["language"] = header_lang
+        if farmer.get("id"):
+            update_farmer_language(farmer["id"], header_lang)
         st.rerun()
 
 with profile_col3:
