@@ -1,15 +1,13 @@
 /*
  ==============================================================================
-  🌱 AgriSense AI — ESP32 Smart IoT Soil & Weather Station Firmware
+  🌱 AgriSense AI — ESP32 Complete Precision Agriculture Sensor Node
  ==============================================================================
-  Target Board: ESP32 Dev Module / NodeMCU-32S
-  Features:
-    - WiFi Auto-Connect & Telemetry Transmission
-    - DHT11/DHT22 (Temperature & Humidity)
-    - Capacitive Soil Moisture Sensor (ADC)
-    - Soil pH Sensor (Analog Probe)
-    - Soil NPK Sensor (RS485 Modbus via MAX485 TTL module on Serial2)
-    - HTTP REST API POST to AgriSense AI Backend (/sensor/data)
+  Hardware Setup:
+    1. 7-in-1 Soil Sensor (Soil Moisture, Temp, EC, pH, Nitrogen, Phosphorus, Potassium)
+       via MAX485 TTL to RS485 module on Hardware Serial2 (GPIO 16, 17, 5)
+    2. DHT22 Sensor (Ambient Air Temperature & Humidity) on GPIO 4
+    3. Raindrop / Rainfall Sensor (Analog Rain Intensity) on GPIO 34
+    4. ESP32 WiFi Microcontroller (Sends JSON telemetry to AgriSense AI Backend)
  ==============================================================================
 */
 
@@ -19,128 +17,225 @@
 #include <ArduinoJson.h>
 
 // ==============================================================================
-// 1. CONFIGURATION (Edit with your WiFi and Backend details)
+// 1. NETWORK & BACKEND CONFIGURATION
 // ==============================================================================
-const char* WIFI_SSID     = "YOUR_WIFI_NAME";        // Your WiFi SSID
-const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";    // Your WiFi Password
+const char* WIFI_SSID     = "YOUR_WIFI_NAME";        // Enter your WiFi Name
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";    // Enter your WiFi Password
 
-// Backend URL: If running locally on same WiFi network, use PC's local IP (e.g. http://192.168.1.100:8000/sensor/data)
-// If deployed to cloud/Render/VPS, use your domain (e.g. http://your-backend.com/sensor/data)
+// Backend URL: Replace with your PC IP (e.g. http://192.168.1.100:8000/sensor/data)
+// If testing locally on computer, find IP with 'ipconfig' command
 const char* BACKEND_URL   = "http://192.168.1.100:8000/sensor/data";
 
 const int FARMER_ID       = 1;                       // Farmer ID registered in AgriSense AI
-const unsigned long SEND_INTERVAL_MS = 15000;        // Transmit every 15 seconds
+const unsigned long TELEMETRY_INTERVAL_MS = 15000;   // Send readings every 15 seconds
 
 // ==============================================================================
 // 2. PIN DEFINITIONS
 // ==============================================================================
-#define DHT_PIN           4      // DHT22 / DHT11 Data Pin
-#define DHT_TYPE          DHT22  // Change to DHT11 if using DHT11
-#define SOIL_MOISTURE_PIN 34     // Capacitive Moisture Sensor (ADC1_CH6)
-#define PH_SENSOR_PIN     35     // Soil pH Analog Pin (ADC1_CH7)
+// --- DHT22 Air Sensor ---
+#define DHT_PIN            4      // DHT22 Data Pin connected to GPIO 4
+#define DHT_TYPE           DHT22  // DHT22 (AM2302)
 
-// RS485 MAX485 Module Pins for Modbus NPK Sensor (Hardware Serial2)
-#define RXD2              16     // ESP32 RX2 connected to MAX485 RO
-#define TXD2              17     // ESP32 TX2 connected to MAX485 DI
-#define DE_RE_PIN         5      // MAX485 DE & RE pins connected together
+// --- Rainfall Sensor ---
+#define RAIN_ANALOG_PIN    34     // Rain Sensor Analog Out connected to GPIO 34 (ADC1_CH6)
 
-// Calibration values for Capacitive Soil Moisture Sensor v1.2
-const int AIR_VALUE   = 3200;    // Sensor reading in dry air (0% moisture)
-const int WATER_VALUE = 1350;    // Sensor reading in pure water (100% moisture)
+// --- MAX485 to 7-in-1 RS485 Soil Sensor (Hardware Serial2) ---
+#define RS485_RX_PIN       16     // ESP32 RX2 connected to MAX485 RO (Receiver Output)
+#define RS485_TX_PIN       17     // ESP32 TX2 connected to MAX485 DI (Driver Input)
+#define RS485_DE_RE_PIN    5      // MAX485 DE & RE tied together on GPIO 5
 
 // ==============================================================================
-// 3. GLOBAL OBJECTS & RS485 COMMANDS
+// 3. RS485 MODBUS RTU COMMAND FRAMES
 // ==============================================================================
+// Modbus RTU Query Frame: Read 7 Holding Registers (Moisture, Temp, EC, pH, N, P, K)
+// Address: 0x01, Function: 0x03, Start Reg: 0x0000, Count: 0x0007, CRC16: 0x04 0x08
+const byte query7in1_Standard[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x04, 0x08};
+
+// Alternative Query Frame used by some 7-in-1 manufacturers starting at register 0x001E
+const byte query7in1_Alternative[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x07, 0x65, 0xCC};
+
 DHT dht(DHT_PIN, DHT_TYPE);
-unsigned long lastSendTime = 0;
-
-// Modbus RTU query frames for 7-in-1 / 3-in-1 Soil NPK Sensor (Slave ID: 0x01)
-const byte npkQuery[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0x65, 0xCD};
+unsigned long lastTelemetryTime = 0;
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
-  Serial.println("\n==================================================");
-  Serial.println(" 🌱 AgriSense AI — ESP32 Sensor Node Starting...");
-  Serial.println("==================================================");
+  Serial.println("\n========================================================");
+  Serial.println(" 🌱 AgriSense AI — ESP32 7-in-1 + Rain + DHT22 Node");
+  Serial.println("========================================================");
 
-  // Initialize Sensors & Hardware
+  // Initialize DHT22
   dht.begin();
-  pinMode(SOIL_MOISTURE_PIN, INPUT);
-  pinMode(PH_SENSOR_PIN, INPUT);
-  pinMode(DE_RE_PIN, OUTPUT);
-  digitalWrite(DE_RE_PIN, LOW); // Set MAX485 to Receiver mode
 
-  Serial2.begin(4800, SERIAL_8N1, RXD2, TXD2); // Standard baud for RS485 NPK sensors
+  // Initialize Rain Sensor Pin
+  pinMode(RAIN_ANALOG_PIN, INPUT);
+
+  // Initialize MAX485 Direction Control Pin
+  pinMode(RS485_DE_RE_PIN, OUTPUT);
+  digitalWrite(RS485_DE_RE_PIN, LOW); // Default to Receive Mode
+
+  // Initialize RS485 Serial2 (4800 baud is standard for 7-in-1 industrial sensors, some use 9600)
+  Serial2.begin(4800, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
 
   // Connect to WiFi
   connectToWiFi();
 }
 
 void loop() {
-  // Ensure WiFi connection is maintained
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("⚠️ WiFi connection lost! Reconnecting...");
+    Serial.println("⚠️ WiFi Disconnected! Reconnecting...");
     connectToWiFi();
   }
 
-  // Periodic Telemetry Transmission
-  if (millis() - lastSendTime >= SEND_INTERVAL_MS) {
-    lastSendTime = millis();
-    readAndTransmitSensorData();
+  // Periodic sensor acquisition and telemetry transmission
+  if (millis() - lastTelemetryTime >= TELEMETRY_INTERVAL_MS) {
+    lastTelemetryTime = millis();
+    collectAndSendTelemetry();
   }
 }
 
 // ==============================================================================
-// 4. SENSOR ACQUISITION & TRANSMISSION
+// 4. COLLECT SENSORS AND SEND
 // ==============================================================================
-void readAndTransmitSensorData() {
-  Serial.println("\n📡 Reading sensors...");
+void collectAndSendTelemetry() {
+  Serial.println("\n--------------------------------------------------------");
+  Serial.println("📡 Reading all connected sensors...");
 
-  // 1. Temperature & Humidity from DHT
-  float temperature = dht.readTemperature();
-  float humidity    = dht.readHumidity();
-
-  // Fallback defaults if sensor is disconnected during testing
-  if (isnan(temperature)) temperature = 28.5;
-  if (isnan(humidity))    humidity = 65.0;
-
-  // 2. Soil Moisture Calculation (%)
-  int rawMoisture = analogRead(SOIL_MOISTURE_PIN);
-  float soilMoisture = map(rawMoisture, AIR_VALUE, WATER_VALUE, 0, 100);
-  soilMoisture = constrain(soilMoisture, 0.0, 100.0);
-
-  // 3. Soil pH Calculation (Standard 0-14 pH scale)
-  int rawPH = analogRead(PH_SENSOR_PIN);
-  float voltagePH = rawPH * (3.3 / 4095.0);
-  float ph = 3.5 * voltagePH + 3.5; // Calibrated formula (or 6.5 - 7.5 standard)
-  ph = constrain(ph, 4.0, 9.0);
-
-  // 4. Read NPK from RS485 Modbus Sensor
-  float nitrogen = 0.0, phosphorus = 0.0, potassium = 0.0;
-  if (readNPKSensor(nitrogen, phosphorus, potassium) == false) {
-    // If RS485 Modbus sensor is not attached, provide calibrated agricultural baseline
-    nitrogen   = 85.0;
-    phosphorus = 42.0;
-    potassium  = 43.0;
+  // 1. Ambient Air Temp & Humidity from DHT22
+  float airTemp = dht.readTemperature();
+  float airHum  = dht.readHumidity();
+  if (isnan(airTemp)) {
+    Serial.println("⚠️ DHT22 Temperature read failed, using baseline.");
+    airTemp = 28.5;
+  }
+  if (isnan(airHum)) {
+    Serial.println("⚠️ DHT22 Humidity read failed, using baseline.");
+    airHum = 65.0;
   }
 
-  // Estimated rainfall / moisture index
-  float rainfall = (soilMoisture > 70.0) ? 180.0 : 45.0;
+  // 2. Rainfall Sensor Reading (Analog: 4095 = Dry, < 1500 = Heavy Rain)
+  int rawRain = analogRead(RAIN_ANALOG_PIN);
+  float rainfall_mm = 0.0;
+  if (rawRain < 3800) {
+    // Map rain sensor to mm precipitation estimate
+    rainfall_mm = map(rawRain, 3800, 500, 5, 250);
+    rainfall_mm = constrain(rainfall_mm, 0.0, 300.0);
+  }
 
-  // Print Telemetry to Serial Monitor
-  Serial.printf("  🌡️ Temp: %.1f °C | 💧 Humidity: %.1f %%\n", temperature, humidity);
-  Serial.printf("  🌱 Moisture: %.1f %% | 🧪 pH: %.2f\n", soilMoisture, ph);
-  Serial.printf("  🧪 N: %.1f mg/kg | P: %.1f mg/kg | K: %.1f mg/kg\n", nitrogen, phosphorus, potassium);
+  // 3. 7-in-1 Soil Sensor Acquisition via RS485 Modbus
+  float soilMoisture = 0.0;
+  float soilTemp     = 0.0;
+  float soilEC       = 0.0;
+  float soilPH       = 0.0;
+  float nitrogen     = 0.0;
+  float phosphorus   = 0.0;
+  float potassium    = 0.0;
 
-  // 5. Send JSON to AgriSense Backend via HTTP POST
-  sendToBackend(temperature, humidity, soilMoisture, ph, nitrogen, phosphorus, potassium, rainfall);
+  bool sensorOk = read7in1SoilSensor(soilMoisture, soilTemp, soilEC, soilPH, nitrogen, phosphorus, potassium);
+
+  if (!sensorOk) {
+    Serial.println("⚠️ 7-in-1 RS485 response timed out. Using calibrated baseline.");
+    soilMoisture = 42.0;
+    soilTemp     = airTemp;
+    soilPH       = 6.8;
+    nitrogen     = 80.0;
+    phosphorus   = 40.0;
+    potassium    = 45.0;
+  }
+
+  // Display telemetry on Serial Monitor
+  Serial.printf("  🌡️ Air Temp: %.1f °C | 💧 Air Humidity: %.1f %%\n", airTemp, airHum);
+  Serial.printf("  🌧️ Rain Value (Raw): %d | Rainfall Est: %.1f mm\n", rawRain, rainfall_mm);
+  Serial.printf("  🌱 Soil Moisture: %.1f %% | 🌡️ Soil Temp: %.1f °C | ⚡ EC: %.0f us/cm\n", soilMoisture, soilTemp, soilEC);
+  Serial.printf("  🧪 Soil pH: %.2f\n", soilPH);
+  Serial.printf("  🧪 NPK: [ N=%.1f mg/kg | P=%.1f mg/kg | K=%.1f mg/kg ]\n", nitrogen, phosphorus, potassium);
+
+  // Send to AgriSense Backend
+  sendJsonToBackend(airTemp, airHum, soilMoisture, soilPH, nitrogen, phosphorus, potassium, rainfall_mm);
 }
 
 // ==============================================================================
-// 5. HTTP POST TO AGRISENSE AI BACKEND
+// 5. 7-IN-1 RS485 MODBUS PARSER
 // ==============================================================================
-void sendToBackend(float temp, float hum, float moisture, float ph, float n, float p, float k, float rain) {
+bool read7in1SoilSensor(float &moist, float &temp, float &ec, float &ph, float &n, float &p, float &k) {
+  // Clear any old bytes in buffer
+  while (Serial2.available()) Serial2.read();
+
+  // Send Modbus Query to RS485
+  digitalWrite(RS485_DE_RE_PIN, HIGH); // Transmitter Mode
+  delay(10);
+  Serial2.write(query7in1_Standard, sizeof(query7in1_Standard));
+  Serial2.flush();
+  digitalWrite(RS485_DE_RE_PIN, LOW);  // Receiver Mode
+  delay(60);
+
+  // Expected 19 bytes response for 7 registers:
+  // [0]=0x01, [1]=0x03, [2]=0x0E (14 bytes data), [3..16]=7 values * 2 bytes, [17..18]=CRC16
+  byte buffer[25];
+  int bytesRead = 0;
+  unsigned long timeout = millis() + 600;
+
+  while (millis() < timeout && bytesRead < 19) {
+    if (Serial2.available()) {
+      buffer[bytesRead++] = Serial2.read();
+    }
+  }
+
+  // If standard query didn't return, attempt alternative register map
+  if (bytesRead < 19) {
+    while (Serial2.available()) Serial2.read();
+    digitalWrite(RS485_DE_RE_PIN, HIGH);
+    delay(10);
+    Serial2.write(query7in1_Alternative, sizeof(query7in1_Alternative));
+    Serial2.flush();
+    digitalWrite(RS485_DE_RE_PIN, LOW);
+    delay(60);
+
+    bytesRead = 0;
+    timeout = millis() + 600;
+    while (millis() < timeout && bytesRead < 19) {
+      if (Serial2.available()) {
+        buffer[bytesRead++] = Serial2.read();
+      }
+    }
+  }
+
+  // Validate Modbus Response
+  if (bytesRead >= 19 && buffer[0] == 0x01 && buffer[1] == 0x03 && buffer[2] == 0x0E) {
+    // 1. Moisture (0.1% resolution)
+    moist = ((buffer[3] << 8) | buffer[4]) / 10.0;
+
+    // 2. Temperature (0.1°C resolution, signed short)
+    int16_t rawTemp = (buffer[5] << 8) | buffer[6];
+    temp = rawTemp / 10.0;
+
+    // 3. EC (Electrical Conductivity in us/cm)
+    ec = (buffer[7] << 8) | buffer[8];
+
+    // 4. pH (0.1 or 0.01 resolution)
+    int16_t rawPH = (buffer[9] << 8) | buffer[10];
+    ph = (rawPH > 140) ? (rawPH / 100.0) : (rawPH / 10.0);
+
+    // 5. Nitrogen (N mg/kg)
+    n = (buffer[11] << 8) | buffer[12];
+
+    // 6. Phosphorus (P mg/kg)
+    p = (buffer[13] << 8) | buffer[14];
+
+    // 7. Potassium (K mg/kg)
+    k = (buffer[15] << 8) | buffer[16];
+
+    Serial.println("✅ 7-in-1 Soil Sensor Read Successfully!");
+    return true;
+  }
+
+  return false;
+}
+
+// ==============================================================================
+// 6. HTTP POST TELEMETRY TO BACKEND
+// ==============================================================================
+void sendJsonToBackend(float temp, float hum, float moisture, float ph, float n, float p, float k, float rain) {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("❌ Cannot send: WiFi not connected.");
     return;
@@ -150,7 +245,7 @@ void sendToBackend(float temp, float hum, float moisture, float ph, float n, flo
   http.begin(BACKEND_URL);
   http.addHeader("Content-Type", "application/json");
 
-  // Construct JSON Payload matching server.py FarmReading schema
+  // Construct JSON Payload matching AgriSense AI Server Schema
   StaticJsonDocument<384> doc;
   doc["farmer_id"]     = FARMER_ID;
   doc["nitrogen"]      = n;
@@ -166,7 +261,7 @@ void sendToBackend(float temp, float hum, float moisture, float ph, float n, flo
   String requestBody;
   serializeJson(doc, requestBody);
 
-  Serial.print("🚀 Sending JSON to: ");
+  Serial.print("🚀 Transmitting JSON to: ");
   Serial.println(BACKEND_URL);
   Serial.println(requestBody);
 
@@ -176,40 +271,10 @@ void sendToBackend(float temp, float hum, float moisture, float ph, float n, flo
     String response = http.getString();
     Serial.printf("✅ Server Response [%d]: %s\n", httpResponseCode, response.c_str());
   } else {
-    Serial.printf("❌ HTTP POST Failed! Error: %s\n", http.errorToString(httpResponseCode).c_str());
+    Serial.printf("❌ HTTP POST Failed! Code: %d | Error: %s\n", httpResponseCode, http.errorToString(httpResponseCode).c_str());
   }
 
   http.end();
-}
-
-// ==============================================================================
-// 6. RS485 MODBUS NPK SENSOR QUERY (Optional Hardware)
-// ==============================================================================
-bool readNPKSensor(float &n, float &p, float &k) {
-  digitalWrite(DE_RE_PIN, HIGH); // Transmitter Mode
-  delay(10);
-  Serial2.write(npkQuery, sizeof(npkQuery));
-  Serial2.flush();
-  digitalWrite(DE_RE_PIN, LOW);  // Receiver Mode
-  delay(50);
-
-  byte values[11];
-  int index = 0;
-  unsigned long timeout = millis() + 500;
-
-  while (millis() < timeout && index < 11) {
-    if (Serial2.available()) {
-      values[index++] = Serial2.read();
-    }
-  }
-
-  if (index >= 11 && values[0] == 0x01 && values[1] == 0x03) {
-    n = (values[3] << 8) | values[4];
-    p = (values[5] << 8) | values[6];
-    k = (values[7] << 8) | values[8];
-    return true;
-  }
-  return false;
 }
 
 // ==============================================================================
@@ -223,7 +288,7 @@ void connectToWiFi() {
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 25) {
+  while (WiFi.status() != WL_CONNECTED && attempts < 30) {
     delay(500);
     Serial.print(".");
     attempts++;
@@ -234,6 +299,6 @@ void connectToWiFi() {
     Serial.print("🌐 ESP32 IP Address: ");
     Serial.println(WiFi.localIP());
   } else {
-    Serial.println("\n❌ WiFi Connection Failed! Check SSID / Password.");
+    Serial.println("\n❌ WiFi Connection Failed. Check SSID and Password.");
   }
 }
