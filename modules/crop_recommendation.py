@@ -384,15 +384,12 @@ def show_crop_recommendation():
             )
 
             if has_img:
-                c_img, c_info = st.columns([1, 2])
-                with c_img:
+                img_c1, img_c2, img_c3 = st.columns([1, 2, 1])
+                with img_c2:
                     st.image(crop_img_path, caption=crop_display, use_container_width=True)
-                with c_info:
-                    details = CROP_DETAILS.get(crop)
-                    show_ai_crop_advisor(crop, details)
-            else:
-                details = CROP_DETAILS.get(crop)
-                show_ai_crop_advisor(crop, details)
+
+            details = CROP_DETAILS.get(crop)
+            show_ai_crop_advisor(crop, details)
 
             # Top 3 probability rankings breakdown with Visual Crop Cards
             if top_crops and len(top_crops) > 1:
