@@ -455,7 +455,182 @@ def show_farmer_home():
     )
 
     # =====================================================
-    # 2-COLUMN FEATURE GRID (Clean & Responsive Cards)
+    # 🔊 TODAY'S 20-SECOND FARM VOICE SUMMARY WIDGET
+    # =====================================================
+    import sqlite3
+    import streamlit.components.v1 as components
+    import json
+
+    db_moisture = 45.0
+    db_temp = 28.0
+    db_ph = 6.8
+    try:
+        conn = sqlite3.connect("database/agrisense.db")
+        c = conn.cursor()
+        c.execute("SELECT soil_moisture, temperature, ph, rainfall FROM farm_readings WHERE farmer_id = ? ORDER BY id DESC LIMIT 1", (farmer['id'] if farmer else 1,))
+        row = c.fetchone()
+        if row:
+            db_moisture = row[0] if row[0] is not None else 45.0
+            db_temp = row[1] if row[1] is not None else 28.0
+            db_ph = row[2] if row[2] is not None else 6.8
+        conn.close()
+    except Exception:
+        pass
+
+    # Localized audio summary scripts
+    audio_summaries = {
+        "te": {
+            "title": "🔊 ఈరోజు పొలం సలహా వినండి (20 సెకన్లు)",
+            "subtitle": "చదవడం అవసరం లేదు — నేల తేమ & నీటి స్థితి వినడానికి నొక్కండి",
+            "btn": "🔊 సలహా వినండి (Play Summary)",
+            "stop_btn": "⏹ ఆపండి",
+            "speech_lang": "te-IN",
+            "script": f"నమస్కారం {farmer_name} గారు! మీ పొలంలో తాజా నేల తేమ {db_moisture:.0f} శాతం ఉంది. ఉష్ణోగ్రత {db_temp:.0f} డిగ్రీలు, నేల పి హెచ్ {db_ph:.1f} ఉంది. {'నేలలో తేమ తక్కువగా ఉంది, నీరు పెట్టడం మంచిది.' if db_moisture < 30 else 'నేలలో తగినంత తేమ ఉంది, పంట ఆరోగ్యంగా ఉంది.'} ఉత్తమ దిగుబడికి అగ్రిసెన్స్ AI తో మాట్లాడండి!"
+        },
+        "hi": {
+            "title": "🔊 आज की खेत की सलाह सुनें (20 सेकंड)",
+            "subtitle": "पढ़ने की जरूरत नहीं — नमी और पानी की स्थिति सुनने के लिए दबाएं",
+            "btn": "🔊 सलाह सुनें (Play Summary)",
+            "stop_btn": "⏹ रोकें",
+            "speech_lang": "hi-IN",
+            "script": f"नमस्ते {farmer_name} जी! आपके खेत की नमी {db_moisture:.0f} प्रतिशत है। तापमान {db_temp:.0f} डिग्री और मिट्टी का पीएच {db_ph:.1f} है। {'मिट्टी में नमी कम है, सिंचाई करना जरूरी है।' if db_moisture < 30 else 'मिट्टी में पर्याप्त नमी है, फसल स्वस्थ है।'} अधिक जानकारी के लिए एग्रीसेंस AI से पूछें!"
+        },
+        "ta": {
+            "title": "🔊 இன்றைய பண்ணை ஆலோசனையைக் கேளுங்கள்",
+            "subtitle": "படிக்கத் தேவையில்லை — குரல் வழியே கேட்க அழுத்தவும்",
+            "btn": "🔊 ஆலோசனையைக் கேளுங்கள்",
+            "stop_btn": "⏹ நிறுத்து",
+            "speech_lang": "ta-IN",
+            "script": f"வணக்கம் {farmer_name}! உங்கள் நிலத்தின் ஈரப்பதம் {db_moisture:.0f} சதவீதம் உள்ளது. வெப்பநிலை {db_temp:.0f} டிகிரி. {'மண்ணில் ஈரப்பதம் குறைவு, உடனே நீர் பாய்ச்சவும்.' if db_moisture < 30 else 'மண்ணில் போதுமான ஈரப்பதம் உள்ளது.'} அக்ரிசென்ஸ் AI-ஐப் பயன்படுத்துங்கள்!"
+        },
+        "kn": {
+            "title": "🔊 ಇಂದಿನ ಹೊಲದ ಧ್ವನಿ ಸಾರಾಂಶ ಆಲಿಸಿ",
+            "subtitle": "ಓದುವ ಅಗತ್ಯವಿಲ್ಲ — ಧ್ವನಿ ಮೂಲಕ ತಿಳಿಯಲು ಒತ್ತಿ",
+            "btn": "🔊 ಸಾರಾಂಶ ಆಲಿಸಿ",
+            "stop_btn": "⏹ ನಿಲ್ಲಿಸಿ",
+            "speech_lang": "kn-IN",
+            "script": f"ನಮಸ್ಕಾರ {farmer_name}! ನಿಮ್ಮ ಜಮೀನಿನ ತೇವಾಂಶ {db_moisture:.0f} ಪ್ರತಿಶತ ಇದೆ. {'ತೇವಾಂಶ ಕಡಿಮೆಯಿದೆ, ನೀರಾವರಿ ಮಾಡಿ.' if db_moisture < 30 else 'ತೇವಾಂಶ ಉತ್ತಮವಾಗಿದೆ, ಬೆಳೆ ಆರೋಗ್ಯವಾಗಿದೆ.'} ಅಗ್ರಿಸೆನ್ಸ್ AI ಬಳಸಿ!"
+        },
+        "mr": {
+            "title": "🔊 आजचा शेती सल्ला ऐका (20 सेकंद)",
+            "subtitle": "वाचण्याची गरज नाही — ऑडिओ सल्ला ऐकण्यासाठी दाबा",
+            "btn": "🔊 सल्ला ऐका",
+            "stop_btn": "⏹ थांबवा",
+            "speech_lang": "mr-IN",
+            "script": f"नमस्कार {farmer_name}! तुमच्या शेतातील ओलावा {db_moisture:.0f} टक्के आहे. {'जमिनीत ओलावा कमी आहे, पाणी द्या.' if db_moisture < 30 else 'जमिनीत पुरेसा ओलावा आहे, पीक चांगले आहे.'} अधिक सल्ल्यासाठी एग्रीसेन्स AI वापरा!"
+        },
+        "en": {
+            "title": "🔊 Listen to Today's Farm Summary (20s)",
+            "subtitle": "No reading needed — Tap to hear real-time soil moisture and watering advice",
+            "btn": "🔊 Listen to Summary",
+            "stop_btn": "⏹ Stop Audio",
+            "speech_lang": "en-IN",
+            "script": f"Namaste {farmer_name}! Your latest soil moisture is {db_moisture:.0f} percent, temperature is {db_temp:.0f} degrees Celsius, and soil pH is {db_ph:.1f}. {'Soil moisture is low, irrigation is recommended.' if db_moisture < 30 else 'Soil moisture is optimal, your farm is healthy.'} Tap Ask AgriSense for more details!"
+        }
+    }
+
+    current_summary = audio_summaries.get(language_code, audio_summaries["en"])
+
+    # High-contrast, easy-to-tap Audio Summary Banner
+    st.markdown(
+        f"""
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #22c55e; border-radius: 18px; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 22px;">📢</span>
+                        <span style="color: #4ade80; font-size: 17px; font-weight: 800;">{current_summary['title']}</span>
+                    </div>
+                    <div style="color: #cbd5e1; font-size: 13px; font-weight: 600; margin-top: 4px;">
+                        {current_summary['subtitle']}
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Audio player component with speech synthesis
+    summary_text_json = json.dumps(current_summary['script'])
+    summary_lang_code = current_summary['speech_lang']
+    btn_play_text = current_summary['btn']
+    btn_stop_text = current_summary['stop_btn']
+
+    components.html(
+        f"""
+        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <button id="playSummaryBtn" onclick="playFarmSummary()" style="
+                flex: 1;
+                min-height: 48px;
+                background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+                color: #ffffff;
+                border: none;
+                border-radius: 12px;
+                font-family: system-ui, sans-serif;
+                font-size: 16px;
+                font-weight: 800;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            ">
+                <span>{btn_play_text}</span>
+            </button>
+            <button id="stopSummaryBtn" onclick="stopFarmSummary()" style="
+                min-height: 48px;
+                padding: 0 20px;
+                background: #334155;
+                color: #f8fafc;
+                border: 1px solid #475569;
+                border-radius: 12px;
+                font-family: system-ui, sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+            ">
+                {btn_stop_text}
+            </button>
+        </div>
+        <script>
+            const summaryText = {summary_text_json};
+            const speechLang = "{summary_lang_code}";
+
+            function playFarmSummary() {{
+                if (!('speechSynthesis' in window)) {{
+                    alert('Voice is not supported in this browser.');
+                    return;
+                }}
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(summaryText);
+                utterance.lang = speechLang;
+                utterance.rate = 0.95;
+                utterance.pitch = 1.0;
+                
+                const btn = document.getElementById('playSummaryBtn');
+                btn.style.background = '#059669';
+                utterance.onend = function() {{
+                    btn.style.background = 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)';
+                }};
+                window.speechSynthesis.speak(utterance);
+            }}
+
+            function stopFarmSummary() {{
+                if ('speechSynthesis' in window) {{
+                    window.speechSynthesis.cancel();
+                    const btn = document.getElementById('playSummaryBtn');
+                    btn.style.background = 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)';
+                }}
+            }}
+        </script>
+        """,
+        height=62
+    )
+
+    # =====================================================
+    # 2-COLUMN FEATURE GRID (Clean & High-Contrast Touch Cards)
     # =====================================================
 
     col1, col2 = st.columns(2)

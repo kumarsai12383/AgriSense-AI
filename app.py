@@ -76,29 +76,30 @@ st.markdown(
         background: transparent;
     }
 
-    /* Primary Action Buttons */
+    /* Primary Action Buttons - Extra Large Touch Targets for Farmers */
     .stButton > button {
         width: 100%;
-        min-height: 48px;
-        border-radius: 12px;
-        font-size: 15px !important;
-        font-weight: 700 !important;
+        min-height: 52px;
+        border-radius: 14px;
+        font-size: 16px !important;
+        font-weight: 800 !important;
         background: linear-gradient(135deg, #15803d 0%, #16a34a 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.30);
         transition: all 0.2s ease;
         cursor: pointer;
     }
 
     .stButton > button * {
         color: #ffffff !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
+        font-size: 16px !important;
     }
 
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(22, 163, 74, 0.40);
+        box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45);
         background: linear-gradient(135deg, #166534 0%, #15803d 100%) !important;
     }
 
