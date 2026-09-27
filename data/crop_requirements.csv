@@ -1,0 +1,45 @@
+crop,min_temperature,max_temperature,min_humidity,max_humidity,min_ph,max_ph,min_rainfall,max_rainfall
+"    apple
+Name: 0, dtype: object",21.04,24.0,90.03,94.92,5.51,6.5,100.12,124.98
+"    banana
+Name: 1, dtype: object",25.01,29.91,75.03,84.98,5.51,6.49,90.11,119.85
+"    blackgram
+Name: 2, dtype: object",25.1,34.95,60.07,69.96,6.5,7.78,60.42,74.92
+"    chickpea
+Name: 3, dtype: object",17.02,21.0,14.26,19.97,5.99,8.87,65.11,94.78
+"    coconut
+Name: 4, dtype: object",25.01,29.87,90.02,99.98,5.5,6.47,131.09,225.63
+"    coffee
+Name: 5, dtype: object",23.06,27.92,50.05,69.95,6.02,7.49,115.16,199.47
+"    cotton
+Name: 6, dtype: object",22.0,25.99,75.01,84.88,5.8,7.99,60.65,99.93
+"    grapes
+Name: 7, dtype: object",8.83,41.95,80.02,83.98,5.51,6.5,65.01,74.92
+"    jute
+Name: 8, dtype: object",23.09,26.99,70.88,89.89,6.0,7.49,150.24,199.84
+"    kidneybeans
+Name: 9, dtype: object",15.33,24.92,18.09,24.97,5.5,6.0,60.28,149.74
+"    lentil
+Name: 10, dtype: object",18.06,29.94,60.09,69.92,5.92,7.84,35.03,54.94
+"    maize
+Name: 11, dtype: object",18.04,26.55,55.28,74.83,5.51,7.0,60.65,109.75
+"    mango
+Name: 12, dtype: object",27.0,35.99,45.02,54.96,4.51,6.97,89.29,100.81
+"    mothbeans
+Name: 13, dtype: object",24.02,32.0,40.01,64.96,3.5,9.94,30.92,74.44
+"    mungbean
+Name: 14, dtype: object",27.01,29.91,80.03,90.0,6.22,7.2,36.12,59.87
+"    muskmelon
+Name: 15, dtype: object",27.02,29.94,90.02,94.96,6.0,6.78,20.21,29.87
+"    orange
+Name: 16, dtype: object",10.01,34.91,90.01,94.96,6.01,8.0,100.17,119.69
+"    papaya
+Name: 17, dtype: object",23.01,43.68,90.04,94.94,6.5,6.99,40.35,248.86
+"    pigeonpeas
+Name: 18, dtype: object",18.32,36.98,30.4,69.69,4.55,7.45,90.05,198.83
+"    pomegranate
+Name: 19, dtype: object",18.07,24.96,85.13,95.0,5.56,7.2,102.52,112.48
+"    rice
+Name: 20, dtype: object",20.05,26.93,80.12,84.97,5.01,7.87,182.56,298.56
+"    watermelon
+Name: 21, dtype: object",24.04,26.99,80.03,89.98,6.0,6.96,40.13,59.76

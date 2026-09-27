@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    padding: 10px;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    background: transparent;
+
+    color: #202124;
+}
+
+
+.chat {
+
+    max-width: 760px;
+
+    height: 680px;
+
+    margin: auto;
+
+    background: white;
+
+    border: 1px solid #e1e4e8;
+
+    border-radius: 18px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+}
+
+
+/* HEADER */
+
+.header {
+
+    padding: 18px 20px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+
+.title {
+
+    font-size: 19px;
+
+    font-weight: 700;
+
+}
+
+
+.subtitle {
+
+    font-size: 13px;
+
+    color: #777;
+
+    margin-top: 3px;
+
+}
+
+
+.language {
+
+    font-size: 13px;
+
+    padding: 7px 11px;
+
+    background: #f1f6f3;
+
+    color: #276642;
+
+    border-radius: 20px;
+
+}
+
+
+/* MESSAGES */
+
+.messages {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 22px;
+
+    background: #fafafa;
+
+}
+
+
+.welcome {
+
+    text-align: center;
+
+    margin-top: 150px;
+
+    color: #777;
+
+}
+
+
+.welcome strong {
+
+    display: block;
+
+    color: #333;
+
+    font-size: 19px;
+
+    margin-bottom: 8px;
+
+}
+
+
+/* MESSAGE */
+
+.row {
+
+    display: flex;
+
+    margin-bottom: 16px;
+
+}
+
+
+.row.user {
+
+    justify-content: flex-end;
+
+}
+
+
+.row.ai {
+
+    justify-content: flex-start;
+
+}
+
+
+.bubble {
+
+    max-width: 75%;
+
+    padding: 12px 15px;
+
+    border-radius: 15px;
+
+    line-height: 1.5;
+
+    font-size: 15px;
+
+    white-space: pre-wrap;
+
+}
+
+
+.user .bubble {
+
+    background: #217a4b;
+
+    color: white;
+
+    border-bottom-right-radius: 4px;
+
+}
+
+
+.ai .bubble {
+
+    background: white;
+
+    border: 1px solid #e0e3e6;
+
+    color: #202124;
+
+    border-bottom-left-radius: 4px;
+
+}
+
+
+/* AI AUDIO BUTTON */
+
+.speak {
+
+    margin-top: 7px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #217a4b;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    padding: 0;
+
+}
+
+
+/* INPUT */
+
+.input-area {
+
+    padding: 13px;
+
+    border-top: 1px solid #e5e7eb;
+
+    background: white;
+
+}
+
+
+.input {
+
+    display: flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+}
+
+
+input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 12px;
+
+    padding: 12px 14px;
+
+    outline: none;
+
+    font-size: 15px;
+
+}
+
+
+input:focus {
+
+    border-color: #217a4b;
+
+}
+
+
+button {
+
+    cursor: pointer;
+
+}
+
+
+.send {
+
+    width: 44px;
+
+    height: 44px;
+
+    border: none;
+
+    border-radius: 11px;
+
+    background: #217a4b;
+
+    color: white;
+
+    font-size: 18px;
+
+}
+
+
+.mic {
+
+    width: 44px;
+
+    height: 44px;
+
+    border: none;
+
+    border-radius: 11px;
+
+    background: #f0f2f4;
+
+    font-size: 18px;
+
+}
+
+
+.mic.recording {
+
+    background: #b42318;
+
+    color: white;
+
+}
+
+
+.status {
+
+    text-align: center;
+
+    font-size: 12px;
+
+    color: #777;
+
+    height: 18px;
+
+    padding-top: 5px;
+
+}
+
+
+@media(max-width:600px) {
+
+    body {
+        padding: 0;
+    }
+
+    .chat {
+        height: 680px;
+        border-radius: 0;
+    }
+
+    .messages {
+        padding: 15px;
+    }
+
+    .bubble {
+        max-width: 88%;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="chat">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <div>
+
+            <div class="title">
+                AgriSense AI
+            </div>
+
+            <div class="subtitle">
+                Farming assistant
+            </div>
+
+        </div>
+
+
+        <div class="language">
+            🌐 __LANGUAGE__
+        </div>
+
+    </div>
+
+
+    <!-- MESSAGES -->
+
+    <div
+        id="messages"
+        class="messages"
+    >
+
+        <div
+            id="welcome"
+            class="welcome"
+        >
+
+            <strong>
+                How can I help with your farm?
+            </strong>
+
+            Speak or type your question.
+
+        </div>
+
+    </div>
+
+
+    <!-- INPUT -->
+
+    <div class="input-area">
+
+        <div class="input">
+
+            <input
+                id="message"
+                type="text"
+                placeholder="Ask about your farm..."
+            >
+
+
+            <button
+                id="mic"
+                class="mic"
+                type="button"
+            >
+                🎤
+            </button>
+
+
+            <button
+                id="send"
+                class="send"
+                type="button"
+            >
+                ➤
+            </button>
+
+        </div>
+
+
+        <div
+            id="status"
+            class="status"
+        >
+            Ready
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+// =========================================================
+// CONFIG
+// =========================================================
+
+const FARMER_ID =
+    "__FARMER_ID__";
+
+const LANGUAGE =
+    "__LANGUAGE__";
+
+
+// =========================================================
+// ELEMENTS
+// =========================================================
+
+const messages =
+    document.getElementById(
+        "messages"
+    );
+
+const input =
+    document.getElementById(
+        "message"
+    );
+
+const send =
+    document.getElementById(
+        "send"
+    );
+
+const mic =
+    document.getElementById(
+        "mic"
+    );
+
+const status =
+    document.getElementById(
+        "status"
+    );
+
+
+// =========================================================
+// VARIABLES
+// =========================================================
+
+let socket = null;
+
+let audioContext = null;
+
+let playbackContext = null;
+
+let stream = null;
+
+let source = null;
+
+let processor = null;
+
+let recording = false;
+
+let nextAudioTime = 0;
+
+let aiBubble = null;
+
+let aiText = "";
+
+
+// =========================================================
+// STATUS
+// =========================================================
+
+function setStatus(text) {
+
+    status.innerText = text;
+
+}
+
+
+// =========================================================
+// CONNECT
+// =========================================================
+
+function connect() {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            if (
+                socket &&
+                socket.readyState ===
+                WebSocket.OPEN
+            ) {
+
+                resolve();
+
+                return;
+
+            }
+
+
+            const url =
+                "ws://localhost:8000/live"
+                + "?language="
+                + encodeURIComponent(
+                    LANGUAGE
+                )
+                + "&farmer_id="
+                + encodeURIComponent(
+                    FARMER_ID
+                );
+
+
+            setStatus(
+                "Connecting..."
+            );
+
+
+            socket =
+                new WebSocket(
+                    url
+                );
+
+
+            socket.binaryType =
+                "arraybuffer";
+
+
+            socket.onopen =
+                function() {
+
+                    console.log(
+                        "WebSocket connected"
+                    );
+
+                    setStatus(
+                        "Connected"
+                    );
+
+                    resolve();
+
+                };
+
+
+            socket.onerror =
+                function(error) {
+                    console.error("WebSocket error", error);
+                    setStatus("Connection failed (Ensure 'python server.py' is running on port 8000)");
+                    reject(error);
+                };
+
+            socket.onclose =
+                function(event) {
+                    console.log("WebSocket closed", event.code, event.reason);
+                    if (event && (event.code === 1005 || event.code === 1006)) {
+                        setStatus("Disconnected: WebSocket server offline (port 8000)");
+                    } else {
+                        setStatus("Disconnected");
+                    }
+                    socket = null;
+                };
+
+
+            socket.onmessage =
+                function(event) {
+
+                    handleMessage(
+                        event
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// SERVER MESSAGE
+// =========================================================
+
+function handleMessage(event) {
+
+
+    // AI TEXT
+
+    if (
+        typeof event.data ===
+        "string"
+    ) {
+
+
+        if (
+            event.data.startsWith(
+                "AI_TEXT:"
+            )
+        ) {
+
+            const text =
+                event.data.substring(
+                    8
+                );
+
+            showAIText(
+                text
+            );
+
+            return;
+
+        }
+
+
+        if (
+            event.data ===
+            "AI_DONE"
+        ) {
+
+            finishAI();
+
+            return;
+
+        }
+
+
+        if (
+            event.data.startsWith(
+                "ERROR:"
+            )
+        ) {
+
+            console.error(
+                event.data
+            );
+
+            setStatus(
+                "AI connection error"
+            );
+
+            return;
+
+        }
+
+
+        return;
+
+    }
+
+
+    // AI AUDIO
+
+    playAudio(
+        event.data
+    );
+
+}
+
+
+// =========================================================
+// REMOVE WELCOME
+// =========================================================
+
+function removeWelcome() {
+
+    const welcome =
+        document.getElementById(
+            "welcome"
+        );
+
+    if (welcome) {
+
+        welcome.remove();
+
+    }
+
+}
+
+
+// =========================================================
+// USER MESSAGE
+// =========================================================
+
+function addUserMessage(text) {
+
+    removeWelcome();
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "row user";
+
+
+    const bubble =
+        document.createElement(
+            "div"
+        );
+
+    bubble.className =
+        "bubble";
+
+
+    bubble.innerText =
+        text;
+
+
+    row.appendChild(
+        bubble
+    );
+
+
+    messages.appendChild(
+        row
+    );
+
+
+    scroll();
+
+}
+
+
+// =========================================================
+// AI MESSAGE
+// =========================================================
+
+function showAIText(text) {
+
+    removeWelcome();
+
+
+    if (!aiBubble) {
+
+        const row =
+            document.createElement(
+                "div"
+            );
+
+        row.className =
+            "row ai";
+
+
+        aiBubble =
+            document.createElement(
+                "div"
+            );
+
+        aiBubble.className =
+            "bubble";
+
+
+        row.appendChild(
+            aiBubble
+        );
+
+
+        messages.appendChild(
+            row
+        );
+
+
+        aiText = "";
+
+    }
+
+
+    aiText += text;
+
+
+    aiBubble.innerText =
+        aiText;
+
+
+    scroll();
+
+}
+
+
+// =========================================================
+// AI FINISHED
+// =========================================================
+
+function finishAI() {
+
+    if (!aiBubble) {
+
+        return;
+
+    }
+
+
+    const text =
+        aiText;
+
+
+    aiBubble = null;
+
+    aiText = "";
+
+
+    setStatus(
+        "Ready"
+    );
+
+
+    scroll();
+
+}
+
+
+// =========================================================
+// SCROLL
+// =========================================================
+
+function scroll() {
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+}
+
+
+// =========================================================
+// SEND TEXT
+// =========================================================
+
+async function sendMessage() {
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) {
+
+        return;
+
+    }
+
+
+    input.value = "";
+
+
+    addUserMessage(
+        text
+    );
+
+
+    try {
+
+        await connect();
+
+
+        socket.send(
+            text
+        );
+
+
+        setStatus(
+            "AgriSense is thinking..."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+        setStatus(
+            "Unable to connect"
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// SEND BUTTON
+// =========================================================
+
+send.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+// =========================================================
+// ENTER
+// =========================================================
+
+input.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key ===
+            "Enter"
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// START RECORDING
+// =========================================================
+
+async function startRecording() {
+
+    if (recording) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await connect();
+
+
+        stream =
+            await navigator
+                .mediaDevices
+                .getUserMedia({
+                    audio: true
+                });
+
+
+        audioContext =
+            new AudioContext();
+
+
+        playbackContext =
+            new AudioContext();
+
+
+        await audioContext.resume();
+
+        await playbackContext.resume();
+
+
+        source =
+            audioContext
+                .createMediaStreamSource(
+                    stream
+                );
+
+
+        processor =
+            audioContext
+                .createScriptProcessor(
+                    4096,
+                    1,
+                    1
+                );
+
+
+        processor.onaudioprocess =
+            function(event) {
+
+                if (
+                    !recording ||
+                    !socket ||
+                    socket.readyState !==
+                    WebSocket.OPEN
+                ) {
+
+                    return;
+
+                }
+
+
+                const inputData =
+                    event
+                        .inputBuffer
+                        .getChannelData(
+                            0
+                        );
+
+
+                const pcm =
+                    convertToPCM16(
+                        inputData,
+                        audioContext.sampleRate
+                    );
+
+
+                socket.send(
+                    pcm
+                );
+
+            };
+
+
+        source.connect(
+            processor
+        );
+
+
+        processor.connect(
+            audioContext.destination
+        );
+
+
+        recording =
+            true;
+
+
+        mic.classList.add(
+            "recording"
+        );
+
+
+        mic.innerText =
+            "⏹";
+
+
+        setStatus(
+            "Listening..."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Microphone error:",
+            error
+        );
+
+        setStatus(
+            "Microphone permission required"
+        );
+
+        stopRecording();
+
+    }
+
+}
+
+
+// =========================================================
+// STOP RECORDING
+// =========================================================
+
+function stopRecording() {
+
+    recording =
+        false;
+
+
+    if (processor) {
+
+        processor.disconnect();
+
+        processor = null;
+
+    }
+
+
+    if (source) {
+
+        source.disconnect();
+
+        source = null;
+
+    }
+
+
+    if (stream) {
+
+        stream
+            .getTracks()
+            .forEach(
+                track =>
+                    track.stop()
+            );
+
+        stream = null;
+
+    }
+
+
+    if (audioContext) {
+
+        audioContext.close();
+
+        audioContext = null;
+
+    }
+
+
+    mic.classList.remove(
+        "recording"
+    );
+
+
+    mic.innerText =
+        "🎤";
+
+
+    setStatus(
+        "Ready"
+    );
+
+}
+
+
+// =========================================================
+// MICROPHONE BUTTON
+// =========================================================
+
+mic.addEventListener(
+    "click",
+    function() {
+
+        if (recording) {
+
+            stopRecording();
+
+        }
+        else {
+
+            startRecording();
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// PCM CONVERSION
+// =========================================================
+
+function convertToPCM16(
+    input,
+    sampleRate
+) {
+
+    const targetRate =
+        16000;
+
+
+    if (
+        sampleRate ===
+        targetRate
+    ) {
+
+        return floatToPCM16(
+            input
+        );
+
+    }
+
+
+    const ratio =
+        sampleRate /
+        targetRate;
+
+
+    const length =
+        Math.round(
+            input.length /
+            ratio
+        );
+
+
+    const result =
+        new Float32Array(
+            length
+        );
+
+
+    for (
+        let i = 0;
+        i < length;
+        i++
+    ) {
+
+        const index =
+            Math.floor(
+                i * ratio
+            );
+
+        result[i] =
+            input[
+                Math.min(
+                    index,
+                    input.length - 1
+                )
+            ];
+
+    }
+
+
+    return floatToPCM16(
+        result
+    );
+
+}
+
+
+// =========================================================
+// FLOAT → PCM16
+// =========================================================
+
+function floatToPCM16(
+    input
+) {
+
+    const buffer =
+        new ArrayBuffer(
+            input.length * 2
+        );
+
+
+    const view =
+        new DataView(
+            buffer
+        );
+
+
+    for (
+        let i = 0;
+        i < input.length;
+        i++
+    ) {
+
+        let sample =
+            Math.max(
+                -1,
+                Math.min(
+                    1,
+                    input[i]
+                )
+            );
+
+
+        view.setInt16(
+            i * 2,
+
+            sample < 0
+                ? sample * 32768
+                : sample * 32767,
+
+            true
+        );
+
+    }
+
+
+    return buffer;
+
+}
+
+
+// =========================================================
+// PLAY AI AUDIO
+// =========================================================
+
+async function playAudio(
+    data
+) {
+
+    try {
+
+        if (!playbackContext) {
+
+            playbackContext =
+                new AudioContext();
+
+        }
+
+
+        await playbackContext.resume();
+
+
+        const pcm =
+            new Int16Array(
+                data
+            );
+
+
+        const audio =
+            new Float32Array(
+                pcm.length
+            );
+
+
+        for (
+            let i = 0;
+            i < pcm.length;
+            i++
+        ) {
+
+            audio[i] =
+                pcm[i] /
+                32768;
+
+        }
+
+
+        const buffer =
+            playbackContext
+                .createBuffer(
+                    1,
+                    audio.length,
+                    24000
+                );
+
+
+        buffer.copyToChannel(
+            audio,
+            0
+        );
+
+
+        const source =
+            playbackContext
+                .createBufferSource();
+
+
+        source.buffer =
+            buffer;
+
+
+        source.connect(
+            playbackContext.destination
+        );
+
+
+        const now =
+            playbackContext.currentTime;
+
+
+        if (
+            nextAudioTime <
+            now
+        ) {
+
+            nextAudioTime =
+                now;
+
+        }
+
+
+        source.start(
+            nextAudioTime
+        );
+
+
+        nextAudioTime +=
+            buffer.duration;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Audio playback error:",
+            error
+        );
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>
