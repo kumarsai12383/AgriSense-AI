@@ -1,7 +1,5 @@
 import sqlite3
-
-
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 
 
 def save_prediction(
@@ -15,9 +13,8 @@ def save_prediction(
     rainfall,
     farmer_id=None
 ):
-
-    conn = sqlite3.connect(DB_PATH)
-
+    """Save crop prediction with thread-safe WAL database connection."""
+    conn = connect()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -33,7 +30,6 @@ def save_prediction(
             ph,
             rainfall
         )
-
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
@@ -50,5 +46,4 @@ def save_prediction(
     )
 
     conn.commit()
-
     conn.close()

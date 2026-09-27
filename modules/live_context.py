@@ -1,12 +1,8 @@
-import sqlite3
-
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 
 
 def get_farm_context(farmer_id):
-
-    conn = sqlite3.connect(DB_PATH)
-
+    conn = connect()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -30,7 +26,6 @@ def get_farm_context(farmer_id):
     )
 
     row = cursor.fetchone()
-
     conn.close()
 
     if not row:
@@ -50,9 +45,7 @@ Recorded: {row[8]}
 
 
 def get_crop_recommendation(farmer_id):
-
-    conn = sqlite3.connect(DB_PATH)
-
+    conn = connect()
     cursor = conn.cursor()
 
     cursor.execute(

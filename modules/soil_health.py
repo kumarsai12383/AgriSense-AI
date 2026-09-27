@@ -1,8 +1,4 @@
-import sqlite3
-import streamlit as st
-
-
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 
 
 # =========================================================
@@ -10,15 +6,9 @@ DB_PATH = "database/agrisense.db"
 # =========================================================
 
 def get_latest_farm_reading(farmer_id):
-
-    conn = sqlite3.connect(DB_PATH)
-
-    conn.row_factory = sqlite3.Row
-
+    conn = connect()
     try:
-
         cursor = conn.cursor()
-
         cursor.execute(
             """
             SELECT *
@@ -29,17 +19,11 @@ def get_latest_farm_reading(farmer_id):
             """,
             (farmer_id,)
         )
-
         row = cursor.fetchone()
-
         if row:
-
             return dict(row)
-
         return None
-
     finally:
-
         conn.close()
 
 
@@ -48,8 +32,7 @@ def get_latest_farm_reading(farmer_id):
 # =========================================================
 
 def get_latest_crop(farmer_id):
-
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
 
     conn.row_factory = sqlite3.Row
 

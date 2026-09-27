@@ -46,20 +46,10 @@ app.add_middleware(
 
 MODEL = "gemini-2.5-flash-native-audio-latest"
 FALLBACK_LIVE_MODEL = "gemini-3.1-flash-live-preview"
-DB_PATH = "database/agrisense.db"
-
-
-# =========================================================
-# DATABASE
-# =========================================================
+from database.database import connect as get_db_conn, get_database_health, DB_PATH
 
 def get_connection():
-    conn = sqlite3.connect(
-        DB_PATH,
-        check_same_thread=False
-    )
-    conn.row_factory = sqlite3.Row
-    return conn
+    return get_db_conn()
 
 
 # =========================================================
@@ -141,9 +131,11 @@ def get_voice_chat():
 
 @app.get("/health")
 def health():
+    db_health = get_database_health()
     return {
-        "status": "healthy",
-        "service": "AgriSense AI Backend"
+        "status": "healthy" if db_health.get("status") == "healthy" else "degraded",
+        "service": "AgriSense AI Backend",
+        "database": db_health
     }
 
 

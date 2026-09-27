@@ -457,7 +457,7 @@ def show_farmer_home():
     # =====================================================
     # 🔊 TODAY'S 20-SECOND FARM VOICE SUMMARY WIDGET
     # =====================================================
-    import sqlite3
+    from database.database import connect
     import streamlit.components.v1 as components
     import json
 
@@ -465,7 +465,7 @@ def show_farmer_home():
     db_temp = 28.0
     db_ph = 6.8
     try:
-        conn = sqlite3.connect("database/agrisense.db")
+        conn = connect()
         c = conn.cursor()
         c.execute("SELECT soil_moisture, temperature, ph, rainfall FROM farm_readings WHERE farmer_id = ? ORDER BY id DESC LIMIT 1", (farmer['id'] if farmer else 1,))
         row = c.fetchone()

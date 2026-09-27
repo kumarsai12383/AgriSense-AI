@@ -22,11 +22,7 @@ MODEL = os.environ.get(
     "gemini-3.8-flash"
 )
 
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "database",
-    "agrisense.db"
-)
+from database.database import connect, DB_PATH
 
 
 # =========================================================
@@ -35,10 +31,7 @@ DB_PATH = os.path.join(
 
 def initialize_disease_database():
     """Create disease report table without touching existing data."""
-
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
 
     conn.execute(
         """
@@ -66,9 +59,7 @@ def initialize_disease_database():
 
 def get_latest_farm_context(farmer_id):
     """Get latest farm reading and crop prediction."""
-
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = connect()
 
     reading = conn.execute(
         """
@@ -103,7 +94,6 @@ def get_latest_farm_context(farmer_id):
     ).fetchone()
 
     conn.close()
-
     return reading, crop
 
 
@@ -118,7 +108,7 @@ def save_disease_report(
     result,
     language
 ):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
 
     conn.execute(
         """

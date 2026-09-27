@@ -1,17 +1,14 @@
 import sqlite3
-
-
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    return connect()
 
 
 def create_farmer_table():
-
+    """Ensure farmers table exists."""
     conn = get_connection()
-
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -29,7 +26,7 @@ def create_farmer_table():
 
 
 def get_or_create_farmer(name, phone):
-
+    """Retrieve existing farmer by phone or create a new profile safely."""
     create_farmer_table()
 
     conn = get_connection()
@@ -43,14 +40,12 @@ def get_or_create_farmer(name, phone):
     farmer = cursor.fetchone()
 
     if farmer:
-
         conn.close()
-
         return {
-            "id": farmer[0],
-            "name": farmer[1],
-            "phone": farmer[2],
-            "language": farmer[3]
+            "id": farmer["id"] if isinstance(farmer, sqlite3.Row) else farmer[0],
+            "name": farmer["name"] if isinstance(farmer, sqlite3.Row) else farmer[1],
+            "phone": farmer["phone"] if isinstance(farmer, sqlite3.Row) else farmer[2],
+            "language": farmer["language"] if isinstance(farmer, sqlite3.Row) else farmer[3]
         }
 
     cursor.execute(
@@ -62,9 +57,7 @@ def get_or_create_farmer(name, phone):
     )
 
     conn.commit()
-
     farmer_id = cursor.lastrowid
-
     conn.close()
 
     return {

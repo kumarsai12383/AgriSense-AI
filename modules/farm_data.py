@@ -8,16 +8,13 @@ import joblib
 # AgriSense AI - High-Speed Farm Data & IoT Management Page
 # =========================================================
 
-DB_PATH = "database/agrisense.db"
+from database.database import connect as get_db_conn, DB_PATH
 MODEL_PATH = "models/crop_model.pkl"
 
 
 def get_connection():
     """Direct, high-speed connection to local SQLite database."""
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return get_db_conn()
 
 
 @st.cache_resource

@@ -1,8 +1,4 @@
-import streamlit as st
-import sqlite3
-import pandas as pd
-
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 
 
 # ======================================
@@ -10,8 +6,7 @@ DB_PATH = "database/agrisense.db"
 # ======================================
 
 def get_prediction_history(farmer_id):
-
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
 
     query = """
         SELECT

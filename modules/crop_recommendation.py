@@ -6,7 +6,7 @@ import numpy as np
 from modules.ai_crop_advisor import show_ai_crop_advisor
 from modules.crop_details import CROP_DETAILS
 
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 MODEL_PATH = "models/crop_model.pkl"
 
 LOCALIZED_CROP_NAMES = {
@@ -191,7 +191,7 @@ PAGE_TEXT = {
 
 
 def get_latest_farm_data(farmer_id):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -227,7 +227,7 @@ def save_prediction(
     humidity,
     rainfall
 ):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cursor = conn.cursor()
     cursor.execute(
         """

@@ -10,7 +10,7 @@ import streamlit as st
 from google import genai
 
 
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
 
@@ -42,9 +42,7 @@ def get_gemini_client():
 # =========================================================
 
 def get_latest_farm_data(farmer_id):
-
-    conn = sqlite3.connect(DB_PATH)
-
+    conn = connect()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -92,9 +90,7 @@ def get_latest_farm_data(farmer_id):
 # =========================================================
 
 def get_latest_crop_prediction(farmer_id):
-
-    conn = sqlite3.connect(DB_PATH)
-
+    conn = connect()
     cursor = conn.cursor()
 
     cursor.execute(

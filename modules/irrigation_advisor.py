@@ -5,7 +5,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
 
-DB_PATH = "database/agrisense.db"
+from database.database import connect, DB_PATH
 
 
 # =========================================================
@@ -15,8 +15,7 @@ DB_PATH = "database/agrisense.db"
 def get_latest_farm_reading(farmer_id):
     """Retrieve the latest farm reading from SQLite database."""
     try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
+        conn = connect()
         cursor = conn.cursor()
         cursor.execute("""
             SELECT *
@@ -35,7 +34,7 @@ def get_latest_farm_reading(farmer_id):
 def get_latest_predicted_crop(farmer_id):
     """Retrieve the latest recommended crop for the farmer."""
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = connect()
         cursor = conn.cursor()
         cursor.execute("""
             SELECT crop
