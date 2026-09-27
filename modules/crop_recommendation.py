@@ -326,7 +326,6 @@ def show_crop_recommendation():
             crop = str(prediction[0]).lower()
 
             # Calculate probability confidence if supported
-            probs = None
             top_crops = []
             if hasattr(model, "predict_proba"):
                 try:
@@ -351,82 +350,94 @@ def show_crop_recommendation():
             )
 
             st.session_state.recommended_crop = crop
-            
-            # Localized crop display
             crop_display = LOCALIZED_CROP_NAMES.get(lang_code, {}).get(crop, crop.title())
-
-            # =========================================================
-            # VISUAL HIGH-IMPACT CROP CARD FOR FARMERS
-            # =========================================================
-            import os
             crop_img_path = f"images/{crop}.jpg"
             has_img = os.path.exists(crop_img_path)
 
-            st.markdown(
-                f"""
-                <div style="background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%); border-radius: 18px; padding: 22px; color: white; margin-top: 15px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(20, 83, 45, 0.35);">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                        <div>
-                            <span style="background: rgba(255,255,255,0.2); color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; border: 1px solid rgba(255,255,255,0.3);">
-                                ⭐ 1st Choice • అధిక దిగుబడినిచ్చే పంట
-                            </span>
-                            <h1 style="color: #ffffff !important; font-size: 32px !important; font-weight: 800; margin: 8px 0 4px 0;">
-                                🌾 {crop_display}
-                            </h1>
-                            <p style="color: #dcfce7; font-size: 15px; margin: 0; font-weight: 600;">
-                                {text['rec_title']}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            if has_img:
-                img_c1, img_c2, img_c3 = st.columns([1, 2, 1])
-                with img_c2:
-                    try:
-                        st.image(crop_img_path, caption=crop_display, use_container_width=True)
-                    except Exception:
-                        pass
-
-            details = CROP_DETAILS.get(crop)
-            show_ai_crop_advisor(crop, details)
-
-            # Top 3 probability rankings breakdown with Visual Crop Cards
-            if top_crops and len(top_crops) > 1:
-                st.markdown("<h4 style='margin-top: 18px; margin-bottom: 10px; color: #0f172a;'>📊 Top Ranked Crops for Your Soil (అనువైన ఇతర పంటలు):</h4>", unsafe_allow_html=True)
-                top_cols = st.columns(len(top_crops))
-                for i, (c_name, c_prob) in enumerate(top_crops):
-                    loc_name = LOCALIZED_CROP_NAMES.get(lang_code, {}).get(c_name.lower(), c_name.title())
-                    sub_img_path = f"images/{c_name.lower()}.jpg"
-                    with top_cols[i]:
-                        with st.container(border=True):
-                            if os.path.exists(sub_img_path):
-                                try:
-                                    st.image(sub_img_path, use_container_width=True)
-                                except Exception:
-                                    pass
-                            st.markdown(f"<div style='font-weight: 800; font-size: 15px; color: #15803d; text-align: center; margin-top: 4px;'>{loc_name}</div>", unsafe_allow_html=True)
-                            st.markdown(f"<div style='font-size: 13px; font-weight: 700; color: #475569; text-align: center;'>{c_prob:.1f}% Match</div>", unsafe_allow_html=True)
-                            st.progress(min(1.0, max(0.05, c_prob / 100.0)))
-
-            st.markdown("---")
-            
-            # Action Buttons for Farmer Next Steps
-            st.markdown("#### 🚜 Next Steps for this Crop:")
-            act_col1, act_col2 = st.columns(2)
-            with act_col1:
-                if st.button("💧 Check Water & Irrigation Schedule", key="btn_rec_to_irrig", use_container_width=True):
-                    st.session_state.page = "water"
-                    st.rerun()
-            with act_col2:
-                if st.button("🌿 View Fertilizer Application Dosage", key="btn_rec_to_fert", use_container_width=True):
-                    st.session_state.page = "fertilizer"
-                    st.rerun()
-
-            st.info(f"🤖 {text['rec_info']}")
+            st.session_state.crop_prediction_data = {
+                "crop": crop,
+                "top_crops": top_crops,
+                "crop_display": crop_display,
+                "has_img": has_img,
+                "crop_img_path": crop_img_path
+            }
 
         except Exception as e:
             st.error(f"Prediction Error: {e}")
+
+    # =========================================================
+    # RENDER PREDICTION RESULTS & NEXT STEP ACTIONS (PERSISTENT)
+    # =========================================================
+    if "crop_prediction_data" in st.session_state:
+        p_data = st.session_state.crop_prediction_data
+        crop = p_data["crop"]
+        top_crops = p_data["top_crops"]
+        crop_display = LOCALIZED_CROP_NAMES.get(lang_code, {}).get(crop, crop.title())
+        crop_img_path = p_data["crop_img_path"]
+        has_img = os.path.exists(crop_img_path)
+
+        st.markdown(
+            f"""
+            <div style="background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%); border-radius: 18px; padding: 22px; color: white; margin-top: 15px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(20, 83, 45, 0.35);">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <span style="background: rgba(255,255,255,0.2); color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; border: 1px solid rgba(255,255,255,0.3);">
+                            ⭐ 1st Choice • అధిక దిగుబడినిచ్చే పంట
+                        </span>
+                        <h1 style="color: #ffffff !important; font-size: 32px !important; font-weight: 800; margin: 8px 0 4px 0;">
+                            🌾 {crop_display}
+                        </h1>
+                        <p style="color: #dcfce7; font-size: 15px; margin: 0; font-weight: 600;">
+                            {text['rec_title']}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        if has_img:
+            img_c1, img_c2, img_c3 = st.columns([1, 2, 1])
+            with img_c2:
+                try:
+                    st.image(crop_img_path, caption=crop_display, use_container_width=True)
+                except Exception:
+                    pass
+
+        details = CROP_DETAILS.get(crop)
+        show_ai_crop_advisor(crop, details)
+
+        # Top 3 probability rankings breakdown with Visual Crop Cards
+        if top_crops and len(top_crops) > 1:
+            st.markdown("<h4 style='margin-top: 18px; margin-bottom: 10px; color: #0f172a;'>📊 Top Ranked Crops for Your Soil (అనువైన ఇతర పంటలు):</h4>", unsafe_allow_html=True)
+            top_cols = st.columns(len(top_crops))
+            for i, (c_name, c_prob) in enumerate(top_crops):
+                loc_name = LOCALIZED_CROP_NAMES.get(lang_code, {}).get(c_name.lower(), c_name.title())
+                sub_img_path = f"images/{c_name.lower()}.jpg"
+                with top_cols[i]:
+                    with st.container(border=True):
+                        if os.path.exists(sub_img_path):
+                            try:
+                                st.image(sub_img_path, use_container_width=True)
+                            except Exception:
+                                pass
+                        st.markdown(f"<div style='font-weight: 800; font-size: 15px; color: #15803d; text-align: center; margin-top: 4px;'>{loc_name}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 13px; font-weight: 700; color: #475569; text-align: center;'>{c_prob:.1f}% Match</div>", unsafe_allow_html=True)
+                        st.progress(min(1.0, max(0.05, c_prob / 100.0)))
+
+        st.markdown("---")
+        
+        # Action Buttons for Farmer Next Steps
+        st.markdown("#### 🚜 Next Steps for this Crop:")
+        act_col1, act_col2 = st.columns(2)
+        with act_col1:
+            if st.button("💧 Check Water & Irrigation Schedule", key="btn_rec_to_irrig", use_container_width=True):
+                st.session_state.page = "water"
+                st.rerun()
+        with act_col2:
+            if st.button("🌿 View Fertilizer Application Dosage", key="btn_rec_to_fert", use_container_width=True):
+                st.session_state.page = "fertilizer"
+                st.rerun()
+
+        st.info(f"🤖 {text['rec_info']}")
