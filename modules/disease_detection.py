@@ -1,6 +1,11 @@
 import os
 import sqlite3
 from datetime import datetime
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 import streamlit as st
 from PIL import Image

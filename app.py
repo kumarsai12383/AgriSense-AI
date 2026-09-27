@@ -1,3 +1,10 @@
+import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import streamlit as st
 
 from database.database import initialize_database
@@ -279,42 +286,36 @@ initialize_database()
 # LOGIN
 # =========================================================
 
-if "farmer" not in st.session_state:
-
+if "farmer" not in st.session_state or not st.session_state.farmer:
     show_login()
-
     st.stop()
 
 
 # =========================================================
-# LANGUAGE SELECTION
-# =========================================================
-
-if not st.session_state.get(
-    "language_selected",
-    False
-):
-
-    from modules.farmer_home import show_language_selection
-
-    show_language_selection()
-
-    st.stop()
-
-
-# =========================================================
-# FARMER
+# FARMER & LANGUAGE INITIALIZATION
 # =========================================================
 
 farmer = st.session_state.farmer
 
+LANGUAGES_MAP = {
+    "English": "en",
+    "తెలుగు": "te",
+    "हिंदी": "hi",
+    "தமிழ்": "ta",
+    "ಕನ್ನಡ": "kn",
+    "मराठी": "mr",
+}
 
-# =========================================================
-# DEFAULT PAGE
-# =========================================================
+if "selected_language" not in st.session_state:
+    st.session_state.selected_language = farmer.get("language", "English")
+
+if st.session_state.selected_language not in LANGUAGES_MAP:
+    st.session_state.selected_language = "English"
+
+st.session_state.language_code = LANGUAGES_MAP[st.session_state.selected_language]
+st.session_state.language_selected = True
 
 if "page" not in st.session_state:
-
     st.session_state.page = "home"
 
 
@@ -406,7 +407,7 @@ NAV_TITLE = {
     "mr": "🧭 नेव्हिगेशन मेनू"
 }
 
-lang_code = st.session_state.get("language_code", "en")
+lang_code = st.session_state.language_code
 CURRENT_MENU = MENUS_BY_LANG.get(lang_code, MENUS_BY_LANG["en"])
 nav_prompt = NAV_TITLE.get(lang_code, "🧭 Quick Navigation")
 
@@ -414,23 +415,22 @@ PAGE_TO_LABEL = {v: k for k, v in CURRENT_MENU.items()}
 page_values = list(CURRENT_MENU.values())
 page_keys = list(CURRENT_MENU.keys())
 
-current_page = st.session_state.get("page", "home")
+current_page = st.session_state.page
 if current_page not in page_values:
     current_page = "home"
     st.session_state.page = "home"
 
 current_label = PAGE_TO_LABEL.get(current_page, page_keys[0])
-current_index = page_keys.index(current_label)
+current_index = page_keys.index(current_label) if current_label in page_keys else 0
 
 selected_menu = st.selectbox(
     nav_prompt,
     page_keys,
     index=current_index,
-    key=f"nav_select_{current_page}_{lang_code}"
+    key=f"nav_select_{lang_code}"
 )
 
-new_page = CURRENT_MENU[selected_menu]
-
+new_page = CURRENT_MENU.get(selected_menu, "home")
 if new_page != st.session_state.page:
     st.session_state.page = new_page
     st.rerun()
@@ -440,18 +440,7 @@ if new_page != st.session_state.page:
 # TOP FARMER PROFILE BAR WITH INSTANT LANGUAGE SWITCHER
 # =========================================================
 
-LANGUAGES_MAP = {
-    "English": "en",
-    "తెలుగు": "te",
-    "हिंदी": "hi",
-    "தமிழ்": "ta",
-    "ಕನ್ನಡ": "kn",
-    "मराठी": "mr",
-}
-
-current_lang = st.session_state.get("selected_language", farmer.get("language", "English"))
-if current_lang not in LANGUAGES_MAP:
-    current_lang = "English"
+current_lang = st.session_state.selected_language
 
 profile_col1, profile_col2, profile_col3 = st.columns([3, 2, 1])
 
@@ -494,6 +483,7 @@ with profile_col3:
         st.rerun()
 
 st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
 
 
 

@@ -3,6 +3,11 @@ import sys
 import asyncio
 import sqlite3
 from datetime import datetime
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # Prevent Windows charmap UnicodeEncodeError when printing emojis
 if hasattr(sys.stdout, "reconfigure"):

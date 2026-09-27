@@ -9,8 +9,10 @@ build/
 dist/
 *.egg-info/
 
-# Environments
+# Environments & Secret Keys
 .env
+.env.*
+!.env.example
 .venv/
 env/
 venv/
@@ -18,7 +20,7 @@ venv/
 # Streamlit secrets and runtime
 .streamlit/secrets.toml
 
-# IDE files
+# IDE & Editor files
 .vscode/
 .idea/
 *.swp
@@ -29,7 +31,13 @@ venv/
 Thumbs.db
 desktop.ini
 
-# Database temp/journal files
+# Database & Farmer Private Data (Prevents local records from leaking to GitHub)
+*.db
+*.sqlite
+*.sqlite3
+database/*.db
+database/*.sqlite
+database/*.sqlite3
 *.db-journal
 *.db-wal
 *.db-shm

@@ -1,7 +1,12 @@
 import os
 import sqlite3
-import streamlit as st
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
+import streamlit as st
 from google import genai
 
 

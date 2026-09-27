@@ -1,6 +1,12 @@
 import os
 import json
 import re
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -149,21 +155,55 @@ LANGUAGES_META = {
 
 
 def clean_text_for_speech(text: str) -> str:
-    """Removes markdown syntax, urls, and special symbols so speech synthesis sounds natural."""
+    """
+    Strips markdown symbols, emojis, URLs, and formatting artifacts
+    so browser Text-to-Speech (TTS) speaks natural, crystal-clear Indian language sentences.
+    """
     if not text:
         return ""
-    # Strip markdown headings and bold
-    clean = re.sub(r'#+\s*', '', text)
-    clean = re.sub(r'\*+', '', clean)
-    clean = re.sub(r'_+', '', clean)
-    clean = re.sub(r'`+', '', clean)
+
+    # Strip HTML tags
+    clean = re.sub(r'<[^>]+>', ' ', text)
+    # Strip URLs
+    clean = re.sub(r'http\S+|www\.\S+', '', clean)
+
+    # Strip all Unicode emoji ranges (emojis make TTS stutter or read out symbol names)
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"
+        "\U0001F300-\U0001F5FF"
+        "\U0001F680-\U0001F6FF"
+        "\U0001F1E0-\U0001F1FF"
+        "\U00002702-\U000027B0"
+        "\U000024C2-\U0001F251"
+        "\U0001F900-\U0001F9FF"
+        "\U0001FA00-\U0001FA6F"
+        "\U0001FA70-\U0001FAFF"
+        "\U00002600-\U000026FF"
+        "\U00002B50-\U00002B55"
+        "\U0000200D"
+        "\U0000FE0F"
+        "]+",
+        flags=re.UNICODE
+    )
+    clean = emoji_pattern.sub('', clean)
+
+    # Strip markdown headers, bold, italics, code blocks
+    clean = re.sub(r'#+\s*', '', clean)
+    clean = re.sub(r'[*_~`]+', '', clean)
     clean = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', clean)
-    clean = re.sub(r'[-–—•]\s*', ' ', clean)
+
+    # Convert bullets and dashes to brief pauses
+    clean = re.sub(r'[-–—•]\s*', ', ', clean)
+
+    # Normalize punctuation & symbols
+    clean = re.sub(r'[:;()[\]{}|]', ', ', clean)
     clean = re.sub(r'\n+', '. ', clean)
-    # Remove excessive symbols
-    clean = re.sub(r'[:;]+', ' ', clean)
+    clean = re.sub(r'\.{2,}', '.', clean)
+    clean = re.sub(r',{2,}', ',', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
     return clean
+
 
 
 # =========================================================
@@ -461,17 +501,48 @@ def show_ai_assistant():
                 statusSub.innerText = "Please use Google Chrome or Microsoft Edge on Mobile/Desktop.";
             }}
 
+            function findBestVoice(langCode) {{
+                if (!window.speechSynthesis) return null;
+                const voices = window.speechSynthesis.getVoices();
+                if (!voices || voices.length === 0) return null;
+                const code = (langCode || "").toLowerCase().replace("_", "-");
+                const prefix = code.split("-")[0];
+                let match = voices.find(v => (v.lang.toLowerCase() === code || v.lang.toLowerCase().startsWith(prefix)) &&
+                                              (v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Neural") || v.name.includes("Online")));
+                if (match) return match;
+                match = voices.find(v => v.lang.toLowerCase() === code);
+                if (match) return match;
+                match = voices.find(v => v.lang.toLowerCase().startsWith(prefix));
+                return match || null;
+            }}
+
+            if (window.speechSynthesis) {{
+                window.speechSynthesis.onvoiceschanged = () => {{
+                    findBestVoice(speechLang);
+                }};
+            }}
+
             function speakCleanText(rawText) {{
                 if (!synth) return;
                 synth.cancel();
-                // Clean markdown artifacts
-                let clean = rawText.replace(/[#*_`]/g, "")
-                                   .replace(/[-–—•]/g, " ")
-                                   .replace(/\\n+/g, ". ")
-                                   .replace(/\\s+/g, " ");
+                let clean = (rawText || "").replace(/<[^>]+>/g, " ")
+                                           .replace(/http\\S+/g, "")
+                                           .replace(/[#*_`~]/g, "")
+                                           .replace(/[-–—•]/g, ", ")
+                                           .replace(/[:;()\\[\\]{{}}|]/g, ", ")
+                                           .replace(/\\n+/g, ". ")
+                                           .replace(/\\s+/g, " ").trim();
                 const utterance = new SpeechSynthesisUtterance(clean);
-                utterance.lang = speechLang;
+                const bestVoice = findBestVoice(speechLang);
+                if (bestVoice) {{
+                    utterance.voice = bestVoice;
+                    utterance.lang = bestVoice.lang;
+                }} else {{
+                    utterance.lang = speechLang;
+                }}
+                utterance.pitch = 1.0;
                 utterance.rate = voiceSpeed;
+                utterance.volume = 1.0;
                 utterance.onend = () => {{
                     statusTitle.innerText = "{meta['tap_to_speak']}";
                     statusSub.innerText = "Finished speaking in " + languageName;
@@ -540,16 +611,27 @@ def show_ai_assistant():
                 with audio_col1:
                     clean_js_text = json.dumps(msg_audio_clean)
                     listen_html = f"""
-                    <button onclick='
-                        if (window.speechSynthesis) {{
-                            window.speechSynthesis.cancel();
-                            let ut = new SpeechSynthesisUtterance({clean_js_text});
-                            ut.lang = "{speech_lang}";
-                            ut.rate = {rate_val};
-                            window.speechSynthesis.speak(ut);
-                        }}
-                    ' style="padding: 4px 10px; font-size: 12px; font-weight: 700; background: #dcfce7; color: #166534; border: 1px solid #86efac; border-radius: 8px; cursor: pointer;">
-                        🔊 Listen / వినండి
+                    <script>
+                    function playCrispAudio() {{
+                        if (!window.speechSynthesis) return;
+                        window.speechSynthesis.cancel();
+                        const text = {clean_js_text};
+                        const utter = new SpeechSynthesisUtterance(text);
+                        const voices = window.speechSynthesis.getVoices() || [];
+                        const code = "{speech_lang}".toLowerCase().replace("_", "-");
+                        const prefix = code.split("-")[0];
+                        let v = voices.find(x => (x.lang.toLowerCase() === code || x.lang.toLowerCase().startsWith(prefix)) &&
+                                                 (x.name.includes("Natural") || x.name.includes("Google") || x.name.includes("Neural") || x.name.includes("Online")));
+                        if (!v) v = voices.find(x => x.lang.toLowerCase() === code || x.lang.toLowerCase().startsWith(prefix));
+                        if (v) {{ utter.voice = v; utter.lang = v.lang; }} else {{ utter.lang = "{speech_lang}"; }}
+                        utter.pitch = 1.0;
+                        utter.rate = {rate_val};
+                        utter.volume = 1.0;
+                        window.speechSynthesis.speak(utter);
+                    }}
+                    </script>
+                    <button onclick='playCrispAudio()' style="padding: 4px 12px; font-size: 12px; font-weight: 700; background: #dcfce7; color: #166534; border: 1.5px solid #86efac; border-radius: 8px; cursor: pointer;">
+                        🔊 Listen Aloud
                     </button>
                     """
                     components.html(listen_html, height=35)
@@ -586,9 +668,17 @@ def show_ai_assistant():
                     <script>
                         if (window.speechSynthesis) {{
                             window.speechSynthesis.cancel();
-                            let utter = new SpeechSynthesisUtterance({js_speech_text});
-                            utter.lang = "{speech_lang}";
+                            const utter = new SpeechSynthesisUtterance({js_speech_text});
+                            const voices = window.speechSynthesis.getVoices() || [];
+                            const code = "{speech_lang}".toLowerCase().replace("_", "-");
+                            const prefix = code.split("-")[0];
+                            let v = voices.find(x => (x.lang.toLowerCase() === code || x.lang.toLowerCase().startsWith(prefix)) &&
+                                                     (x.name.includes("Natural") || x.name.includes("Google") || x.name.includes("Neural") || x.name.includes("Online")));
+                            if (!v) v = voices.find(x => x.lang.toLowerCase() === code || x.lang.toLowerCase().startsWith(prefix));
+                            if (v) {{ utter.voice = v; utter.lang = v.lang; }} else {{ utter.lang = "{speech_lang}"; }}
+                            utter.pitch = 1.0;
                             utter.rate = {rate_val};
+                            utter.volume = 1.0;
                             window.speechSynthesis.speak(utter);
                         }}
                     </script>
