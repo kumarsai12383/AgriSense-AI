@@ -50,7 +50,7 @@ st.markdown(
         padding-top: 1.2rem;
         padding-left: 1.2rem;
         padding-right: 1.2rem;
-        padding-bottom: 4rem;
+        padding-bottom: 80px;
     }
 
     /* Headings - Bold, High-Contrast & Presentation Clear */
@@ -410,28 +410,18 @@ MENUS_BY_LANG = {
     }
 }
 
-NAV_TITLE = {
-    "en": "🧭 Quick Menu & Navigation",
-    "te": "🧭 నావిగేషన్ మెను & పేజీలు",
-    "hi": "🧭 मुख्य नेविगेशन मेनू",
-    "ta": "🧭 முதன்மை மெனு",
-    "kn": "🧭 ಮುಖ್ಯ ನ್ಯಾವಿಗೇಷನ್",
-    "mr": "🧭 मुख्य नेव्हिगेशन"
-}
-
 HELP_BTN_LABEL = {
-    "en": "❓ Farmer Help Center",
-    "te": "❓ రైతు సహాయ కేంద్రం",
-    "hi": "❓ किसान सहायता केंद्र",
-    "ta": "❓ உதவி மையம்",
-    "kn": "❓ ಸಹಾಯ ಕೇಂದ್ರ",
-    "mr": "❓ शेतकरी मदत केंद्र"
+    "en": "❓ Help",
+    "te": "❓ సహాయం",
+    "hi": "❓ सहायता",
+    "ta": "❓ உதவி",
+    "kn": "❓ ಸಹಾಯ",
+    "mr": "❓ मदत"
 }
 
 lang_code = st.session_state.language_code
 CURRENT_MENU = MENUS_BY_LANG.get(lang_code, MENUS_BY_LANG["en"])
-nav_prompt = NAV_TITLE.get(lang_code, "🧭 Quick Menu & Navigation")
-help_btn_text = HELP_BTN_LABEL.get(lang_code, "❓ Farmer Help Center")
+help_btn_text = HELP_BTN_LABEL.get(lang_code, "❓ Help")
 
 PAGE_TO_LABEL = {v: k for k, v in CURRENT_MENU.items()}
 page_values = list(CURRENT_MENU.values())
@@ -442,58 +432,54 @@ if current_page not in page_values:
     current_page = "home"
     st.session_state.page = "home"
 
+
 # =========================================================
-# TOP NAVIGATION HEADER BAR (FARMER PROFILE, HELP & LANGUAGE)
+# APP-STYLE NAVIGATION (CLEAN, MINIMAL, MOBILE-FIRST)
 # =========================================================
 
 current_lang = st.session_state.selected_language
 f_name = farmer.get('name', 'Farmer')
 f_phone = farmer.get('phone', '')
 
-# Top Header Container
-with st.container():
-    st.markdown(
-        f"""
-        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 10px 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1.5px solid #86efac;">
-                        👨‍🌾
-                    </div>
-                    <div>
-                        <div style="font-weight: 800; color: #0f172a; font-size: 15px; line-height: 1.2;">
-                            {f_name}
-                            <span style="font-size: 11px; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 9999px; margin-left: 6px; font-weight: 700; border: 1px solid #86efac;">
-                                🟢 IoT Active
-                            </span>
-                        </div>
-                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">📞 {f_phone or 'Farmer Mobile'} &nbsp;•&nbsp; 🌐 {current_lang}</div>
-                    </div>
+# ---- Slim Top App Bar ----
+st.markdown(
+    f"""
+    <div style="
+        background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+        border-radius: 16px;
+        padding: 12px 18px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 16px rgba(20, 83, 45, 0.20);
+    ">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    🌱
                 </div>
-                <div style="font-size: 13px; font-weight: 800; color: #15803d; letter-spacing: -0.2px;">
-                    🌱 AgriSense AI
+                <div>
+                    <div style="font-weight: 800; color: #ffffff; font-size: 16px; line-height: 1.1;">AgriSense AI</div>
+                    <div style="font-size: 11px; color: #bbf7d0; font-weight: 600;">
+                        👨‍🌾 {f_name} &nbsp;•&nbsp; 🌐 {current_lang}
+                    </div>
                 </div>
             </div>
+            <span style="font-size: 10px; background: rgba(220, 252, 231, 0.25); color: #bbf7d0; padding: 2px 8px; border-radius: 9999px; font-weight: 700; border: 1px solid rgba(255,255,255,0.2);">
+                🟢 IoT
+            </span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-# Action Row: Help Center Quick Button | Language Switcher | Logout
-head_col1, head_col2, head_col3 = st.columns([3, 2, 1])
+# ---- Compact Settings Row ----
+settings_c1, settings_c2, settings_c3 = st.columns([3, 2, 1])
 
-with head_col1:
-    # Prominent Help Center Direct Action Button - Always 1 Tap away
-    is_on_help = (current_page == "help")
-    if st.button(help_btn_text, key="top_help_center_btn", use_container_width=True, type="primary" if is_on_help else "secondary"):
-        st.session_state.page = "help"
-        st.rerun()
-
-with head_col2:
+with settings_c1:
     lang_keys = list(LANGUAGES_MAP.keys())
     c_idx = lang_keys.index(current_lang) if current_lang in lang_keys else 0
     header_lang = st.selectbox(
-        "🌐 Language / భాష",
+        "🌐 Language",
         lang_keys,
         index=c_idx,
         key="header_language_select",
@@ -508,63 +494,186 @@ with head_col2:
             update_farmer_language(farmer["id"], header_lang)
         st.rerun()
 
-with head_col3:
-    if st.button("🚪 Logout", key="logout_top", use_container_width=True):
+with settings_c2:
+    is_on_help = (current_page == "help")
+    if st.button(help_btn_text, key="top_help_center_btn", use_container_width=True, type="primary" if is_on_help else "secondary"):
+        st.session_state.page = "help"
+        st.rerun()
+
+with settings_c3:
+    if st.button("🚪", key="logout_top", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
-# Primary Dropdown Navigation Menu
-target_label = PAGE_TO_LABEL.get(current_page, page_keys[0])
-nav_key = f"nav_select_{lang_code}"
+# ---- Sticky Bottom Navigation Bar (App-Style) ----
+BOTTOM_NAV_LABELS = {
+    "en": {"home": "Home", "crop": "Crop", "voice": "AI Chat", "market": "Market", "more": "More"},
+    "te": {"home": "హోమ్", "crop": "పంట", "voice": "AI చాట్", "market": "మార్కెట్", "more": "మరిన్ని"},
+    "hi": {"home": "होम", "crop": "फसल", "voice": "AI चैट", "market": "बाज़ार", "more": "और"},
+    "ta": {"home": "முகப்பு", "crop": "பயிர்", "voice": "AI அரட்டை", "market": "சந்தை", "more": "மேலும்"},
+    "kn": {"home": "ಮುಖಪುಟ", "crop": "ಬೆಳೆ", "voice": "AI ಚಾಟ್", "market": "ಮಾರುಕಟ್ಟೆ", "more": "ಇನ್ನಷ್ಟು"},
+    "mr": {"home": "होम", "crop": "पीक", "voice": "AI चॅट", "market": "बाजार", "more": "अजून"},
+}
 
-if nav_key in st.session_state and CURRENT_MENU.get(st.session_state[nav_key]) != current_page:
-    st.session_state[nav_key] = target_label
+bnav = BOTTOM_NAV_LABELS.get(lang_code, BOTTOM_NAV_LABELS["en"])
 
-def on_nav_change():
-    selected = st.session_state.get(nav_key)
-    if selected and selected in CURRENT_MENU:
-        st.session_state.page = CURRENT_MENU[selected]
-
-current_index = page_keys.index(target_label) if target_label in page_keys else 0
-
-st.selectbox(
-    nav_prompt,
-    page_keys,
-    index=current_index,
-    key=nav_key,
-    on_change=on_nav_change
-)
-
-# Responsive Quick Navigation Pills (Instant Access to Major Modules)
-pill_cols = st.columns(7)
-quick_navs = [
-    ("🏠 Home", "home"),
-    ("🌾 Crop", "crop"),
-    ("💧 Water", "water"),
-    ("🌿 Fertilizer", "fertilizer"),
-    ("🦠 Disease", "disease"),
-    ("🤖 Voice AI", "voice"),
-    ("📊 Market", "market")
+bottom_nav_items = [
+    ("🏠", bnav["home"], "home"),
+    ("🌾", bnav["crop"], "crop"),
+    ("🤖", bnav["voice"], "voice"),
+    ("📊", bnav["market"], "market"),
+    ("☰", bnav["more"], "__more__"),
 ]
 
-for p_idx, (p_label, p_target) in enumerate(quick_navs):
-    with pill_cols[p_idx]:
-        is_active = (current_page == p_target)
-        btn_type = "primary" if is_active else "secondary"
-        if st.button(p_label, key=f"pnav_{p_target}_{p_idx}", use_container_width=True, type=btn_type):
-            st.session_state.page = p_target
-            st.rerun()
+def _active_css(page_id):
+    if page_id == "__more__":
+        secondary = {"farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
+        is_active = current_page in secondary
+    else:
+        is_active = current_page == page_id
+    if is_active:
+        return "color: #16a34a; font-weight: 800;"
+    return "color: #94a3b8; font-weight: 600;"
 
-st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+def _dot(page_id):
+    if page_id == "__more__":
+        secondary = {"farm", "soil", "progress", "water", "fertilizer", "disease", "voice_live", "help"}
+        if current_page in secondary:
+            return '<div style="width:5px;height:5px;border-radius:50%;background:#16a34a;margin-top:2px;"></div>'
+        return ""
+    if current_page == page_id:
+        return '<div style="width:5px;height:5px;border-radius:50%;background:#16a34a;margin-top:2px;"></div>'
+    return ""
 
-st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+nav_items_html = ""
+for icon, label, pid in bottom_nav_items:
+    nav_items_html += f"""
+    <div style="flex:1; text-align:center; cursor:pointer; padding:6px 0;" onclick="
+        if('{pid}' === '__more__') {{
+            document.getElementById('agri-more-menu').style.display =
+                document.getElementById('agri-more-menu').style.display === 'flex' ? 'none' : 'flex';
+        }} else {{
+            document.getElementById('agri-more-menu').style.display = 'none';
+            const url = new URL(window.location.href);
+            url.searchParams.set('nav_target', '{pid}');
+            window.location.href = url.toString();
+        }}
+    ">
+        <div style="font-size:22px;line-height:1;">{icon}</div>
+        <div style="font-size:10px;margin-top:2px;{_active_css(pid)}">{label}</div>
+        {_dot(pid)}
+    </div>
+    """
 
+# Secondary "More" menu items
+MORE_ITEMS = {
+    "en": [
+        ("📡", "My Farm Data", "farm"), ("🧪", "Soil & NPK", "soil"), ("📊", "History", "progress"),
+        ("💧", "Irrigation", "water"), ("🌿", "Fertilizer", "fertilizer"), ("🦠", "Disease", "disease"),
+        ("⚡", "Live Voice", "voice_live"), ("❓", "Help Center", "help"),
+    ],
+    "te": [
+        ("📡", "పొలం డేటా", "farm"), ("🧪", "నేల & NPK", "soil"), ("📊", "రికార్డులు", "progress"),
+        ("💧", "నీటిపారుదల", "water"), ("🌿", "ఎరువులు", "fertilizer"), ("🦠", "వ్యాధి", "disease"),
+        ("⚡", "లైవ్ వాయిస్", "voice_live"), ("❓", "సహాయం", "help"),
+    ],
+    "hi": [
+        ("📡", "खेत डेटा", "farm"), ("🧪", "मिट्टी & NPK", "soil"), ("📊", "इतिहास", "progress"),
+        ("💧", "सिंचाई", "water"), ("🌿", "खाद", "fertilizer"), ("🦠", "रोग", "disease"),
+        ("⚡", "लाइव वॉइस", "voice_live"), ("❓", "सहायता", "help"),
+    ],
+    "ta": [
+        ("📡", "பண்ணை தகவல்", "farm"), ("🧪", "மண் & NPK", "soil"), ("📊", "வரலாறு", "progress"),
+        ("💧", "பாசனம்", "water"), ("🌿", "உரம்", "fertilizer"), ("🦠", "நோய்", "disease"),
+        ("⚡", "நேரலை குரல்", "voice_live"), ("❓", "உதவி", "help"),
+    ],
+    "kn": [
+        ("📡", "ಹೊಲ ಮಾಹಿತಿ", "farm"), ("🧪", "ಮಣ್ಣು & NPK", "soil"), ("📊", "ಇತಿಹಾಸ", "progress"),
+        ("💧", "ನೀರಾವರಿ", "water"), ("🌿", "ಗೊಬ್ಬರ", "fertilizer"), ("🦠", "ರೋಗ", "disease"),
+        ("⚡", "ಲೈವ್ ವಾಯ್ಸ್", "voice_live"), ("❓", "ಸಹಾಯ", "help"),
+    ],
+    "mr": [
+        ("📡", "शेत डेटा", "farm"), ("🧪", "माती & NPK", "soil"), ("📊", "इतिहास", "progress"),
+        ("💧", "सिंचन", "water"), ("🌿", "खत", "fertilizer"), ("🦠", "रोग", "disease"),
+        ("⚡", "लाइव्ह व्हॉइस", "voice_live"), ("❓", "मदत", "help"),
+    ],
+}
 
+more_items = MORE_ITEMS.get(lang_code, MORE_ITEMS["en"])
+more_html = ""
+for m_icon, m_label, m_pid in more_items:
+    is_active_more = current_page == m_pid
+    active_bg = "background: #dcfce7; border-color: #86efac;" if is_active_more else "background: #ffffff; border-color: #e2e8f0;"
+    active_color = "color: #166534; font-weight: 800;" if is_active_more else "color: #334155; font-weight: 600;"
+    more_html += f"""
+    <div onclick="
+        document.getElementById('agri-more-menu').style.display='none';
+        const url = new URL(window.location.href);
+        url.searchParams.set('nav_target', '{m_pid}');
+        window.location.href = url.toString();
+    " style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;cursor:pointer;border:1.5px solid #e2e8f0;{active_bg}transition:all 0.15s;">
+        <span style="font-size:20px;">{m_icon}</span>
+        <span style="font-size:14px;{active_color}">{m_label}</span>
+    </div>
+    """
 
+st.markdown(
+    f"""
+    <!-- Sticky Bottom Navigation Bar -->
+    <div id="agri-bottom-nav" style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: #ffffff;
+        border-top: 1.5px solid #e2e8f0;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 4px 0 max(6px, env(safe-area-inset-bottom));
+    ">
+        {nav_items_html}
+    </div>
 
-# =========================================================
-# HOME
-# =========================================================
+    <!-- More Menu (Slide-Up Panel) -->
+    <div id="agri-more-menu" style="
+        display: none;
+        position: fixed;
+        bottom: 64px;
+        left: 8px;
+        right: 8px;
+        z-index: 9998;
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.10);
+        padding: 16px;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 55vh;
+        overflow-y: auto;
+    ">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:15px;font-weight:800;color:#0f172a;">☰ {bnav['more']}</span>
+            <span onclick="document.getElementById('agri-more-menu').style.display='none';" style="font-size:20px;cursor:pointer;color:#94a3b8;padding:4px 8px;">✕</span>
+        </div>
+        {more_html}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ---- Handle Bottom Bar Navigation via Query Params ----
+nav_target = st.query_params.get("nav_target")
+if nav_target and nav_target != current_page:
+    st.session_state.page = nav_target
+    st.query_params.clear()
+    st.rerun()
+elif nav_target:
+    st.query_params.clear()
+
 
 if st.session_state.page == "home":
 
