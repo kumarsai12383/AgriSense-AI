@@ -201,7 +201,13 @@ export default function Dashboard({
               id="btn-start-soil-test"
               onClick={() => setCurrentTab('sensors')}
               className="btn"
-              style={{ background: '#fff', color: '#15803d', fontWeight: 800, fontSize: 14 }}
+              style={{
+                background: '#ffffff',
+                color: '#15803d',
+                fontWeight: 900,
+                fontSize: 14,
+                boxShadow: '0 6px 16px rgba(0,0,0,0.15)'
+              }}
             >
               <Cpu size={16} />
               {feats.sensors?.cta || 'Start Soil Test'}
@@ -209,7 +215,15 @@ export default function Dashboard({
             <button
               id="btn-get-crop-ai"
               onClick={() => setCurrentTab('crop')}
-              className="btn btn-ghost"
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: 14,
+                border: '1px solid rgba(255,255,255,0.4)',
+                boxShadow: '0 6px 16px rgba(22,163,74,0.35)'
+              }}
             >
               <Wheat size={16} />
               {feats.crop?.cta || 'Get Crop Recommendation'}
@@ -218,10 +232,44 @@ export default function Dashboard({
               id="btn-voice-ai"
               onClick={() => setCurrentTab('voice')}
               className="btn btn-ghost"
+              style={{
+                background: 'rgba(255,255,255,0.20)',
+                color: '#ffffff',
+                fontWeight: 800,
+                fontSize: 14,
+                border: '1px solid rgba(255,255,255,0.35)',
+                backdropFilter: 'blur(8px)'
+              }}
             >
               <Mic size={16} />
               {feats.voice?.cta || 'Talk to AI'}
             </button>
+          </div>
+
+          {/* Live Telemetry Ribbon (Pro Agro-Tech Header) */}
+          <div className="telemetry-ribbon">
+            <div className="telemetry-ribbon-item">
+              <span className="telemetry-ribbon-label">🌡️ Soil Temp</span>
+              <span className="telemetry-ribbon-value">{temp}°C</span>
+            </div>
+            <div className="telemetry-ribbon-item">
+              <span className="telemetry-ribbon-label">💧 Moisture</span>
+              <span className="telemetry-ribbon-value" style={{ color: isMoistureLow ? '#f87171' : '#4ade80' }}>
+                {soilMoisture}% {isMoistureLow ? '⚠️ Low' : '✅ Optimal'}
+              </span>
+            </div>
+            <div className="telemetry-ribbon-item">
+              <span className="telemetry-ribbon-label">🧪 Soil pH</span>
+              <span className="telemetry-ribbon-value">{ph} pH</span>
+            </div>
+            <div className="telemetry-ribbon-item">
+              <span className="telemetry-ribbon-label">🌱 Soil Health</span>
+              <span className="telemetry-ribbon-value" style={{ color: '#4ade80' }}>{healthScore}/100</span>
+            </div>
+            <div className="telemetry-ribbon-item">
+              <span className="telemetry-ribbon-label">🛰️ Sensor Status</span>
+              <span className="telemetry-ribbon-value">{sensorStatus ? '🟢 7-in-1 IoT Live' : '🔵 Manual Telemetry'}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -241,36 +289,38 @@ export default function Dashboard({
       {/* ══════════════════════════════════════════════
           REAL-TIME METRIC CARDS
           ══════════════════════════════════════════════ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 16 }}>
         {/* Soil Score */}
-        <div className="agri-card" style={{ padding: 20, borderRadius: 20 }}>
+        <div className="agri-card-pro" style={{ padding: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>{t.dashboard?.soilScore || 'Soil Health'}</span>
-            <div style={{ padding: 8, background: '#f0fdf4', borderRadius: 10, color: '#15803d' }}>
-              <Activity size={16} />
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: '#64748b' }}>{t.dashboard?.soilScore || 'Soil Health Index'}</span>
+            <div style={{ padding: 8, background: '#f0fdf4', borderRadius: 12, color: '#15803d' }}>
+              <Activity size={18} />
             </div>
           </div>
-          <div style={{ fontSize: 30, fontWeight: 900, color: '#15803d', marginBottom: 8 }}>{healthScore}<span style={{ fontSize: 14, color: '#64748b', fontWeight: 600 }}>/100</span></div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: '#15803d', marginBottom: 8, fontFamily: 'Outfit, sans-serif' }}>
+            {healthScore}<span style={{ fontSize: 14, color: '#64748b', fontWeight: 700 }}>/100</span>
+          </div>
           <div className="soil-gauge">
             <div className="soil-gauge-fill" style={{
               width: `${healthScore}%`,
               background: `linear-gradient(90deg, ${healthScore > 70 ? '#22c55e' : healthScore > 50 ? '#eab308' : '#ef4444'}, ${healthScore > 70 ? '#15803d' : healthScore > 50 ? '#d97706' : '#dc2626'})`
             }} />
           </div>
-          <span style={{ fontSize: 11, color: '#059669', fontWeight: 600, marginTop: 6, display: 'block' }}>
-            {healthScore >= 80 ? '🌟 Excellent soil condition' : healthScore >= 60 ? '✅ Good soil, minor adjustments' : '⚠️ Soil needs improvement'}
+          <span style={{ fontSize: 11.5, color: '#059669', fontWeight: 700, marginTop: 8, display: 'block' }}>
+            {healthScore >= 80 ? '🌟 Excellent soil condition' : healthScore >= 60 ? '✅ Good soil, minor adjustments' : '⚠️ Soil needs enrichment'}
           </span>
         </div>
 
         {/* Moisture */}
-        <div className="agri-card" style={{ padding: 20, borderRadius: 20 }}>
+        <div className="agri-card-pro" style={{ padding: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>{t.dashboard?.waterStatus || 'Soil Moisture'}</span>
-            <div style={{ padding: 8, background: isMoistureLow ? '#fee2e2' : '#e0f2fe', borderRadius: 10, color: isMoistureLow ? '#dc2626' : '#0369a1' }}>
-              <Droplets size={16} />
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: '#64748b' }}>{t.dashboard?.waterStatus || 'Soil Moisture'}</span>
+            <div style={{ padding: 8, background: isMoistureLow ? '#fee2e2' : '#e0f2fe', borderRadius: 12, color: isMoistureLow ? '#dc2626' : '#0369a1' }}>
+              <Droplets size={18} />
             </div>
           </div>
-          <div style={{ fontSize: 30, fontWeight: 900, color: isMoistureLow ? '#dc2626' : '#0369a1', marginBottom: 8 }}>
+          <div style={{ fontSize: 32, fontWeight: 900, color: isMoistureLow ? '#dc2626' : '#0369a1', marginBottom: 8, fontFamily: 'Outfit, sans-serif' }}>
             {soilMoisture}%
           </div>
           <div className="soil-gauge">
@@ -279,34 +329,36 @@ export default function Dashboard({
               background: isMoistureLow ? '#ef4444' : '#0284c7'
             }} />
           </div>
-          <span style={{ fontSize: 11, color: isMoistureLow ? '#dc2626' : '#0369a1', fontWeight: 700, marginTop: 6, display: 'block' }}>
+          <span style={{ fontSize: 11.5, color: isMoistureLow ? '#dc2626' : '#0369a1', fontWeight: 800, marginTop: 8, display: 'block' }}>
             {isMoistureLow ? `⚠️ ${t.dashboard?.needsWater || 'Water needed urgently!'}` : `✅ ${t.dashboard?.optimal || 'Moisture optimal'}`}
           </span>
         </div>
 
         {/* Temperature */}
-        <div className="agri-card" style={{ padding: 20, borderRadius: 20 }}>
+        <div className="agri-card-pro" style={{ padding: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Temperature</span>
-            <div style={{ padding: 8, background: '#fef3c7', borderRadius: 10, color: '#d97706' }}>
-              <Sun size={16} />
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: '#64748b' }}>Ambient Climate</span>
+            <div style={{ padding: 8, background: '#fef3c7', borderRadius: 12, color: '#d97706' }}>
+              <Sun size={18} />
             </div>
           </div>
-          <div style={{ fontSize: 30, fontWeight: 900, color: '#d97706', marginBottom: 8 }}>{temp}°C</div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: '#d97706', marginBottom: 8, fontFamily: 'Outfit, sans-serif' }}>
+            {temp}°C
+          </div>
           <div className="soil-gauge">
             <div className="soil-gauge-fill" style={{ width: `${Math.min(100, (temp / 45) * 100)}%`, background: '#f59e0b' }} />
           </div>
-          <span style={{ fontSize: 11, color: '#92400e', fontWeight: 600, marginTop: 6, display: 'block' }}>
+          <span style={{ fontSize: 11.5, color: '#92400e', fontWeight: 700, marginTop: 8, display: 'block' }}>
             💨 Humidity: {farmData?.humidity ?? 65}% • 🌧 Rain: {farmData?.rainfall ?? 110}mm
           </span>
         </div>
 
         {/* IoT Sensor */}
-        <div className="agri-card" style={{ padding: 20, borderRadius: 20 }}>
+        <div className="agri-card-pro" style={{ padding: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>{t.dashboard?.iotStatus || 'IoT Sensor'}</span>
-            <div style={{ padding: 8, background: '#f5f3ff', borderRadius: 10, color: '#7c3aed' }}>
-              <Cpu size={16} />
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: '#64748b' }}>{t.dashboard?.iotStatus || 'IoT 7-in-1 Sensor'}</span>
+            <div style={{ padding: 8, background: '#f5f3ff', borderRadius: 12, color: '#7c3aed' }}>
+              <Cpu size={18} />
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>

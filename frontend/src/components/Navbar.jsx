@@ -3,7 +3,7 @@ import {
   Sprout, Wifi, WifiOff, Languages, UserCheck, LogOut, Sparkles,
   LayoutDashboard, Wheat, Activity, Droplets, FlaskConical, Stethoscope,
   TrendingUp, Building2, Mic, MessageSquareCode, HelpCircle, Cpu, Server,
-  Menu, X, Radio
+  Menu, X, Radio, ChevronDown
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 
@@ -35,7 +35,7 @@ export default function Navbar({
   const mobileItems = [
     { id: 'dashboard', label: t.nav?.dashboard || 'Home',      icon: LayoutDashboard },
     { id: 'crop',      label: t.nav?.crop || 'Crop AI',        icon: Wheat },
-    { id: 'voice',     label: t.nav?.voice || 'Voice AI',      icon: Mic },
+    { id: 'voice',     label: t.nav?.voice || 'Voice AI',      icon: Mic, highlight: true },
     { id: 'mandi',     label: t.nav?.mandi || 'Mandi',         icon: TrendingUp },
     { id: 'menu',      label: t.nav?.menu || 'Menu',           icon: Menu, isMenuToggle: true },
   ];
@@ -52,58 +52,120 @@ export default function Navbar({
   return (
     <>
       {/* ── TOP BAR ── */}
-      <header className="navbar">
-        <div className="navbar-top">
+      <header className="navbar" style={{
+        background: 'rgba(255, 255, 255, 0.94)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        borderBottom: '1px solid rgba(21, 128, 61, 0.15)',
+        boxShadow: '0 4px 20px -5px rgba(0, 0, 0, 0.05)'
+      }}>
+        <div className="navbar-top" style={{ padding: '10px 24px' }}>
           {/* Brand */}
-          <div className="nav-brand" onClick={() => setCurrentTab('dashboard')}>
-            <div className="brand-icon">
+          <div
+            className="nav-brand"
+            onClick={() => setCurrentTab('dashboard')}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          >
+            <div style={{
+              width: 44,
+              height: 44,
+              borderRadius: 14,
+              background: 'linear-gradient(135deg, #15803d 0%, #22c55e 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              boxShadow: '0 6px 16px rgba(21, 128, 61, 0.35)',
+              border: '1px solid rgba(255, 255, 255, 0.4)'
+            }}>
               <Sprout size={24} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px', fontFamily: 'Outfit, sans-serif' }}>
+                <span style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#0f172a',
+                  letterSpacing: '-0.5px',
+                  fontFamily: 'Outfit, sans-serif'
+                }}>
                   {t.appName || 'AgriSense AI'}
                 </span>
-                <span className="badge badge-green" style={{ fontSize: 9, padding: '2px 7px', letterSpacing: '0.5px' }}>
-                  PRO
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 900,
+                  padding: '2px 8px',
+                  borderRadius: 99,
+                  background: 'linear-gradient(135deg, #15803d, #16a34a)',
+                  color: '#ffffff',
+                  letterSpacing: '0.5px',
+                  boxShadow: '0 2px 6px rgba(21,128,61,0.25)'
+                }}>
+                  PRO 2.0
                 </span>
               </div>
-              <div className="hide-on-mobile" style={{ fontSize: 10.5, color: '#64748b', fontWeight: 600 }}>
-                {t.tagline || 'Smart Agricultural Intelligence'}
+              <div className="hide-on-mobile" style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
+                {t.tagline || 'Smart Precision Agricultural Intelligence'}
               </div>
             </div>
           </div>
 
           {/* Right Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Server status (dot on small mobile) */}
+            {/* Live API status */}
             <div
               className={`badge ${serverOnline ? 'badge-green' : 'badge-amber'}`}
-              title={serverOnline ? 'Backend API online' : 'Backend API offline'}
-              style={{ cursor: 'default', fontSize: 11, padding: '4px 8px' }}
+              title={serverOnline ? 'FastAPI Backend Online' : 'Connecting to API'}
+              style={{
+                cursor: 'default',
+                fontSize: 11,
+                padding: '4px 10px',
+                borderRadius: 99,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5
+              }}
             >
-              <Server size={11} />
-              <span className="hide-on-small-mobile">{serverOnline ? 'API Live' : 'API Off'}</span>
+              <span style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: serverOnline ? '#22c55e' : '#f59e0b',
+                display: 'inline-block'
+              }} />
+              <span className="hide-on-small-mobile">{serverOnline ? 'API Live' : 'API Sync'}</span>
             </div>
 
-            {/* IoT Sensor status */}
+            {/* IoT Telemetry status */}
             <div
               className={`badge ${sensorOnline ? 'badge-green' : 'badge-amber'}`}
-              title={sensorOnline ? 'ESP32 sensor transmitting' : 'No IoT packet in last 10 min'}
-              style={{ cursor: 'pointer', fontSize: 11, padding: '4px 8px' }}
+              title={sensorOnline ? '7-in-1 Soil Sensor Online' : 'Manual Telemetry Mode'}
+              style={{
+                cursor: 'pointer',
+                fontSize: 11,
+                padding: '4px 10px',
+                borderRadius: 99,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5
+              }}
               onClick={() => setCurrentTab('sensors')}
             >
-              {sensorOnline
-                ? <Wifi size={11} className="pulse-glow" />
-                : <WifiOff size={11} />}
-              <span className="hide-on-small-mobile">{sensorOnline ? 'IoT Live' : 'IoT Off'}</span>
+              {sensorOnline ? <Wifi size={12} className="pulse-glow" /> : <WifiOff size={12} />}
+              <span className="hide-on-small-mobile">{sensorOnline ? 'IoT Probe Live' : 'Manual Mode'}</span>
             </div>
 
-            {/* Language selector (High-Contrast & Touch Friendly) */}
+            {/* Language Selector Dropdown (High-Contrast & Touch Friendly) */}
             <div style={{
-              display: 'flex', alignItems: 'center',
-              background: '#f1f5f9', borderRadius: 12, padding: '4px 8px', gap: 4,
-              border: '1px solid #e2e8f0'
+              display: 'flex',
+              alignItems: 'center',
+              background: '#f8fafc',
+              borderRadius: 14,
+              padding: '4px 10px',
+              gap: 6,
+              border: '1.5px solid #cbd5e1',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
             }}>
               <Languages size={15} style={{ color: '#15803d', flexShrink: 0 }} />
               <select
@@ -111,9 +173,14 @@ export default function Navbar({
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 style={{
-                  border: 'none', background: 'transparent',
-                  fontWeight: 800, fontSize: 12.5, color: '#0f172a',
-                  outline: 'none', cursor: 'pointer', maxWidth: 96
+                  border: 'none',
+                  background: 'transparent',
+                  fontWeight: 800,
+                  fontSize: 13,
+                  color: '#0f172a',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  maxWidth: 96
                 }}
               >
                 {languagesList.map((lang) => (
@@ -122,18 +189,27 @@ export default function Navbar({
               </select>
             </div>
 
-            {/* Farmer profile (Desktop / Tablet) */}
+            {/* Farmer Profile Pill (Desktop / Tablet) */}
             {farmer && (
               <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  background: '#f8fafc', border: '1.5px solid #e2e8f0',
-                  padding: '5px 11px', borderRadius: 10, maxWidth: 130
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  background: '#f0fdf4',
+                  border: '1.5px solid #bbf7d0',
+                  padding: '5px 12px',
+                  borderRadius: 12,
+                  maxWidth: 150
                 }}>
                   <UserCheck size={14} style={{ color: '#15803d', flexShrink: 0 }} />
                   <span style={{
-                    fontSize: 12.5, fontWeight: 700, color: '#0f172a',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    color: '#14532d',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
                     {farmer.name}
                   </span>
@@ -141,7 +217,7 @@ export default function Navbar({
                 <button
                   onClick={onLogout}
                   className="btn btn-secondary"
-                  style={{ padding: '6px 10px', height: 34, fontSize: 12 }}
+                  style={{ padding: '6px 10px', height: 34, fontSize: 12, borderRadius: 10 }}
                   title="Logout"
                 >
                   <LogOut size={13} />
@@ -153,17 +229,20 @@ export default function Navbar({
             <button
               onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
               className="btn btn-secondary show-on-mobile"
-              style={{ padding: '6px 10px', height: 34 }}
+              style={{ padding: '7px 11px', height: 36, borderRadius: 10 }}
               aria-label="Open menu"
             >
-              {mobileDrawerOpen ? <X size={16} /> : <Menu size={16} />}
+              {mobileDrawerOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
 
         {/* ── SCROLLABLE NAV TABS (DESKTOP / TABLET) ── */}
-        <div className="navbar-bottom">
-          <nav className="nav-tabs">
+        <div className="navbar-bottom" style={{
+          background: 'rgba(248, 250, 252, 0.85)',
+          borderTop: '1px solid rgba(226, 232, 240, 0.8)'
+        }}>
+          <nav className="nav-tabs" style={{ padding: '8px 12px' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
@@ -176,8 +255,17 @@ export default function Navbar({
                     setMobileDrawerOpen(false);
                   }}
                   className={`nav-tab ${isActive ? 'active' : ''} ${item.highlight && !isActive ? 'highlight' : ''}`}
+                  style={{
+                    borderRadius: 12,
+                    padding: '8px 15px',
+                    fontSize: 13,
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 7
+                  }}
                 >
-                  <Icon size={14} />
+                  <Icon size={15} />
                   <span>{item.label}</span>
                 </button>
               );
@@ -186,15 +274,15 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* ── MOBILE FULL-MENU DRAWER (SLIDE-UP / OVERLAY) ── */}
+      {/* ── MOBILE FULL DRAWER MODAL ── */}
       {mobileDrawerOpen && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.55)',
-            backdropFilter: 'blur(6px)',
+            zIndex: 999,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(8px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -205,51 +293,51 @@ export default function Navbar({
           <div
             style={{
               background: '#ffffff',
-              borderTopLeftRadius: 26,
-              borderTopRightRadius: 26,
-              padding: '20px 20px 80px 20px',
-              maxHeight: '80vh',
+              borderTopLeftRadius: 28,
+              borderTopRightRadius: 28,
+              padding: '24px 20px 96px 20px',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              boxShadow: '0 -10px 40px rgba(0,0,0,0.25)'
+              boxShadow: '0 -10px 40px rgba(0,0,0,0.25)',
+              borderTop: '2px solid #22c55e'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Sprout size={20} color="#15803d" />
-                <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
-                  {t.nav?.menu || "All AgriSense Services"}
-                </span>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 18,
+              paddingBottom: 12,
+              borderBottom: '1px solid #e2e8f0'
+            }}>
+              <div>
+                <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a', fontFamily: 'Outfit, sans-serif' }}>
+                  {t.appName || 'AgriSense AI'}
+                </div>
+                <div style={{ fontSize: 12, color: '#64748b' }}>
+                  {farmer ? `👤 ${farmer.name}` : '🌱 Smart Agricultural Suite'}
+                </div>
               </div>
               <button
                 onClick={() => setMobileDrawerOpen(false)}
-                style={{ background: '#f1f5f9', border: 'none', borderRadius: 99, padding: 6, cursor: 'pointer' }}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 36,
+                  height: 36,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b'
+                }}
               >
-                <X size={18} color="#475569" />
+                <X size={18} />
               </button>
             </div>
-
-            {/* Farmer Profile Strip in Drawer */}
-            {farmer && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f0fdf4', padding: '10px 14px', borderRadius: 14, marginBottom: 16, border: '1px solid #bbf7d0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <UserCheck size={18} color="#15803d" />
-                  <div>
-                    <div style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a' }}>{farmer.name}</div>
-                    <div style={{ fontSize: 11, color: '#166534' }}>{farmer.phone || 'Farmer Profile'} • {language}</div>
-                  </div>
-                </div>
-                <button
-                  onClick={onLogout}
-                  className="btn btn-secondary"
-                  style={{ padding: '6px 12px', fontSize: 11, color: '#b91c1c' }}
-                >
-                  <LogOut size={12} />
-                  <span>Logout</span>
-                </button>
-              </div>
-            )}
 
             {/* 12 Modules Grid in Drawer */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
@@ -268,36 +356,63 @@ export default function Navbar({
                       alignItems: 'center',
                       gap: 10,
                       padding: '12px 14px',
-                      borderRadius: 14,
-                      border: isActive ? '2px solid #15803d' : '1px solid #e2e8f0',
+                      borderRadius: 16,
+                      border: isActive ? '2px solid #15803d' : '1.5px solid #e2e8f0',
                       background: isActive ? '#f0fdf4' : '#ffffff',
                       color: isActive ? '#15803d' : '#1e293b',
                       fontSize: 13,
-                      fontWeight: 700,
+                      fontWeight: 800,
                       cursor: 'pointer',
                       textAlign: 'left',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
                     }}
                   >
                     <div style={{
-                      width: 32, height: 32, borderRadius: 10,
+                      width: 34,
+                      height: 34,
+                      borderRadius: 10,
                       background: isActive ? '#15803d' : '#f1f5f9',
                       color: isActive ? '#ffffff' : '#15803d',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
                     }}>
-                      <Icon size={16} />
+                      <Icon size={17} />
                     </div>
-                    <span style={{ lineHeight: 1.3 }}>{item.label}</span>
+                    <span style={{ lineHeight: 1.25 }}>{item.label}</span>
                   </button>
                 );
               })}
             </div>
+
+            {/* Logout button inside drawer on mobile */}
+            {farmer && (
+              <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #e2e8f0' }}>
+                <button
+                  onClick={() => {
+                    onLogout();
+                    setMobileDrawerOpen(false);
+                  }}
+                  className="btn btn-secondary"
+                  style={{ width: '100%', height: 42, fontSize: 13, color: '#dc2626', borderColor: '#fca5a5' }}
+                >
+                  <LogOut size={15} />
+                  <span>Logout of Profile ({farmer.name})</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* ── MOBILE BOTTOM NAV (5 ICONS DOCK) ── */}
-      <nav className="mobile-nav">
+      <nav className="mobile-nav" style={{
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        borderTop: '1px solid rgba(21, 128, 61, 0.18)',
+        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)'
+      }}>
         {mobileItems.map((item) => {
           const Icon = item.icon;
           const isActive = !item.isMenuToggle && currentTab === item.id;
@@ -306,9 +421,35 @@ export default function Navbar({
               key={item.id}
               onClick={() => handleMobileNavClick(item)}
               className={`mobile-nav-item ${isActive ? 'active' : ''}`}
+              style={{
+                position: 'relative',
+                padding: '6px 0',
+                transition: 'all 0.15s ease'
+              }}
             >
-              <Icon size={20} />
-              <span>{item.label}</span>
+              {item.highlight && !isActive && (
+                <span style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: '25%',
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: '#22c55e'
+                }} />
+              )}
+              <Icon size={21} style={{
+                color: isActive ? '#15803d' : '#64748b',
+                transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                transition: 'transform 0.15s ease'
+              }} />
+              <span style={{
+                fontWeight: isActive ? 800 : 600,
+                color: isActive ? '#15803d' : '#64748b',
+                fontSize: 10.5
+              }}>
+                {item.label}
+              </span>
             </button>
           );
         })}

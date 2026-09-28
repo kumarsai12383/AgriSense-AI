@@ -826,3 +826,113 @@ h1,h2,h3,h4,h5,h6 {
   gap: 8px;
   margin-bottom: 16px;
 }
+
+/* =========================================================
+   PRO DESIGN SYSTEM EXTENSIONS (SILICON VALLEY AGTECH GRADE)
+   ========================================================= */
+
+.agri-card-pro {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 22px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(21, 128, 61, 0.08);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.agri-card-pro:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 45px -8px rgba(21, 128, 61, 0.16), 0 0 0 1.5px rgba(34, 197, 94, 0.4);
+}
+
+.glass-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.telemetry-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.telemetry-ribbon-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-ribbon-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.telemetry-ribbon-value {
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #ffffff;
+  font-family: var(--font-head);
+}
+
+/* Audio Frequency Equalizer Animation */
+.eq-bar-1 { animation: eqBounce1 0.7s infinite ease-in-out; }
+.eq-bar-2 { animation: eqBounce2 0.9s infinite ease-in-out; }
+.eq-bar-3 { animation: eqBounce3 0.6s infinite ease-in-out; }
+.eq-bar-4 { animation: eqBounce4 0.8s infinite ease-in-out; }
+.eq-bar-5 { animation: eqBounce1 1.1s infinite ease-in-out; }
+
+@keyframes eqBounce1 { 0%, 100% { height: 6px; } 50% { height: 26px; } }
+@keyframes eqBounce2 { 0%, 100% { height: 20px; } 50% { height: 8px; } }
+@keyframes eqBounce3 { 0%, 100% { height: 10px; } 50% { height: 28px; } }
+@keyframes eqBounce4 { 0%, 100% { height: 24px; } 50% { height: 12px; } }
+
+/* Live Pulsing Dot */
+.live-glow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: livePulse 1.8s infinite;
+  display: inline-block;
+}
+
+@keyframes livePulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Mobile Touch Optimization */
+@media (max-width: 640px) {
+  .hero-content {
+    padding: 22px 18px;
+  }
+  .telemetry-ribbon {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}

@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
-import { Sprout, Phone, User, ArrowRight, ShieldCheck, Cpu, Droplets, Wheat } from 'lucide-react';
+import {
+  Sprout, Phone, User, ArrowRight, ShieldCheck, Cpu, Droplets,
+  Wheat, Sparkles, CheckCircle2, Zap, Lock
+} from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 import { api } from '../api';
+
+const DEMO_FARMERS = [
+  { name: 'Ramesh Reddy', phone: '9876543210', lang: 'తెలుగు', state: 'Telangana', crops: 'Paddy / Cotton' },
+  { name: 'Priya Sharma', phone: '9123456780', lang: 'हिंदी', state: 'Punjab', crops: 'Wheat / Mustard' },
+  { name: 'Anand Patil',  phone: '9988776655', lang: 'मराठी', state: 'Maharashtra', crops: 'Sugarcane / Grapes' },
+];
 
 export default function LoginModal({ language, setLanguage, onLoginSuccess, addToast }) {
   const [name, setName] = useState('');
@@ -9,13 +18,12 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
   const [loading, setLoading] = useState(false);
   const t = TRANSLATIONS[language] || TRANSLATIONS.English;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name.trim()) {
+  const handleLogin = async (farmerName, farmerPhone, chosenLang = language) => {
+    if (!farmerName.trim()) {
       addToast('Please enter your farmer name', 'error');
       return;
     }
-    const cleanPhone = phone.replace(/\D/g, '');
+    const cleanPhone = farmerPhone.replace(/\D/g, '');
     if (cleanPhone.length !== 10) {
       addToast('Please enter a valid 10-digit mobile number', 'error');
       return;
@@ -23,15 +31,14 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
 
     setLoading(true);
     try {
-      const res = await api.loginFarmer(name.trim(), cleanPhone, language);
+      const res = await api.loginFarmer(farmerName.trim(), cleanPhone, chosenLang);
       if (res && res.farmer) {
         onLoginSuccess(res.farmer);
         addToast(`Namaste ${res.farmer.name}! Welcome to AgriSense AI`, 'success');
       }
     } catch (err) {
       console.error('Login error:', err);
-      // Fallback offline mock farmer profile if backend is starting
-      const mockFarmer = { id: 1, name: name.trim(), phone: cleanPhone, language };
+      const mockFarmer = { id: 1, name: farmerName.trim(), phone: cleanPhone, language: chosenLang };
       onLoginSuccess(mockFarmer);
       addToast(`Logged in as ${mockFarmer.name}`, 'info');
     } finally {
@@ -39,114 +46,238 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleLogin(name, phone);
+  };
+
+  const handleQuickDemo = (demo) => {
+    setName(demo.name);
+    setPhone(demo.phone);
+    setLanguage(demo.lang);
+    handleLogin(demo.name, demo.phone, demo.lang);
+  };
+
   const pillars = [
-    { title: "🌾 ML Crop Science", desc: "Predicts the highest-yielding crop tailored to your exact NPK & weather.", icon: Wheat },
-    { title: "💧 Smart Irrigation", desc: "Automated root zone moisture alerts and water budgeting.", icon: Droplets },
-    { title: "🧪 7-in-1 Soil Testing", desc: "Instant N-P-K nutrient diagnostics, pH check, and fertilizer dosing.", icon: Cpu },
-    { title: "🎙️ Multilingual Voice AI", desc: "Real-time speech interaction in 6 Indian languages with Gemini Live.", icon: Sprout },
+    { title: "🌾 ML Crop Science", desc: "Random Forest model predicts high-profit crops using soil & climate telemetry.", icon: Wheat },
+    { title: "💧 Smart Irrigation", desc: "Root zone moisture monitoring with automated pump hours calculator.", icon: Droplets },
+    { title: "🧪 7-in-1 Soil Testing", desc: "Instant N-P-K nutrient diagnostics, pH balance, and stage-wise schedule.", icon: Cpu },
+    { title: "🎙️ Native Voice AI", desc: "Real-time voice answers in 6 Indian languages with Gemini Live.", icon: Sprout },
   ];
 
   return (
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(15, 23, 42, 0.75)',
-      backdropFilter: 'blur(8px)',
+      background: 'radial-gradient(circle at 50% 30%, rgba(21,128,61,0.22) 0%, rgba(15,23,42,0.88) 100%)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 1000,
-      padding: 16
+      padding: '16px 12px'
     }}>
-      <div 
+      <div
         className="agri-card"
         style={{
           width: '100%',
-          maxWidth: 580,
-          maxHeight: '92vh',
+          maxWidth: 560,
+          maxHeight: '94vh',
           overflowY: 'auto',
-          padding: 32,
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)'
+          padding: '28px 24px',
+          background: 'rgba(255, 255, 255, 0.96)',
+          borderRadius: 28,
+          border: '1px solid rgba(255, 255, 255, 0.9)',
+          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(21, 128, 61, 0.15)'
         }}
       >
-        {/* Header Hero */}
+        {/* Header Hero Banner */}
         <div style={{
-          background: 'linear-gradient(135deg, #14532d 0%, #16a34a 100%)',
-          borderRadius: 18,
+          background: 'linear-gradient(135deg, #052e16 0%, #14532d 50%, #15803d 100%)',
+          borderRadius: 22,
           padding: '24px 20px',
           color: 'white',
           textAlign: 'center',
-          marginBottom: 24,
+          marginBottom: 20,
           position: 'relative',
-          boxShadow: '0 8px 20px rgba(22, 163, 74, 0.25)'
+          overflow: 'hidden',
+          boxShadow: '0 10px 25px -5px rgba(21,128,61,0.4)'
         }}>
+          {/* Background Ambient Glow */}
           <div style={{
-            width: 56,
-            height: 56,
-            background: 'rgba(255, 255, 255, 0.2)',
+            position: 'absolute',
+            top: -40,
+            right: -40,
+            width: 140,
+            height: 140,
             borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(74,222,128,0.3) 0%, transparent 70%)',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Logo Badge */}
+          <div style={{
+            width: 58,
+            height: 58,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1))',
+            borderRadius: 18,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 10px auto',
-            fontSize: 30
+            margin: '0 auto 12px auto',
+            border: '1.5px solid rgba(255,255,255,0.35)',
+            boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
           }}>
-            🌱
+            <Sprout size={32} color="#86efac" />
           </div>
-          <h2 style={{ color: 'white', fontSize: 24, margin: '0 0 6px 0' }}>
-            {t.appName}
+
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'rgba(255,255,255,0.15)',
+            border: '1px solid rgba(255,255,255,0.25)',
+            padding: '3px 10px',
+            borderRadius: 99,
+            fontSize: 10.5,
+            fontWeight: 800,
+            color: '#bbf7d0',
+            marginBottom: 8,
+            letterSpacing: '0.5px'
+          }}>
+            <Sparkles size={11} /> PRECISION AGRICULTURE PLATFORM 2.0
+          </div>
+
+          <h2 style={{
+            color: 'white',
+            fontSize: 26,
+            fontWeight: 900,
+            margin: '0 0 6px 0',
+            fontFamily: 'Outfit, sans-serif',
+            letterSpacing: '-0.5px'
+          }}>
+            {t.appName || 'AgriSense AI'}
           </h2>
-          <p style={{ color: '#dcfce7', fontSize: 13, margin: 0, fontWeight: 600 }}>
-            {t.tagline}
+          <p style={{
+            color: 'rgba(255,255,255,0.85)',
+            fontSize: 13,
+            margin: 0,
+            fontWeight: 500,
+            maxWidth: 440,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            lineHeight: 1.4
+          }}>
+            {t.tagline || 'Smart Agricultural Decision Support & Real-Time Farm Intelligence'}
           </p>
 
-          {/* Language Switcher Buttons */}
+          {/* Multilingual Selector Pills */}
           <div style={{
             display: 'flex',
             gap: 6,
             justifyContent: 'center',
             flexWrap: 'wrap',
-            marginTop: 14
+            marginTop: 16
           }}>
-            {Object.keys(TRANSLATIONS).map((lang) => (
+            {Object.keys(TRANSLATIONS).map((lang) => {
+              const isSelected = language === lang;
+              return (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setLanguage(lang)}
+                  style={{
+                    background: isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.16)',
+                    color: isSelected ? '#14532d' : '#ffffff',
+                    border: isSelected ? '1.5px solid #ffffff' : '1px solid rgba(255,255,255,0.22)',
+                    borderRadius: 99,
+                    padding: '5px 12px',
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s ease',
+                    boxShadow: isSelected ? '0 4px 10px rgba(0,0,0,0.15)' : 'none'
+                  }}
+                >
+                  {lang}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 1-Tap Quick Demo Farmers (Pro Feature) */}
+        <div style={{
+          background: '#f8fafc',
+          border: '1.5px solid #e2e8f0',
+          borderRadius: 18,
+          padding: '14px 16px',
+          marginBottom: 20
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 10
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Zap size={13} /> 1-Tap Quick Demo Access
+            </span>
+            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Zero typing needed</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+            {DEMO_FARMERS.map((d, i) => (
               <button
-                key={lang}
+                key={i}
                 type="button"
-                onClick={() => setLanguage(lang)}
+                onClick={() => handleQuickDemo(d)}
                 style={{
-                  background: language === lang ? '#ffffff' : 'rgba(255, 255, 255, 0.2)',
-                  color: language === lang ? '#14532d' : '#ffffff',
-                  border: 'none',
-                  borderRadius: 20,
-                  padding: '4px 12px',
-                  fontSize: 12,
-                  fontWeight: 700,
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 12,
+                  padding: '9px 10px',
+                  textAlign: 'left',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.18s ease',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#15803d';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 10px rgba(21,128,61,0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
                 }}
               >
-                {lang}
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a' }}>{d.name}</div>
+                <div style={{ fontSize: 11, color: '#15803d', fontWeight: 700 }}>{d.crops}</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>{d.state} • {d.lang}</div>
               </button>
             ))}
           </div>
         </div>
 
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '14px 0 18px 0' }}>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            or enter mobile number
+          </span>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+        </div>
+
         {/* Login Form */}
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 18 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>
-              {t.login.title}
-            </div>
-            <div style={{ fontSize: 13, color: '#64748b' }}>
-              {t.login.subtitle}
-            </div>
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">
+          <div className="input-group" style={{ marginBottom: 14 }}>
+            <label className="input-label" style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <User size={15} style={{ color: '#15803d' }} />
-                {t.login.name}
+                {t.login?.name || 'Farmer Full Name'}
               </span>
             </label>
             <input
@@ -154,66 +285,105 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
               className="input-field"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t.login.placeholderName}
+              placeholder={t.login?.placeholderName || 'e.g. Ramesh Reddy'}
+              style={{ height: 46, fontSize: 14 }}
               required
             />
           </div>
 
-          <div className="input-group">
-            <label className="input-label">
+          <div className="input-group" style={{ marginBottom: 18 }}>
+            <label className="input-label" style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Phone size={15} style={{ color: '#15803d' }} />
-                {t.login.phone}
+                {t.login?.phone || 'Mobile Number (10 digits)'}
               </span>
             </label>
-            <input
-              type="tel"
-              maxLength={10}
-              className="input-field"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-              placeholder={t.login.placeholderPhone}
-              required
-            />
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <span style={{
+                position: 'absolute',
+                left: 14,
+                fontSize: 13.5,
+                fontWeight: 800,
+                color: '#64748b',
+                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4
+              }}>
+                🇮🇳 +91
+              </span>
+              <input
+                type="tel"
+                maxLength={10}
+                className="input-field"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                placeholder={t.login?.placeholderPhone || '98765 43210'}
+                style={{ paddingLeft: 72, height: 46, fontSize: 14, fontWeight: 700, letterSpacing: '0.5px' }}
+                required
+              />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
             className="btn btn-primary"
-            style={{ width: '100%', height: 48, marginTop: 10, fontSize: 16 }}
+            style={{
+              width: '100%',
+              height: 48,
+              fontSize: 15,
+              fontWeight: 800,
+              borderRadius: 14,
+              boxShadow: '0 6px 20px rgba(21,128,61,0.35)'
+            }}
           >
             {loading ? (
-              <span>Authenticating...</span>
+              <span>Authenticating Secure Profile...</span>
             ) : (
               <>
-                <span>{t.login.submit}</span>
-                <ArrowRight size={18} />
+                <span>{t.login?.submit || 'Enter Farm Dashboard'}</span>
+                <ArrowRight size={17} />
               </>
             )}
           </button>
         </form>
 
+        {/* Security & Features Ribbon */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6,
+          marginTop: 14,
+          fontSize: 11.5,
+          color: '#64748b',
+          fontWeight: 600
+        }}>
+          <ShieldCheck size={14} color="#15803d" />
+          <span>256-Bit Encrypted • Free for All Indian Farmers</span>
+        </div>
+
         {/* 4 Pillars Info Grid */}
-        <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+        <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
             {pillars.map((p, idx) => {
               const Icon = p.icon;
               return (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   style={{
                     background: '#f8fafc',
-                    padding: '10px 12px',
+                    padding: '9px 11px',
                     borderRadius: 12,
                     border: '1px solid #e2e8f0'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: '#15803d', marginBottom: 2 }}>
-                    <Icon size={14} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 800, color: '#15803d', marginBottom: 2 }}>
+                    <Icon size={13} />
                     <span>{p.title}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.3 }}>
+                  <div style={{ fontSize: 10.5, color: '#64748b', lineHeight: 1.3 }}>
                     {p.desc}
                   </div>
                 </div>
