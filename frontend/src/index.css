@@ -1,0 +1,791 @@
+/* =========================================================
+   AGRISENSE AI — ULTRA-PREMIUM DESIGN SYSTEM v3.0
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Outfit:wght@700;800;900&display=swap');
+
+:root {
+  /* Agriculture Brand Palette */
+  --agri-green-950: #052e16;
+  --agri-green-900: #14532d;
+  --agri-green-800: #15803d;
+  --agri-green-700: #16a34a;
+  --agri-green-600: #22c55e;
+  --agri-green-400: #4ade80;
+  --agri-green-200: #bbf7d0;
+  --agri-green-100: #dcfce7;
+  --agri-green-50:  #f0fdf4;
+
+  --agri-earth:   #854d0e;
+  --agri-sun:     #ca8a04;
+  --agri-sun-bg:  #fef3c7;
+  --agri-water:   #0369a1;
+  --agri-water-bg:#e0f2fe;
+  --agri-sky:     #0284c7;
+  --agri-cream:   #fefce8;
+  --agri-wheat:   #d97706;
+
+  /* Slate scale */
+  --s-950: #020617;
+  --s-900: #0f172a;
+  --s-800: #1e293b;
+  --s-700: #334155;
+  --s-600: #475569;
+  --s-500: #64748b;
+  --s-400: #94a3b8;
+  --s-300: #cbd5e1;
+  --s-200: #e2e8f0;
+  --s-100: #f1f5f9;
+  --s-50:  #f8fafc;
+
+  /* Cards */
+  --card-bg: rgba(255,255,255,0.96);
+  --card-border: rgba(226,232,240,0.9);
+  --card-shadow: 0 4px 24px -4px rgba(0,0,0,0.06), 0 2px 8px -2px rgba(0,0,0,0.04);
+  --card-shadow-hover: 0 16px 40px -8px rgba(21,128,61,0.14), 0 4px 12px -2px rgba(0,0,0,0.06);
+
+  /* Radius */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-full: 9999px;
+
+  /* Fonts */
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-head: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: #f0fdf4;
+  background-image:
+    radial-gradient(at 0% 0%,   rgba(21,128,61,0.08)  0px, transparent 55%),
+    radial-gradient(at 100% 0%, rgba(2,132,199,0.05)  0px, transparent 55%),
+    radial-gradient(at 50% 100%,rgba(234,179,8,0.04)  0px, transparent 55%);
+  background-attachment: fixed;
+  color: var(--s-900);
+  min-height: 100vh;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--font-head);
+  font-weight: 800;
+  color: var(--s-900);
+  letter-spacing: -0.025em;
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+.app-container { display: flex; flex-direction: column; min-height: 100vh; }
+
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 28px 32px 100px;
+}
+
+@media (max-width: 768px) {
+  .main-content { padding: 16px 14px 96px; }
+}
+
+/* =========================================================
+   NAVIGATION BAR — FULL-WIDTH SCROLLABLE
+   ========================================================= */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(21,128,61,0.12);
+  box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+}
+
+.navbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 28px;
+  gap: 12px;
+}
+
+.navbar-bottom {
+  border-top: 1px solid var(--s-100);
+  background: var(--s-50);
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.navbar-bottom::-webkit-scrollbar { display: none; }
+
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 0;
+  white-space: nowrap;
+  width: max-content;
+  min-width: 100%;
+}
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--s-600);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nav-tab:hover:not(.active) {
+  background: var(--agri-green-100);
+  color: var(--agri-green-800);
+}
+
+.nav-tab.active {
+  background: var(--agri-green-800);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(21,128,61,0.30);
+}
+
+.nav-tab.highlight:not(.active) {
+  background: var(--agri-green-100);
+  color: var(--agri-green-800);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  cursor: pointer;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #15803d, #22c55e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(21,128,61,0.35);
+}
+
+/* =========================================================
+   CARDS & PANELS
+   ========================================================= */
+.agri-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.agri-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(21,128,61,0.22);
+}
+
+.agri-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.agri-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--s-900);
+}
+
+/* =========================================================
+   HERO / DASHBOARD BANNER
+   ========================================================= */
+.hero-banner {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  align-items: flex-end;
+  box-shadow: 0 20px 60px -10px rgba(15,23,42,0.3);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5,46,22,0.35) 0%, rgba(5,46,22,0.78) 100%),
+    url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat;
+  transition: transform 8s ease;
+}
+
+.hero-banner:hover .hero-bg {
+  transform: scale(1.03);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 32px 36px;
+  width: 100%;
+}
+
+/* Agriculture Pattern Overlay */
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(34,197,94,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(202,138,4,0.12) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* =========================================================
+   SOIL → CROP WORKFLOW STEPPER
+   ========================================================= */
+.workflow-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--r-full);
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.30);
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.workflow-step:hover,
+.workflow-step.active {
+  background: rgba(255,255,255,0.95);
+  color: var(--agri-green-800);
+  border-color: white;
+}
+
+.workflow-arrow {
+  color: rgba(255,255,255,0.50);
+  font-size: 18px;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  border-radius: var(--r-md);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(21,128,61,0.35);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #14532d 0%, #15803d 100%);
+  box-shadow: 0 6px 20px rgba(21,128,61,0.45);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--s-700);
+  border: 1.5px solid var(--s-200);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.btn-secondary:hover {
+  background: var(--s-50);
+  border-color: var(--s-300);
+  color: var(--s-900);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+  box-shadow: 0 4px 14px rgba(220,38,38,0.30);
+}
+.btn-danger:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); }
+
+.btn-ghost {
+  background: rgba(255,255,255,0.18);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.35);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.30); }
+
+/* =========================================================
+   INPUTS & FORMS
+   ========================================================= */
+.input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+
+.input-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--s-700);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input-field {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--s-200);
+  background: #fff;
+  color: var(--s-900);
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.input-field:focus {
+  border-color: var(--agri-green-700);
+  box-shadow: 0 0 0 3px rgba(21,128,61,0.15);
+}
+
+.range-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 4px;
+  background: var(--s-200);
+  outline: none;
+  accent-color: var(--agri-green-800);
+  cursor: pointer;
+}
+
+/* =========================================================
+   BADGES & STATUS
+   ========================================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.badge-green  { background: var(--agri-green-100); color: var(--agri-green-800); border: 1px solid var(--agri-green-200); }
+.badge-amber  { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.badge-blue   { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.badge-red    { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.badge-purple { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+
+.status-indicator {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+.status-online  { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.25); animation: pulse-dot 2s infinite; }
+.status-offline { background: #94a3b8; }
+
+@keyframes pulse-dot {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  50%      { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+}
+
+/* =========================================================
+   FEATURE CARDS (GRID ON DASHBOARD)
+   ========================================================= */
+.feature-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(21,128,61,0.25);
+}
+
+.feature-card:hover::before { opacity: 1; }
+
+.feature-card.green::before  { background: linear-gradient(90deg, #15803d, #22c55e); }
+.feature-card.blue::before   { background: linear-gradient(90deg, #0369a1, #0284c7); }
+.feature-card.amber::before  { background: linear-gradient(90deg, #b45309, #d97706); }
+.feature-card.red::before    { background: linear-gradient(90deg, #b91c1c, #ef4444); }
+.feature-card.purple::before { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+.feature-card.teal::before   { background: linear-gradient(90deg, #0f766e, #14b8a6); }
+
+.feature-icon {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* =========================================================
+   CROP ALTERNATIVES LIST
+   ========================================================= */
+.crop-alt-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--s-200);
+  background: var(--s-50);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.crop-alt-item:hover,
+.crop-alt-item.selected {
+  background: var(--agri-green-50);
+  border-color: var(--agri-green-200);
+}
+
+.crop-alt-rank {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--agri-green-800);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.crop-alt-rank.rank-1 { background: linear-gradient(135deg, #ca8a04, #eab308); }
+.crop-alt-rank.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #334155; }
+.crop-alt-rank.rank-3 { background: linear-gradient(135deg, #b45309, #d97706); }
+
+/* =========================================================
+   AUDIO / VOICE VISUALIZER
+   ========================================================= */
+.voice-visualizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 48px;
+  margin: 12px 0;
+}
+
+.wave-bar {
+  width: 5px;
+  border-radius: 4px;
+  background: #16a34a;
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(1) { height: 16px; }
+.wave-bar:nth-child(2) { height: 24px; animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { height: 32px; animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { height: 24px; animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { height: 16px; animation-delay: 0.6s; }
+
+@keyframes wave {
+  0%,100% { transform: scaleY(1); }
+  50%      { transform: scaleY(2.2); background: #22c55e; }
+}
+
+.pulse-glow { animation: pulse-anim 2s infinite; }
+@keyframes pulse-anim {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* =========================================================
+   GRID HELPERS
+   ========================================================= */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+@media (max-width: 1200px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .hero-banner { min-height: 320px; }
+  .hero-content { padding: 20px; }
+  .navbar-top { padding: 10px 16px; }
+}
+
+/* =========================================================
+   TOAST NOTIFICATIONS
+   ========================================================= */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 13px 18px;
+  border-radius: var(--r-md);
+  background: var(--s-900);
+  color: white;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.22);
+  animation: toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: auto;
+  max-width: 360px;
+}
+
+@keyframes toastIn {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* =========================================================
+   MOBILE BOTTOM NAV
+   ========================================================= */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--s-200);
+  padding: 6px 8px;
+  z-index: 150;
+  justify-content: space-around;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 768px) { .mobile-nav { display: flex; } }
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  color: var(--s-400);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  transition: all 0.15s ease;
+}
+
+.mobile-nav-item.active {
+  color: var(--agri-green-800);
+  background: var(--agri-green-50);
+}
+
+/* =========================================================
+   SOIL TEST METER / GAUGES
+   ========================================================= */
+.soil-gauge {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  background: var(--s-100);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+
+.soil-gauge-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Progress ring animation */
+@keyframes fillRing {
+  from { stroke-dashoffset: 220; }
+  to   { stroke-dashoffset: var(--target); }
+}
+
+/* =========================================================
+   SCHEME CARDS
+   ========================================================= */
+.scheme-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--s-200);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  transition: all 0.22s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scheme-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(21,128,61,0.12);
+  border-color: var(--agri-green-200);
+}
+
+/* =========================================================
+   MANDI PRICE TABLE
+   ========================================================= */
+.mandi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.mandi-table th {
+  background: var(--agri-green-900);
+  color: white;
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mandi-table th:first-child { border-radius: 10px 0 0 10px; }
+.mandi-table th:last-child  { border-radius: 0 10px 10px 0; }
+
+.mandi-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--s-100);
+  color: var(--s-800);
+  font-weight: 600;
+}
+
+.mandi-table tr:hover td { background: var(--agri-green-50); }
+.mandi-table tr:last-child td { border-bottom: none; }
+
+/* =========================================================
+   CROP INFO DETAIL PAGE
+   ========================================================= */
+.crop-image-hero {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: var(--r-lg);
+  border: 2px solid var(--agri-green-200);
+}
+
+.crop-detail-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--r-full);
+  background: var(--agri-green-100);
+  color: var(--agri-green-800);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   SCROLLBAR STYLING
+   ========================================================= */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--s-300); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--agri-green-700); }
+
+/* =========================================================
+   UTILITY
+   ========================================================= */
+.text-gradient {
+  background: linear-gradient(135deg, #15803d, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.section-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--s-900);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
