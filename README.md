@@ -207,12 +207,17 @@ uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 
 ## ☁️ Deployment
 
-### 1. Render Deployment
-The project includes a ready-to-use [`render.yaml`](file:///c:/Users/praveenreddy/OneDrive/Desktop/SmartCropRecommendation%201/render.yaml) specification:
+### 1. Render Deployment (Production Mobile Web App)
+The project runs as a high-performance **FastAPI + React 18 Mobile App** with Live Voice AI on Render (no Streamlit):
 1. Push your repository to GitHub.
-2. Log into [Render Dashboard](https://dashboard.render.com).
-3. Click **New +** $\rightarrow$ **Blueprint** and connect this repository.
-4. Add your `GEMINI_API_KEY` under Environment Variables.
+2. In the [Render Dashboard](https://dashboard.render.com):
+   - **If deploying via Blueprint**: Click **New +** $\rightarrow$ **Blueprint** and select this repo (uses [`render.yaml`](file:///c:/Users/praveenreddy/OneDrive/Desktop/SmartCropRecommendation%201/render.yaml)).
+   - **If deploying as a Web Service**:
+     - **Environment**: `Python 3`
+     - **Build Command**: `pip install -r requirements.txt`
+     - **Start Command**: `uvicorn server:app --host 0.0.0.0 --port $PORT` (also automatically read from [`Procfile`](file:///c:/Users/praveenreddy/OneDrive/Desktop/SmartCropRecommendation%201/Procfile))
+3. Add your `GEMINI_API_KEY` under Environment Variables.
+4. Render serves the unified React Mobile App at `/` and `/dashboard` with full multilingual voice, farm intelligence, and daily 1-minute audio briefings.
 
 ### 2. Self-Hosted Linux / Cloud VM (systemd / Background Daemon)
 To deploy on your own private server (AWS EC2, DigitalOcean, Ubuntu VM, or on-premise):
