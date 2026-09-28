@@ -734,7 +734,16 @@ def get_daily_farm_briefing(farmer_id: int, language: str = None):
     finally:
         conn.close()
 
-    lang = language or farmer_dict.get("language") or "English"
+    LANG_MAP = {
+        "telugu": "తెలుగు", "te": "తెలుగు", "తెలుగు": "తెలుగు",
+        "hindi": "हिंदी", "hi": "हिंदी", "हिंदी": "हिंदी",
+        "tamil": "தமிழ்", "ta": "தமிழ்", "தமிழ்": "தமிழ்",
+        "kannada": "ಕನ್ನಡ", "kn": "ಕನ್ನಡ", "ಕನ್ನಡ": "ಕನ್ನಡ",
+        "marathi": "मराठी", "mr": "मराठी", "मराठी": "मराठी",
+        "english": "English", "en": "English"
+    }
+    raw_lang = (language or farmer_dict.get("language") or "English").strip()
+    lang = LANG_MAP.get(raw_lang.lower(), raw_lang)
     farmer_name = farmer_dict.get("name", "Farmer")
 
     reading = get_latest_farm_reading(farmer_id) or {
