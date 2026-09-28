@@ -187,28 +187,30 @@ GEMINI_API_KEY=your_google_gemini_api_key_here
 GEMINI_VISION_MODEL=gemini-2.5-flash
 ```
 
-### 5. Launch the Applications
+### 5. Launch the Application (Production React Mobile App + FastAPI)
 
-#### Option A: Start Python Streamlit Frontend
 ```bash
-streamlit run app.py
-```
-👉 Open **[http://localhost:8501](http://localhost:8501)** in your browser.
-
-#### Option B: Start FastAPI Backend + React Dashboard
-```bash
+# Start FastAPI Server serving the compiled React Mobile App:
 python server.py
 # or
 uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 ```
-👉 Open **[http://localhost:8000/dashboard](http://localhost:8000/dashboard)** in your browser.
+👉 Open **[http://localhost:8000](http://localhost:8000)** in your browser or smartphone.
+
+To develop the React frontend with hot-module reload:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+👉 Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
 ---
 
 ## ☁️ Deployment
 
 ### 1. Render Deployment (Production Mobile Web App)
-The project runs as a high-performance **FastAPI + React 18 Mobile App** with Live Voice AI on Render (no Streamlit):
+The project runs as a high-performance **FastAPI + React 18 Mobile App** with Live Voice AI on Render (no Streamlit required):
 1. Push your repository to GitHub.
 2. In the [Render Dashboard](https://dashboard.render.com):
    - **If deploying via Blueprint**: Click **New +** $\rightarrow$ **Blueprint** and select this repo (uses [`render.yaml`](file:///c:/Users/praveenreddy/OneDrive/Desktop/SmartCropRecommendation%201/render.yaml)).
@@ -224,9 +226,6 @@ To deploy on your own private server (AWS EC2, DigitalOcean, Ubuntu VM, or on-pr
 ```bash
 # Run FastAPI Backend with React SPA as background service
 nohup python server.py > server.log 2>&1 &
-
-# Run Streamlit Frontend (optional)
-nohup streamlit run app.py --server.port 8501 --server.headless true > app.log 2>&1 &
 ```
 
 ---
@@ -235,7 +234,7 @@ nohup streamlit run app.py --server.port 8501 --server.headless true > app.log 2
 
 ```
 AgriSense-AI/
-├── app.py                      # Main Streamlit multilingual application
+├── app.py                      # Production entrypoint (boots FastAPI + React Mobile App)
 ├── server.py                   # FastAPI REST API + WebSocket server
 ├── fertilizer.py               # Crop agronomy & fertilization knowledge base
 ├── train_model.py              # Random Forest training & evaluation script

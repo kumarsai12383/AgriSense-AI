@@ -1,22 +1,35 @@
 import os
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+# Boot the production FastAPI + React 18 Mobile Application when executed directly
+if __name__ == "__main__":
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    print(f"[AgriSense AI] Launching Unified FastAPI + React 18 Mobile Server on port {port}...")
+    uvicorn.run("server:app", host="0.0.0.0", port=port)
+    sys.exit(0)
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
 
-import streamlit as st
-import streamlit.runtime
-
-# If executed directly with standard python (e.g. `python app.py` on cloud/Render),
-# automatically boot the production FastAPI + React 18 Mobile Application
-if __name__ == "__main__" and not streamlit.runtime.exists():
-    import sys
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))
-    print(f"[AgriSense AI] Launching Unified FastAPI + React 18 Mobile Server on port {port}...")
-    uvicorn.run("server:app", host="0.0.0.0", port=port)
-    sys.exit(0)
+try:
+    import streamlit as st
+    import streamlit.runtime
+except ImportError:
+    st = None
 
 from database.database import initialize_database
 from database.farmers import update_farmer_language
