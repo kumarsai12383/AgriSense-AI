@@ -13,9 +13,13 @@ def check_buttons_and_keys():
     duplicates = []
     
     for file_path in files:
+        if os.path.basename(file_path).startswith("test_"):
+            continue
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
-            for line_no, line in enumerate(lines, 1):
+            for line_no, raw_line in enumerate(lines, 1):
+                # Ignore commented code
+                line = raw_line.split("#")[0]
                 # Search for key="..." or key='...'
                 matches = re.findall(r'key\s*=\s*["\']([^"\']+)["\']', line)
                 for k in matches:

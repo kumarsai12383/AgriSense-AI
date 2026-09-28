@@ -1,4 +1,5 @@
 import sqlite3
+import streamlit as st
 from database.database import connect, DB_PATH
 
 
