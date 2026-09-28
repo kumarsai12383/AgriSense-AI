@@ -18,6 +18,7 @@ if hasattr(sys.stderr, "reconfigure"):
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types
@@ -35,7 +36,7 @@ app = FastAPI(
     description="Central backend for AgriSense AI"
 )
 
-# Enable CORS for Streamlit and external clients
+# Enable CORS for external clients
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,6 +44,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "frontend", "dist")
+if os.path.isdir(FRONTEND_DIST):
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
 
 MODEL = "gemini-2.5-flash-native-audio-latest"
 FALLBACK_LIVE_MODEL = "gemini-3.1-flash-live-preview"
@@ -114,14 +122,18 @@ class DiseaseDetectRequest(BaseModel):
 
 @app.get("/")
 def root():
-    # If accessed in a web browser, serve the modern React Dashboard directly
+    # If compiled React Vite app exists, serve production SPA
+    dist_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(dist_index):
+        return FileResponse(dist_index, media_type="text/html")
+    # Fallback to static html
     dashboard_path = os.path.join(os.path.dirname(__file__), "static", "react_dashboard.html")
     if os.path.exists(dashboard_path):
         return FileResponse(dashboard_path, media_type="text/html")
     return {
         "name": "AgriSense AI Backend",
         "status": "running",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "dashboard": "/dashboard",
         "docs": "/docs"
     }
@@ -129,10 +141,29 @@ def root():
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def get_react_dashboard():
+    dist_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(dist_index):
+        return FileResponse(dist_index, media_type="text/html")
     dashboard_path = os.path.join(os.path.dirname(__file__), "static", "react_dashboard.html")
     if os.path.exists(dashboard_path):
         return FileResponse(dashboard_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="Dashboard not found")
+
+
+@app.get("/favicon.svg")
+def get_favicon():
+    fav = os.path.join(FRONTEND_DIST, "favicon.svg")
+    if os.path.exists(fav):
+        return FileResponse(fav, media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="Favicon not found")
+
+
+@app.get("/icons.svg")
+def get_icons():
+    icons = os.path.join(FRONTEND_DIST, "icons.svg")
+    if os.path.exists(icons):
+        return FileResponse(icons, media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="Icons not found")
 
 
 @app.get("/voice-chat", response_class=HTMLResponse)
@@ -675,6 +706,138 @@ def latest_crop(farmer_id: int):
 
 
 # =========================================================
+# DAILY 1-MINUTE FARM BRIEFING & MARKET INTELLIGENCE
+# =========================================================
+
+DAILY_MANDI_RATES = {
+    "rice": {"name": "Rice (Paddy)", "price": "₹2,350 / q", "trend": "📈 +1.8% Up", "msp": "₹2,300/q", "action": "Steady buyer demand in local APMC."},
+    "paddy": {"name": "Paddy (Rice)", "price": "₹2,350 / q", "trend": "📈 +1.8% Up", "msp": "₹2,300/q", "action": "Steady buyer demand in local APMC."},
+    "cotton": {"name": "Cotton", "price": "₹7,420 / q", "trend": "📈 +2.4% Up", "msp": "₹7,121/q", "action": "High mill procurement; good time to sell."},
+    "wheat": {"name": "Wheat", "price": "₹2,480 / q", "trend": "📊 Steady", "msp": "₹2,275/q", "action": "Procurement centers open at MSP."},
+    "maize": {"name": "Maize (Corn)", "price": "₹2,250 / q", "trend": "📈 +1.2% Up", "msp": "₹2,090/q", "action": "Poultry feed demand firming up prices."},
+    "chilli": {"name": "Chilli", "price": "₹18,500 / q", "trend": "🔥 High Demand", "msp": "Open Market", "action": "Export demand strong; premium for dry quality."},
+    "soybean": {"name": "Soybean", "price": "₹4,850 / q", "trend": "📊 Stable", "msp": "₹4,892/q", "action": "Crushing plant demand steady."},
+    "groundnut": {"name": "Groundnut", "price": "₹6,800 / q", "trend": "📈 +3.1% Up", "msp": "₹6,783/q", "action": "Oil expellers buying at premium."},
+    "turmeric": {"name": "Turmeric", "price": "₹14,200 / q", "trend": "📈 Rising", "msp": "Open Market", "action": "Hold dry stock for festival demand."},
+    "sugarcane": {"name": "Sugarcane", "price": "₹340 / q", "trend": "📊 Steady", "msp": "₹315 FRP", "action": "Sugar mills scheduling crushing passes."}
+}
+
+
+@app.get("/farm/daily-briefing/{farmer_id}")
+def get_daily_farm_briefing(farmer_id: int, language: str = None):
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, phone, language FROM farmers WHERE id = ?", (farmer_id,))
+        farmer_row = cursor.fetchone()
+        farmer_dict = dict(farmer_row) if farmer_row else {"id": farmer_id, "name": "Farmer", "language": "English"}
+    finally:
+        conn.close()
+
+    lang = language or farmer_dict.get("language") or "English"
+    farmer_name = farmer_dict.get("name", "Farmer")
+
+    reading = get_latest_farm_reading(farmer_id) or {
+        "nitrogen": 88.0, "phosphorus": 42.0, "potassium": 44.0,
+        "temperature": 27.5, "humidity": 72.0, "ph": 6.8,
+        "rainfall": 160.0, "soil_moisture": 42.0, "source": "manual",
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+
+    crop_rec = get_crop_recommendation(farmer_id)
+    crop_name = crop_rec.get("crop", "Cotton") if crop_rec else "Cotton"
+    crop_key = crop_name.lower().split()[0]
+    mandi_info = DAILY_MANDI_RATES.get(crop_key, DAILY_MANDI_RATES["cotton"])
+
+    moisture = float(reading.get("soil_moisture") or 42.0)
+    temp = float(reading.get("temperature") or 28.0)
+    ph = float(reading.get("ph") or 6.8)
+    needs_water = moisture < 35.0
+
+    today_str = datetime.now().strftime("%d %b %Y")
+
+    # Spoken scripts for ~1 min playback in user's language
+    scripts = {
+        "తెలుగు": (
+            f"నమస్కారం {farmer_name} గారు! ఇది మీ AgriSense AI నేటి 1 నిమిషం వ్యవసాయ అప్‌డేట్. "
+            f"తేదీ {today_str}. మీ పొలంలో తాజా నేల తేమ {moisture:.0f} శాతం, ఉష్ణోగ్రత {temp:.0f} డిగ్రీలు, pH {ph:.1f}. "
+            f"{'నేలలో తేమ తక్కువగా ఉంది, ఈరోజు ఉదయాన్నే 2 గంటలు తేలికపాటి తడి అందించండి.' if needs_water else 'నేలలో తగినంత తేమ ఉంది, ఈరోజు అదనపు నీరు అవసరం లేదు.'} "
+            f"మీ ఎంపిక పంట {crop_name}. నేడు మార్కెట్‌లో {mandi_info['name']} క్వింటాల్ సగటు ధర {mandi_info['price']}, ధోరణి {mandi_info['trend']}. {mandi_info['action']} "
+            f"పంట ఆరోగ్య సూచన: వాతావరణ తేమ వల్ల తెగుళ్లు రాకుండా లీటరు నీటికి 5 మిల్లీలీటర్ల వేప నూనెను పిచికారీ చేయండి. "
+            f"ప్రభుత్వ పథకం సూచన: పిఎం కిసాన్ మరియు పంటల బీమా ప్రయోజనాలను సద్వినియోగం చేసుకోండి. మంచి దిగుబడి కోసం AgriSense AI శుభాకాంక్షలు!"
+        ),
+        "हिंदी": (
+            f"नमस्ते {farmer_name} जी! यह है आपका AgriSense AI दैनिक 1 मिनट का फार्म अपडेट। "
+            f"आज तारीख है {today_str}। आपके खेत की मिट्टी में नमी {moisture:.0f} प्रतिशत, तापमान {temp:.0f} डिग्री और pH {ph:.1f} है। "
+            f"{'मिट्टी में नमी कम है, इसलिए आज सुबह 2 घंटे हल्की सिंचाई अवश्य करें।' if needs_water else 'मिट्टी में पर्याप्त नमी बनी हुई है, आज सिंचाई की आवश्यकता नहीं है।' } "
+            f"आपकी चुनी हुई फसल {crop_name} है। आज नजदीकी मंडी में {mandi_info['name']} का औसत भाव {mandi_info['price']}, बाजार रुख {mandi_info['trend']} है। {mandi_info['action']} "
+            f"फसल स्वास्थ्य निर्देश: फफूंद व कीटों से बचाव हेतु प्रति लीटर पानी में 5 मि.ली. नीम तेल मिलाकर छिड़काव करें। "
+            f"आज की कृषि सलाह: पीएम-किसान व फसल बीमा योजना का लाभ उठाएं। अच्छी पैदावार के लिए शुभकामनाएं!"
+        ),
+        "தமிழ்": (
+            f"வணக்கம் {farmer_name}! இது உங்கள் AgriSense AI-ன் இன்றைய 1 நிமிட பண்ணை அறிக்கை. "
+            f"நாள் {today_str}. உங்கள் பண்ணை மண் ஈரப்பதம் {moisture:.0f}%, வெப்பநிலை {temp:.0f} டிகிரி, மண் pH {ph:.1f}. "
+            f"{'மண்ணில் ஈரப்பதம் குறைவு, இன்று காலை பாசனம் செய்யவும்.' if needs_water else 'மண்ணில் ஈரப்பதம் சரியாக உள்ளது, இன்று பாசனம் தேவையில்லை.'} "
+            f"பரிந்துரைக்கப்பட்ட பயிர் {crop_name}. இன்றைய சந்தையில் {mandi_info['name']} குவிண்டால் சராசரி விலை {mandi_info['price']}, போக்கு {mandi_info['trend']}. "
+            f"பயிர் பாதுகாப்பு: இலைப்புள்ளி நோயைத் தடுக்க வேப்பெண்ணெய் 5ml/லிட்டர் தெளிக்கவும். உழவன் செயலி மற்றும் பயிர் காப்பீட்டைப் பயன்படுத்தவும்!"
+        ),
+        "ಕನ್ನಡ": (
+            f"ನಮಸ್ಕಾರ {farmer_name}! ಇದು ನಿಮ್ಮ AgriSense AI ಇಂದಿನ 1 ನಿಮಿಷದ ಕೃಷಿ ವರದಿ. "
+            f"ದಿನಾಂಕ {today_str}. ನಿಮ್ಮ ಜಮೀನಿನ ಮಣ್ಣಿನ ತೇವಾಂಶ {moisture:.0f}%, ತಾಪಮಾನ {temp:.0f} ಡಿಗ್ರಿ, pH {ph:.1f}. "
+            f"{'ಮಣ್ಣಿನಲ್ಲಿ ತೇವಾಂಶ ಕಡಿಮೆ ಇದೆ, ಇಂದು ಬೆಳಗ್ಗೆ ನೀರಾವರಿ ಮಾಡಿ.' if needs_water else 'ಮಣ್ಣಿನಲ್ಲಿ ತೇವಾಂಶ ಉತ್ತಮವಾಗಿದೆ, ಇಂದು ನೀರು ಬೇಡ.'} "
+            f"ಶಿಫಾರಸು ಬೆಳೆ {crop_name}. ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ {mandi_info['name']} ಕ್ವಿಂಟಾಲ್‌ಗೆ {mandi_info['price']} ಬೆಲೆ ಇದೆ. "
+            f"ರೋಗ ತಡೆಗಟ್ಟಲು ಲೀಟರ್ ನೀರಿಗೆ 5 ಮಿ.ಲೀ ಬೇವಿನ ಎಣ್ಣೆ ಸಿಂಪಡಿಸಿ. ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸೌಲಭ್ಯವನ್ನು ಪಡೆದುಕೊಳ್ಳಿ!"
+        ),
+        "मराठी": (
+            f"नमस्कार {farmer_name}! हे आहे तुमचे AgriSense AI चे आजचे 1 मिनिटांचे कृषी बुलेटीन. "
+            f"तारीख {today_str}. शेतातील मातीतील ओलावा {moisture:.0f} टक्के, तापमान {temp:.0f} अंश सेल्सिअस, pH {ph:.1f}. "
+            f"{'मातीत ओलावा कमी आहे, आज सकाळी हलके पाणी द्या.' if needs_water else 'मातीत चांगला ओलावा आहे, आज पाण्याची गरज नाही.'} "
+            f"तुमचे पीक {crop_name}. आजच्या बाजारात {mandi_info['name']} चा सरासरी भाव {mandi_info['price']} आहे. "
+            f"कीड नियंत्रणासाठी कडुलिंब तेलाची 5 मिली प्रति लिटर फवारणी करा. पीक विमा योजनेचा लाभ घ्या!"
+        ),
+        "English": (
+            f"Hello {farmer_name}! Here is your AgriSense AI 1-Minute Daily Farm Briefing for {today_str}. "
+            f"Your field root-zone soil moisture is {moisture:.0f} percent, temperature is {temp:.0f} degrees Celsius, and soil pH is {ph:.1f}. "
+            f"{'Soil moisture is below target, so light irrigation is advised this morning.' if needs_water else 'Soil moisture is optimal, no irrigation needed today.'} "
+            f"For your selected crop {crop_name}, today's average mandi market rate is {mandi_info['price']} with a {mandi_info['trend']} market trend. {mandi_info['action']} "
+            f"Crop health alert: high atmospheric humidity may trigger leaf spots; spray 5 ml neem oil per litre of water as preventive care. "
+            f"Daily tip: Take advantage of PM-Kisan and PMFBY crop insurance portals. AgriSense AI wishes you a high yield harvest!"
+        )
+    }
+
+    script = scripts.get(lang) or scripts.get("English")
+    if not script:
+        for k in scripts:
+            if k in lang or lang in k:
+                script = scripts[k]
+                break
+        if not script:
+            script = scripts["English"]
+
+    return {
+        "status": "success",
+        "date": today_str,
+        "farmer_name": farmer_name,
+        "language": lang,
+        "crop": crop_name,
+        "audio_script": script,
+        "duration_seconds": 60,
+        "telemetry": {
+            "soil_moisture": moisture,
+            "temperature": temp,
+            "ph": ph,
+            "nitrogen": reading.get("nitrogen", 90),
+            "phosphorus": reading.get("phosphorus", 42),
+            "potassium": reading.get("potassium", 44),
+            "needs_water": needs_water
+        },
+        "mandi": mandi_info,
+        "health_instruction": "Spray Neem oil 5ml/L preventively against leaf spot & sucking pests." if "English" in lang else "ఆకుమచ్చ తెగులు నివారణకు వేప నూనె 5ml/లీటర్ పిచికారీ చేయండి.",
+        "useful_tip": "PM-Kisan & PMFBY insurance enrollment active." if "English" in lang else "పిఎం కిసాన్ మరియు పంటల బీమా ప్రయోజనాలను సద్వినియోగం చేసుకోండి."
+    }
+
+
+# =========================================================
 # ML CROP PREDICTION
 # =========================================================
 
@@ -948,6 +1111,69 @@ Recorded: {reading['date']}
 # AI TEXT ASSISTANT
 # =========================================================
 
+def get_localized_ai_fallback(language: str, crop: str, question: str):
+    lang_fallbacks = {
+        "తెలుగు": (
+            f"🌾 **AgriSense AI వ్యవసాయ సలహా:**\n\n"
+            f"- **మీ ప్రశ్నకు సమాధానం:** '{question}'\n"
+            f"- **మీ పంట ({crop}) & నేల సిఫార్సులు:**\n"
+            f"  1. నత్రజని, భాస్వరం మరియు పొటాష్ ఎరువులను సమతుల్యంగా (4:2:1 నిష్పత్తిలో) వేయండి.\n"
+            f"  2. నేల తేమ 35% కన్నా తగ్గినప్పుడు మాత్రమే ఉదయం పూట తేలికపాటి తడి అందించండి.\n"
+            f"  3. తెగుళ్ల నివారణ కోసం లీటరు నీటికి 5ml వేప నూనెను ముందుజాగ్రత్తగా పిచికారీ చేయండి.\n"
+            f"  4. రోజువారీ మార్కెట్ ధరల కోసం 'Mandi Prices' మరియు ప్రభుత్వ సబ్సిడీల కోసం 'Govt Schemes' ట్యాబ్‌లను చూడండి."
+        ),
+        "हिंदी": (
+            f"🌾 **AgriSense AI कृषि सलाहकार रिपोर्ट:**\n\n"
+            f"- **आपके प्रश्न पर सलाह:** '{question}'\n"
+            f"- **आपकी फसल ({crop}) और मिट्टी की स्थिति के अनुसार:**\n"
+            f"  1. संतुलित NPK उर्वरक (4:2:1 अनुपात) का प्रयोग करें।\n"
+            f"  2. मिट्टी की नमी 35% से कम होने पर ही सुबह हल्की सिंचाई करें।\n"
+            f"  3. कीटों व फफूंद से बचाव हेतु प्रति लीटर पानी में 5 मि.ली. नीम तेल का छिड़काव करें।\n"
+            f"  4. लाइव मंडी भाव और सरकारी योजनाओं की जानकारी के लिए संबंधित टैब देखें।"
+        ),
+        "தமிழ்": (
+            f"🌾 **AgriSense AI வேளாண்மை அறிக்கை:**\n\n"
+            f"- **உங்கள் கேள்வி:** '{question}'\n"
+            f"- **பரிந்துரைக்கப்பட்ட பயிர் ({crop}) ஆலோசனை:**\n"
+            f"  1. சமச்சீர் NPK உரங்களை (4:2:1 விகிதம்) பயன்படுத்தவும்.\n"
+            f"  2. மண்ணின் ஈரப்பதம் 35% குறையும் போது காலை வேளையில் பாசனம் செய்யவும்.\n"
+            f"  3. பூச்சி தாக்காமல் இருக்க வேப்பெண்ணெய் 5ml/லிட்டர் தெளிக்கவும்.\n"
+            f"  4. நேரடி சந்தை விலைகளுக்கு மண்டி விலை பிரிவை பார்வையிடவும்."
+        ),
+        "ಕನ್ನಡ": (
+            f"🌾 **AgriSense AI ಕೃಷಿ ಸಲಹೆ:**\n\n"
+            f"- **ನಿಮ್ಮ ಪ್ರಶ್ನೆ:** '{question}'\n"
+            f"- **ಶಿಫಾರಸು ಮಾಡಿದ ಬೆಳೆ ({crop}) ಮಾರ್ಗದರ್ಶನ:**\n"
+            f"  1. ಸಮತೋಲಿತ NPK ರಸಗೊಬ್ಬರ (4:2:1 ಅನುಪಾತ) ಬಳಸಿ.\n"
+            f"  2. ಮಣ್ಣಿನ ತೇವಾಂಶ 35% ಗಿಂತ ಕಡಿಮೆಯಾದಾಗ ಮಾತ್ರ ಬೆಳಿಗ್ಗೆ ನೀರು ಹಾಕಿ.\n"
+            f"  3. ರೋಗ ನಿಯಂತ್ರಣಕ್ಕಾಗಿ ಲೀಟರ್ ನೀರಿಗೆ 5 ಮಿ.ಲೀ ಬೇವಿನ ಎಣ್ಣೆ ಸಿಂಪಡಿಸಿ.\n"
+            f"  4. ಮಾರುಕಟ್ಟೆ ದರಗಳು ಮತ್ತು ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ವಿವರಗಳನ್ನು ಆ್ಯಪ್‌ನಲ್ಲಿ ವೀಕ್ಷಿಸಿ."
+        ),
+        "मराठी": (
+            f"🌾 **AgriSense AI कृषी सल्लागार:**\n\n"
+            f"- **तुमचा प्रश्न:** '{question}'\n"
+            f"- **पिकासाठी ({crop}) मुख्य शिफारशी:**\n"
+            f"  1. संतुलित NPK खतांचा (4:2:1 प्रमाण) वापर करा.\n"
+            f"  2. मातीतील ओलावा 35% पेक्षा कमी झाल्यावर सकाळी पाणी द्या.\n"
+            f"  3. कीड संरक्षणासाठी 5 मिली प्रति लिटर कडुलिंब तेलाची फवारणी करा.\n"
+            f"  4. रोजच्या बाजारभावासाठी मंडी दर आणि सरकारी योजना तपासा."
+        ),
+        "English": (
+            f"🌾 **AgriSense AI Agronomist Advisory:**\n\n"
+            f"- **Regarding your query:** '{question}'\n"
+            f"- **Recommended Crop & Farm Advisory for {crop}:**\n"
+            f"  1. Apply balanced NPK fertilizer in split doses (4:2:1 ratio).\n"
+            f"  2. Irrigate during early morning hours when soil moisture drops below 35%.\n"
+            f"  3. Spray Neem oil (5ml/L water) preventively to deter sucking pests and early blight.\n"
+            f"  4. Check the Live Mandi Prices tab for optimal selling windows and Govt Schemes for subsidies."
+        )
+    }
+    for k, v in lang_fallbacks.items():
+        if k in language or language in k:
+            return v
+    return lang_fallbacks["English"]
+
+
 @app.post("/ai/ask")
 @app.post("/ai/chat")
 def ai_ask(data: AIRequest):
@@ -1056,15 +1282,7 @@ Rules:
                     last_error = ie
 
         if not answer:
-            answer = (
-                f"🌾 **AgriSense AI Agronomist Advisory:**\n\n"
-                f"- **Context:** Recommendations tailored for your current farm readings (N: {farm_data.strip() if isinstance(farm_data, str) else 'Optimal'}, Recommended Crop: {crop}).\n"
-                f"- **Guidance for your question:** '{data.question}':\n"
-                f"  1. Ensure balanced NPK fertilizer application (4:2:1 ratio).\n"
-                f"  2. Irrigate when root-zone soil moisture drops below 35%.\n"
-                f"  3. Monitor leaf undersides weekly for early pest detection.\n"
-                f"- **Next Step:** You can also check the Live Mandi Prices and Govt Schemes tabs for market insights."
-            )
+            answer = get_localized_ai_fallback(data.language, crop, data.question)
 
         return {
             "status": "success",
@@ -1075,13 +1293,7 @@ Rules:
         print("AI error:", e)
         return {
             "status": "success",
-            "answer": (
-                f"🌾 **AgriSense AI Advisory:**\n\n"
-                f"Based on your soil and current farm telemetry, for **{crop}**, we recommend:\n"
-                f"1. Top dressing with Nitrogen in split doses at tillering and flowering stages.\n"
-                f"2. Maintain adequate root moisture without waterlogging.\n"
-                f"3. For specific pest or disease questions, take a photo in the Plant Doctor tab."
-            )
+            "answer": get_localized_ai_fallback(data.language, crop, data.question)
         }
 
 
@@ -1110,6 +1322,21 @@ async def run_gemini(
     print("🌱 Farm data loaded for farmer:", farmer_id)
     print("🌾 ML crop:", crop)
 
+    lang_live_rules = {
+        "Telugu": "CRITICAL: The farmer speaks TELUGU (తెలుగు). You MUST speak and respond ONLY in Telugu language (తెలుగులో మాత్రమే మాట్లాడండి). Do NOT speak English.",
+        "తెలుగు": "CRITICAL: The farmer speaks TELUGU (తెలుగు). You MUST speak and respond ONLY in Telugu language (తెలుగులో మాత్రమే మాట్లాడండి). Do NOT speak English.",
+        "Hindi": "CRITICAL: The farmer speaks HINDI (हिन्दी). You MUST speak and respond ONLY in Hindi language (केवल हिन्दी में ही बात करें). Do NOT speak English.",
+        "हिंदी": "CRITICAL: The farmer speaks HINDI (हिन्दी). You MUST speak and respond ONLY in Hindi language (केवल हिन्दी में ही बात करें). Do NOT speak English.",
+        "Tamil": "CRITICAL: The farmer speaks TAMIL (தமிழ்). You MUST speak and respond ONLY in Tamil language (தமிழில் மட்டுமே பேசவும்). Do NOT speak English.",
+        "தமிழ்": "CRITICAL: The farmer speaks TAMIL (தமிழ்). You MUST speak and respond ONLY in Tamil language (தமிழில் மட்டுமே பேசவும்). Do NOT speak English.",
+        "Kannada": "CRITICAL: The farmer speaks KANNADA (ಕನ್ನಡ). You MUST speak and respond ONLY in Kannada language (ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಮಾತನಾಡಿ). Do NOT speak English.",
+        "ಕನ್ನಡ": "CRITICAL: The farmer speaks KANNADA (ಕನ್ನಡ). You MUST speak and respond ONLY in Kannada language (ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಮಾತನಾಡಿ). Do NOT speak English.",
+        "Marathi": "CRITICAL: The farmer speaks MARATHI (मराठी). You MUST speak and respond ONLY in Marathi language (फक्त मराठीतच बोला). Do NOT speak English.",
+        "मराठी": "CRITICAL: The farmer speaks MARATHI (मराठी). You MUST speak and respond ONLY in Marathi language (फक्त मराठीतच बोला). Do NOT speak English.",
+        "English": "Speak in warm, clear, farmer-friendly Indian English."
+    }
+    live_lang_rule = lang_live_rules.get(language, f"CRITICAL: Speak and reply ONLY in {language}. Do NOT speak English.")
+
     client = genai.Client(api_key=api_key)
 
     config = types.LiveConnectConfig(
@@ -1120,24 +1347,25 @@ async def run_gemini(
 You are AgriSense AI.
 You are a friendly, professional farming assistant speaking directly with an Indian farmer.
 
-SELECTED FARMER LANGUAGE
-------------------------
+SELECTED FARMER LANGUAGE:
 {language}
 
-LATEST FARM DATA
-----------------
+LANGUAGE INSTRUCTION:
+{live_lang_rule}
+
+LATEST FARM DATA:
 {farm_data}
 
-LATEST ML CROP RECOMMENDATION
------------------------------
+LATEST ML CROP RECOMMENDATION:
 {crop}
 
-IMPORTANT RULES
-1. Always speak in {language}.
-2. Use simple language suitable for farmers.
-3. Use the farmer's actual farm data whenever relevant.
-4. Keep answers conversational, natural and reasonably short.
-5. If farm data is unavailable, clearly say so.
+IMPORTANT RULES:
+1. {live_lang_rule}
+2. Never switch to English unless mentioning chemical names.
+3. Use simple, warm, everyday vocabulary suitable for rural farmers.
+4. Use the farmer's actual farm data whenever relevant.
+5. Keep answers conversational, natural and reasonably short.
+6. If farm data is unavailable, clearly say so.
 """
     )
 
@@ -1369,5 +1597,6 @@ async def live(websocket: WebSocket):
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting AgriSense Live Voice Backend Server on http://0.0.0.0:8000 ...")
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    print(f"🚀 Starting AgriSense Live Voice Backend Server on http://0.0.0.0:{port} ...")
+    uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)

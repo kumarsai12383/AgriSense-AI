@@ -1,12 +1,12 @@
 services:
-  # AgriSense AI - Main Web Application (Streamlit + ML + AI Engine)
+  # AgriSense AI - Main Production Web Application (FastAPI + React 18 Mobile App + Live Voice AI)
   - type: web
     name: agrisense-ai
     env: python
     region: oregon
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9

@@ -127,8 +127,44 @@ def run_backend_test_suite():
     assert "crop" in latest_crop_data
     print(f"[PASS] GET /crop/latest/{fid} (Verified latest predicted crop: '{latest_crop_data['crop']}')")
 
+    # 14. GET /farm/daily-briefing/{farmer_id} in Telugu, Hindi & English
+    res_te = client.get(f"/farm/daily-briefing/{fid}?language=తెలుగు")
+    assert res_te.status_code == 200, f"Daily briefing Telugu failed: {res_te.status_code}"
+    data_te = res_te.json()
+    assert data_te["status"] == "success" and "నమస్కారం" in data_te["audio_script"]
+    print(f"[PASS] GET /farm/daily-briefing/{fid} (Telugu 1-Min Audio Script verified)")
+
+    res_hi = client.get(f"/farm/daily-briefing/{fid}?language=हिंदी")
+    assert res_hi.status_code == 200, f"Daily briefing Hindi failed: {res_hi.status_code}"
+    data_hi = res_hi.json()
+    assert data_hi["status"] == "success" and "नमस्ते" in data_hi["audio_script"]
+    print(f"[PASS] GET /farm/daily-briefing/{fid} (Hindi 1-Min Audio Script verified)")
+
+    res_en = client.get(f"/farm/daily-briefing/{fid}?language=English")
+    assert res_en.status_code == 200, f"Daily briefing English failed: {res_en.status_code}"
+    data_en = res_en.json()
+    assert data_en["status"] == "success" and len(data_en["audio_script"]) > 100
+    print(f"[PASS] GET /farm/daily-briefing/{fid} (English 1-Min Audio Script verified)")
+
+    # 15. POST /ai/ask with Multilingual Localized Fallback
+    ai_req = {
+        "farmer_id": fid,
+        "question": "What is the best fertilizer for my soil?",
+        "language": "తెలుగు"
+    }
+    res_ai = client.post("/ai/ask", json=ai_req)
+    assert res_ai.status_code == 200, f"AI ask failed: {res_ai.status_code}"
+    ai_data = res_ai.json()
+    assert ai_data.get("status") == "success" and len(ai_data.get("answer", "")) > 10
+    print(f"[PASS] POST /ai/ask (Multilingual AI response verified: {len(ai_data['answer'])} chars)")
+
+    # 16. Static Assets (Favicon & Icons)
+    res_fav = client.get("/favicon.svg")
+    assert res_fav.status_code == 200, f"GET /favicon.svg failed: {res_fav.status_code}"
+    print("[PASS] GET /favicon.svg (Static icon served)")
+
     print("=" * 60)
-    print("ALL 12 BACKEND FASTAPI ENDPOINTS & LOGIC PASSED 100%!")
+    print("ALL 16 BACKEND FASTAPI ENDPOINTS & LOGIC PASSED 100%!")
     print("=" * 60)
 
 

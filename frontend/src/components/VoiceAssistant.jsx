@@ -271,13 +271,29 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
     recognition.start();
   };
 
+  const findMatchingVoice = (langTag) => {
+    if (!synthRef.current) return null;
+    const voices = synthRef.current.getVoices() || [];
+    const prefix = langTag.split('-')[0].toLowerCase();
+    let match = voices.find((v) => v.lang.toLowerCase() === langTag.toLowerCase());
+    if (match) return match;
+    match = voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
+    if (match) return match;
+    match = voices.find((v) => v.name.toLowerCase().includes(prefix));
+    return match || null;
+  };
+
   const speakText = (text, lang) => {
     if (!synthRef.current) return;
     synthRef.current.cancel();
     const cleanText = text.replace(/[*#_`]/g, '');
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = lang;
-    utterance.rate = 1.0;
+    utterance.rate = 0.95;
+    const voice = findMatchingVoice(lang);
+    if (voice) {
+      utterance.voice = voice;
+    }
     utterance.onend = () => {
       setBrowserStatus('Tap microphone to speak again');
     };

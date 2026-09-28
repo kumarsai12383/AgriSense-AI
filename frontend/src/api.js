@@ -1,4 +1,13 @@
-const API_BASE = "http://localhost:8000";
+// Dynamically resolve API URL:
+// In local dev with Vite on port 5173/3000, target FastAPI on port 8000.
+// In production (Render, mobile devices, unified service), use relative path "".
+const isDevServer =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") &&
+  (window.location.port === "5173" || window.location.port === "3000");
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? (isDevServer ? "http://localhost:8000" : "");
+
 
 export const api = {
   // Server Health
@@ -50,6 +59,17 @@ export const api = {
     const res = await fetch(`${API_BASE}/farm/history/${farmerId}?limit=${limit}`);
     if (!res.ok) return { status: "error", data: [] };
     return await res.json();
+  },
+
+  async getDailyBriefing(farmerId, language = "English") {
+    try {
+      const res = await fetch(`${API_BASE}/farm/daily-briefing/${farmerId}?language=${encodeURIComponent(language)}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn("Failed to fetch daily briefing:", e);
+      return null;
+    }
   },
 
   async saveManualFarmData(data) {
@@ -150,7 +170,9 @@ export const api = {
   // WebSocket Live Voice URL Builder
   getLiveVoiceWebSocketUrl(farmerId, language = "English") {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.hostname || "localhost";
-    return `${protocol}//${host}:8000/live?language=${encodeURIComponent(language)}&farmer_id=${encodeURIComponent(farmerId)}`;
+    const host = (window.location.port === "5173" || window.location.port === "3000")
+      ? `${window.location.hostname}:8000`
+      : window.location.host;
+    return `${protocol}//${host}/live?language=${encodeURIComponent(language)}&farmer_id=${encodeURIComponent(farmerId)}`;
   }
 };

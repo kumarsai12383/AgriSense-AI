@@ -142,6 +142,11 @@ export default function App() {
             setCurrentTab={setCurrentTab}
             sensorStatus={sensorOnline}
             onAutofillAndPredict={() => setCurrentTab('crop')}
+            onDataUpdated={(updated) => {
+              setFarmData((prev) => ({ ...prev, ...updated }));
+              loadFarmData();
+            }}
+            addToast={addToast}
           />
         )}
 

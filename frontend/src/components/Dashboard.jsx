@@ -8,6 +8,8 @@ import {
 import { TRANSLATIONS } from '../translations';
 import { CROPS_DATA } from '../cropData';
 
+import DailyBriefing from './DailyBriefing';
+
 // High-quality agriculture images (Unsplash direct CDN)
 const HERO_IMAGES = [
   'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1600&auto=format&fit=crop&q=80',
@@ -17,11 +19,11 @@ const HERO_IMAGES = [
 
 export default function Dashboard({
   farmer, language, farmData, latestCrop,
-  setCurrentTab, sensorStatus, onAutofillAndPredict
+  setCurrentTab, sensorStatus, onAutofillAndPredict,
+  onDataUpdated, addToast
 }) {
   const t = TRANSLATIONS[language] || TRANSLATIONS.English;
   const cropInfo = latestCrop?.crop ? CROPS_DATA[latestCrop.crop.toLowerCase()] : null;
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [heroImg] = useState(HERO_IMAGES[0]);
 
   // Soil health score
@@ -43,129 +45,97 @@ export default function Dashboard({
   const ph            = farmData?.ph ?? 6.8;
   const farmerName    = farmer?.name || 'Farmer';
 
-  // Voice summary scripts
-  const audioSummaries = {
-    'తెలుగు': { langCode: 'te-IN', btn: '🔊 సలహా వినండి', stopBtn: '⏹ ఆపండి',
-      script: `నమస్కారం ${farmerName} గారు! మీ పొలంలో తాజా నేల తేమ ${soilMoisture.toFixed(0)} శాతం. ఉష్ణోగ్రత ${temp.toFixed(0)} డిగ్రీలు. ${soilMoisture < 30 ? 'నేలలో తేమ తక్కువగా ఉంది, నీరు పెట్టండి.' : 'నేలలో తగినంత తేమ ఉంది, పంట ఆరోగ్యంగా ఉంది.'}` },
-    'हिंदी': { langCode: 'hi-IN', btn: '🔊 सलाह सुनें', stopBtn: '⏹ रोकें',
-      script: `नमस्ते ${farmerName} जी! खेत की नमी ${soilMoisture.toFixed(0)} प्रतिशत। तापमान ${temp.toFixed(0)} डिग्री। ${soilMoisture < 30 ? 'मिट्टी में नमी कम है, सिंचाई करें।' : 'मिट्टी में पर्याप्त नमी है।'}` },
-    'தமிழ்': { langCode: 'ta-IN', btn: '🔊 கேளுங்கள்', stopBtn: '⏹ நிறுத்து',
-      script: `வணக்கம் ${farmerName}! ஈரப்பதம் ${soilMoisture.toFixed(0)}%. ${soilMoisture < 30 ? 'உடனே நீர் பாய்ச்சவும்.' : 'ஈரப்பதம் சரியாக உள்ளது.'}` },
-    'ಕನ್ನಡ': { langCode: 'kn-IN', btn: '🔊 ಸಾರಾಂಶ ಆಲಿಸಿ', stopBtn: '⏹ ನಿಲ್ಲಿಸಿ',
-      script: `ನಮಸ್ಕಾರ ${farmerName}! ತೇವಾಂಶ ${soilMoisture.toFixed(0)} %. ${soilMoisture < 30 ? 'ನೀರಾವರಿ ಮಾಡಿ.' : 'ತೇವಾಂಶ ಉತ್ತಮ.'}` },
-    'मराठी': { langCode: 'mr-IN', btn: '🔊 सल्ला ऐका', stopBtn: '⏹ थांबवा',
-      script: `नमस्कार ${farmerName}! ओलावा ${soilMoisture.toFixed(0)} टक्के. ${soilMoisture < 30 ? 'पाणी द्या.' : 'ओलावा चांगला आहे.'}` },
-    'English': { langCode: 'en-IN', btn: '🔊 Listen Summary', stopBtn: '⏹ Stop',
-      script: `Welcome ${farmerName}! Your farm soil moisture is ${soilMoisture.toFixed(0)} percent, temperature ${temp.toFixed(0)} Celsius, pH ${ph.toFixed(1)}. ${soilMoisture < 30 ? 'Irrigation recommended today.' : 'Soil moisture is optimal.'} Latest recommended crop: ${latestCrop?.crop || 'run AI crop prediction'}.` },
-  };
-
-  const summary = audioSummaries[language] || audioSummaries['English'];
-
-  const handleToggleAudio = () => {
-    if (!('speechSynthesis' in window)) return;
-    if (isPlayingAudio) {
-      window.speechSynthesis.cancel();
-      setIsPlayingAudio(false);
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(summary.script);
-    u.lang = summary.langCode;
-    u.rate = 0.95;
-    u.onend = () => setIsPlayingAudio(false);
-    u.onerror = () => setIsPlayingAudio(false);
-    setIsPlayingAudio(true);
-    window.speechSynthesis.speak(u);
-  };
+  const feats = t.dashboard?.features || {};
+  const steps = t.dashboard?.steps || {};
 
   const featureGrid = [
     {
       id: 'sensors',
       icon: '📡', color: 'teal',
       iconBg: '#f0fdfa', iconColor: '#0f766e',
-      title: 'Step 1 — Soil Test',
-      desc: 'Enter NPK, pH, moisture manually or connect the ESP32 7-in-1 sensor probe for live data.',
-      cta: 'Start Soil Test',
+      title: feats.sensors?.title || 'Step 1 — Soil Test',
+      desc: feats.sensors?.desc || 'Enter NPK, pH, moisture manually or connect the ESP32 7-in-1 sensor probe for live data.',
+      cta: feats.sensors?.cta || 'Start Soil Test',
     },
     {
       id: 'crop',
       icon: '🌾', color: 'green',
       iconBg: '#f0fdf4', iconColor: '#15803d',
-      title: 'Step 2 — Crop AI Recommendation',
-      desc: 'ML RandomForest model analyses your 7 soil & climate values to predict the best crop with alternatives.',
-      cta: 'Get Crop Recommendation',
+      title: feats.crop?.title || 'Step 2 — Crop AI Recommendation',
+      desc: feats.crop?.desc || 'ML RandomForest model analyses your 7 soil & climate values to predict the best crop with alternatives.',
+      cta: feats.crop?.cta || 'Get Crop Recommendation',
     },
     {
       id: 'soil',
       icon: '🧪', color: 'amber',
       iconBg: '#fef3c7', iconColor: '#b45309',
-      title: 'Soil Health Report',
-      desc: 'Detailed NPK deficiency chart, pH chemistry, and personalized soil enrichment treatment plan.',
-      cta: 'View Soil Report',
+      title: feats.soil?.title || 'Soil Health Report',
+      desc: feats.soil?.desc || 'Detailed NPK deficiency chart, pH chemistry, and personalized soil enrichment treatment plan.',
+      cta: feats.soil?.cta || 'View Soil Report',
     },
     {
       id: 'irrigation',
       icon: '💧', color: 'blue',
       iconBg: '#e0f2fe', iconColor: '#0369a1',
-      title: 'Smart Irrigation',
-      desc: 'Red = water urgently, Green = soil moist. Calculates exact motor pump hours for your field size.',
-      cta: 'Open Irrigation Advisor',
+      title: feats.irrigation?.title || 'Smart Irrigation',
+      desc: feats.irrigation?.desc || 'Red = water urgently, Green = soil moist. Calculates exact motor pump hours for your field size.',
+      cta: feats.irrigation?.cta || 'Open Irrigation Advisor',
     },
     {
       id: 'fertilizer',
       icon: '🌿', color: 'green',
       iconBg: '#f0fdf4', iconColor: '#15803d',
-      title: 'Fertilizer Schedule',
-      desc: 'Stage-wise Urea, DAP, MOP bag quantities across 4 crop growth stages to minimize cost.',
-      cta: 'View Fertilizer Plan',
+      title: feats.fertilizer?.title || 'Fertilizer Schedule',
+      desc: feats.fertilizer?.desc || 'Stage-wise Urea, DAP, MOP bag quantities across 4 crop growth stages to minimize cost.',
+      cta: feats.fertilizer?.cta || 'View Fertilizer Plan',
     },
     {
       id: 'disease',
       icon: '🔬', color: 'red',
       iconBg: '#fee2e2', iconColor: '#b91c1c',
-      title: 'Plant Doctor (AI)',
-      desc: 'Upload a leaf photo or describe symptoms — AI diagnoses disease and gives organic + chemical cure.',
-      cta: 'Open Plant Doctor',
+      title: feats.disease?.title || 'Plant Doctor (AI)',
+      desc: feats.disease?.desc || 'Upload a leaf photo or describe symptoms — AI diagnoses disease and gives organic + chemical cure.',
+      cta: feats.disease?.cta || 'Open Plant Doctor',
     },
     {
       id: 'mandi',
       icon: '📊', color: 'purple',
       iconBg: '#f5f3ff', iconColor: '#7c3aed',
-      title: 'Live Mandi Prices',
-      desc: 'e-NAM APMC rates, MSP comparison, best market timing, and full farm cost-profit estimator.',
-      cta: 'View Market Prices',
+      title: feats.mandi?.title || 'Live Mandi Prices',
+      desc: feats.mandi?.desc || 'e-NAM APMC rates, MSP comparison, best market timing, and full farm cost-profit estimator.',
+      cta: feats.mandi?.cta || 'View Market Prices',
     },
     {
       id: 'schemes',
       icon: '🏛️', color: 'teal',
       iconBg: '#f0fdfa', iconColor: '#0f766e',
-      title: 'Government Schemes',
-      desc: 'PM-KISAN ₹6,000 / PM-KUSUM solar pump / PMFBY insurance / KCC credit and 20+ state schemes.',
-      cta: 'Browse Schemes',
+      title: feats.schemes?.title || 'Government Schemes',
+      desc: feats.schemes?.desc || 'PM-KISAN ₹6,000 / PM-KUSUM solar pump / PMFBY insurance / KCC credit and 20+ state schemes.',
+      cta: feats.schemes?.cta || 'Browse Schemes',
     },
     {
       id: 'voice',
       icon: '🎙️', color: 'green',
       iconBg: '#f0fdf4', iconColor: '#15803d',
-      title: 'Voice AI Assistant',
-      desc: 'Speak in your language — AgriSense AI answers instantly with voice. Zero typing needed.',
-      cta: 'Talk to AgriSense',
+      title: feats.voice?.title || 'Voice AI Assistant',
+      desc: feats.voice?.desc || 'Speak in your language — AgriSense AI answers instantly with voice. Zero typing needed.',
+      cta: feats.voice?.cta || 'Talk to AgriSense',
     },
     {
       id: 'chat',
       icon: '💬', color: 'blue',
       iconBg: '#e0f2fe', iconColor: '#0369a1',
-      title: 'AI Chat Assistant',
-      desc: 'Ask any farming question by text. AI uses your actual farm data to give personalised advice.',
-      cta: 'Open AI Chat',
+      title: feats.chat?.title || 'AI Chat Assistant',
+      desc: feats.chat?.desc || 'Ask any farming question by text. AI uses your actual farm data to give personalised advice.',
+      cta: feats.chat?.cta || 'Open AI Chat',
     },
     {
       id: 'help',
       icon: '📖', color: 'purple',
       iconBg: '#f5f3ff', iconColor: '#7c3aed',
-      title: 'Help & Guide',
-      desc: '7-step audio walkthrough, colour guide, best practices, and toll-free Kisan Helpline 1551.',
-      cta: 'Open Help Guide',
+      title: feats.help?.title || 'Help & Guide',
+      desc: feats.help?.desc || '7-step audio walkthrough, colour guide, best practices, and toll-free Kisan Helpline 1551.',
+      cta: feats.help?.cta || 'Open Help Guide',
     },
   ];
 
@@ -192,7 +162,7 @@ export default function Dashboard({
             textTransform: 'uppercase', letterSpacing: '0.5px'
           }}>
             <Sparkles size={13} />
-            AgriSense AI v2.0 — India's Smartest Farm Platform
+            AgriSense AI v2.0 — {t.tagline || "Smart Agricultural Decision Support & Farm Intelligence"}
           </div>
 
           <h1 style={{
@@ -202,26 +172,26 @@ export default function Dashboard({
             {t.dashboard?.welcome || 'Welcome back'}, {farmerName}! 🌾
           </h1>
 
-          <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: 15, fontWeight: 500, marginBottom: 20, maxWidth: 600 }}>
+          <p style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15, fontWeight: 500, marginBottom: 20, maxWidth: 600 }}>
             {t.dashboard?.greeting || 'Your AI-powered farm intelligence platform for better yields, smarter decisions, and higher profits.'}
           </p>
 
           {/* Workflow Step Buttons */}
           <div className="workflow-steps">
             <button className={`workflow-step ${!farmData ? 'active' : ''}`} onClick={() => setCurrentTab('sensors')}>
-              <span>📡</span> 1. Soil Test
+              <span>📡</span> {steps.step1 || '1. Soil Test'}
             </button>
             <span className="workflow-arrow">›</span>
             <button className={`workflow-step ${farmData && !latestCrop ? 'active' : ''}`} onClick={() => setCurrentTab('crop')}>
-              <span>🌾</span> 2. AI Recommendation
+              <span>🌾</span> {steps.step2 || '2. AI Recommendation'}
             </button>
             <span className="workflow-arrow">›</span>
             <button className={`workflow-step ${latestCrop ? 'active' : ''}`} onClick={() => setCurrentTab('crop')}>
-              <span>📋</span> 3. Crop Details & Advice
+              <span>📋</span> {steps.step3 || '3. Advice & Economics'}
             </button>
             <span className="workflow-arrow">›</span>
             <button className="workflow-step" onClick={() => setCurrentTab('irrigation')}>
-              <span>💧</span> 4. Irrigation & Fertilizer
+              <span>💧</span> {t.nav?.irrigation || 'Irrigation'}
             </button>
           </div>
 
@@ -234,7 +204,7 @@ export default function Dashboard({
               style={{ background: '#fff', color: '#15803d', fontWeight: 800, fontSize: 14 }}
             >
               <Cpu size={16} />
-              Start Soil Test
+              {feats.sensors?.cta || 'Start Soil Test'}
             </button>
             <button
               id="btn-get-crop-ai"
@@ -242,7 +212,7 @@ export default function Dashboard({
               className="btn btn-ghost"
             >
               <Wheat size={16} />
-              Get Crop Recommendation
+              {feats.crop?.cta || 'Get Crop Recommendation'}
             </button>
             <button
               id="btn-voice-ai"
@@ -250,51 +220,23 @@ export default function Dashboard({
               className="btn btn-ghost"
             >
               <Mic size={16} />
-              Talk to AI
+              {feats.voice?.cta || 'Talk to AI'}
             </button>
           </div>
         </div>
       </div>
 
       {/* ══════════════════════════════════════════════
-          VOICE SUMMARY STRIP
+          DAILY 1-MINUTE FARM AUDIO BRIEFING
           ══════════════════════════════════════════════ */}
-      <div className="agri-card" style={{
-        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-        border: '2px solid #22c55e',
-        borderRadius: 20, padding: '18px 24px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        flexWrap: 'wrap', gap: 14,
-        boxShadow: '0 8px 24px rgba(34,197,94,0.20)'
-      }}>
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 22 }}>📢</span>
-            <span style={{ color: '#4ade80', fontSize: 15, fontWeight: 800 }}>
-              🔊 Listen to Your Farm Summary
-            </span>
-          </div>
-          <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3 }}>
-            No reading needed — tap to hear soil, water & crop advice in {language}
-          </div>
-        </div>
-        <button
-          id="btn-audio-summary"
-          onClick={handleToggleAudio}
-          className="btn"
-          style={{
-            background: isPlayingAudio
-              ? 'linear-gradient(135deg, #b91c1c, #dc2626)'
-              : 'linear-gradient(135deg, #15803d, #22c55e)',
-            color: '#fff', fontWeight: 800, fontSize: 14,
-            padding: '11px 22px', borderRadius: 12,
-            boxShadow: '0 4px 14px rgba(21,128,61,0.35)'
-          }}
-        >
-          {isPlayingAudio ? <Square size={16} /> : <Volume2 size={16} />}
-          <span>{isPlayingAudio ? summary.stopBtn : summary.btn}</span>
-        </button>
-      </div>
+      <DailyBriefing
+        farmer={farmer}
+        language={language}
+        farmData={farmData}
+        latestCrop={latestCrop}
+        onDataUpdated={onDataUpdated}
+        addToast={addToast}
+      />
 
       {/* ══════════════════════════════════════════════
           REAL-TIME METRIC CARDS
