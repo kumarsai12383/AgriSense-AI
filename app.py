@@ -29,13 +29,26 @@ port = int(os.environ.get("PORT", 8000))
 host = "0.0.0.0"
 
 def start_server():
+    server_port = int(os.environ.get("PORT", 8000))
+    for i, arg in enumerate(sys.argv):
+        if arg in ("--server.port", "--port", "-p") and i + 1 < len(sys.argv):
+            try:
+                server_port = int(sys.argv[i + 1])
+            except ValueError:
+                pass
+        elif arg.startswith("--server.port="):
+            try:
+                server_port = int(arg.split("=")[1])
+            except ValueError:
+                pass
+
     print(f"===========================================================")
     print(f"🌱 AgriSense AI — Production Server Launching")
-    print(f"⚡ Binding host: {host}:{port}")
+    print(f"⚡ Binding host: {host}:{server_port}")
     print(f"📱 Frontend: React 18 Mobile SPA (Vite Production Build)")
     print(f"🌾 Backend: FastAPI + SQLite WAL + Random Forest ML")
     print(f"===========================================================")
-    uvicorn.run("server:app", host=host, port=port, log_level="info")
+    uvicorn.run("server:app", host=host, port=server_port, log_level="info")
 
 if __name__ == "__main__":
     start_server()
