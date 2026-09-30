@@ -129,6 +129,19 @@ export const api = {
     return await res.json();
   },
 
+  async explainCropRecommendation(payload) {
+    const res = await fetch(`${API_BASE}/crop/explain`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Explanation failed" }));
+      throw new Error(err.detail || "Explanation failed");
+    }
+    return await res.json();
+  },
+
   // AI Assistant Chat
   async askAiAssistant(farmerId, question, language = "English") {
     const res = await fetch(`${API_BASE}/ai/ask`, {

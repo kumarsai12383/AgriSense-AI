@@ -72,59 +72,132 @@ export default function Navbar({
         borderBottom: '1px solid rgba(21, 128, 61, 0.18)',
         boxShadow: '0 2px 14px rgba(0, 0, 0, 0.04)'
       }}>
-        <div className="navbar-top" style={{ padding: '8px 16px' }}>
-          {/* Brand */}
-          <div
-            className="nav-brand"
-            onClick={() => setCurrentTab('dashboard')}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', minWidth: 0 }}
-          >
-            <div style={{
-              width: 40,
-              height: 40,
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, #0f5132 0%, #15803d 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              boxShadow: '0 4px 12px rgba(15, 81, 50, 0.3)',
-              border: '1.5px solid rgba(255, 255, 255, 0.5)',
-              flexShrink: 0
-            }}>
-              <Sprout size={22} />
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <div className="navbar-top" style={{ padding: '8px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          
+          {/* ── TOP-LEFT CONTROLS: MENU BUTTON + FARMER PROFILE + BRAND ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            {/* Top-Left Menu Drawer Button */}
+            <button
+              id="btn-top-menu"
+              onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+              className="btn"
+              style={{
+                padding: '6px 12px',
+                height: 38,
+                borderRadius: 12,
+                background: mobileDrawerOpen ? '#0f5132' : '#f0fdf4',
+                color: mobileDrawerOpen ? '#ffffff' : '#0f5132',
+                border: '1.5px solid #86efac',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontWeight: 800,
+                fontSize: 13,
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(15, 81, 50, 0.08)',
+                flexShrink: 0
+              }}
+              aria-label="Open all modules menu"
+              title="All Modules & Tools"
+            >
+              {mobileDrawerOpen ? <X size={18} /> : <Menu size={18} />}
+              <span style={{ fontWeight: 800 }}>{t.nav?.menu || 'Menu'}</span>
+            </button>
+
+            {/* Top-Left Farmer Profile Badge */}
+            {farmer && (
+              <div
+                id="btn-farmer-profile"
+                onClick={() => setMobileDrawerOpen(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  background: '#f0fdf4',
+                  border: '1.5px solid #bbf7d0',
+                  padding: '5px 11px',
+                  borderRadius: 12,
+                  cursor: 'pointer',
+                  maxWidth: 145,
+                  height: 38,
+                  boxSizing: 'border-box',
+                  flexShrink: 0
+                }}
+                title="Farmer Profile & Settings"
+              >
+                <div style={{
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #15803d, #22c55e)',
+                  color: 'white', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', fontSize: 11, fontWeight: 900,
+                  flexShrink: 0
+                }}>
+                  {farmer.name ? farmer.name.charAt(0).toUpperCase() : '👨‍🌾'}
+                </div>
                 <span style={{
-                  fontSize: 17,
-                  fontWeight: 900,
-                  color: '#0f172a',
-                  letterSpacing: '-0.4px',
-                  fontFamily: 'Outfit, sans-serif',
+                  fontSize: 12.5,
+                  fontWeight: 800,
+                  color: '#14532d',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap'
                 }}>
-                  {t.appName || 'AgriSense AI'}
-                </span>
-                <span style={{
-                  fontSize: 9,
-                  fontWeight: 900,
-                  padding: '2px 6px',
-                  borderRadius: 99,
-                  background: '#0f5132',
-                  color: '#ffffff',
-                  letterSpacing: '0.4px'
-                }}>
-                  GOVT
+                  {farmer.name}
                 </span>
               </div>
-              <div style={{ fontSize: 10.5, color: '#15803d', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                राष्ट्रीय किसान पोर्टल • National Portal
+            )}
+
+            {/* Portal Brand Emblem */}
+            <div
+              className="nav-brand hide-on-tiny"
+              onClick={() => { setCurrentTab('dashboard'); setMobileDrawerOpen(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', minWidth: 0 }}
+            >
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, #0f5132 0%, #15803d 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(15, 81, 50, 0.25)'
+              }}>
+                <Sprout size={20} />
+              </div>
+              <div className="hide-on-mobile" style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#0f172a',
+                    letterSpacing: '-0.3px',
+                    fontFamily: 'Outfit, sans-serif',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {t.appName || 'AgriSense AI'}
+                  </span>
+                  <span style={{
+                    fontSize: 8.5,
+                    fontWeight: 900,
+                    padding: '2px 5px',
+                    borderRadius: 99,
+                    background: '#0f5132',
+                    color: '#ffffff'
+                  }}>
+                    GOVT
+                  </span>
+                </div>
+                <div style={{ fontSize: 10, color: '#15803d', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  రాష్ట్రీయ కిసాన్ పోర్టల్
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Controls */}
+          {/* ── TOP-RIGHT CONTROLS: STATUS + LANGUAGE + LOGOUT ── */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
             {/* Live API status (Desktop only) */}
             <div
@@ -166,7 +239,7 @@ export default function Navbar({
               onClick={() => setCurrentTab('sensors')}
             >
               {sensorOnline ? <Wifi size={12} className="pulse-glow" /> : <WifiOff size={12} />}
-              <span>{sensorOnline ? 'IoT Live' : 'Manual Mode'}</span>
+              <span>{sensorOnline ? 'IoT Live' : 'Manual'}</span>
             </div>
 
             {/* Language Selector Dropdown (High-Contrast & Touch Friendly) */}
@@ -175,10 +248,12 @@ export default function Navbar({
               alignItems: 'center',
               background: '#f8fafc',
               borderRadius: 14,
-              padding: '4px 10px',
-              gap: 6,
+              padding: '4px 8px',
+              gap: 5,
               border: '1.5px solid #cbd5e1',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              height: 38,
+              boxSizing: 'border-box'
             }}>
               <Languages size={15} style={{ color: '#15803d', flexShrink: 0 }} />
               <select
@@ -193,7 +268,7 @@ export default function Navbar({
                   color: '#0f172a',
                   outline: 'none',
                   cursor: 'pointer',
-                  maxWidth: 96
+                  maxWidth: 95
                 }}
               >
                 {languagesList.map((lang) => (
@@ -202,51 +277,17 @@ export default function Navbar({
               </select>
             </div>
 
-            {/* Farmer Profile Pill (Desktop / Tablet) */}
+            {/* Farmer Logout Button (Desktop) */}
             {farmer && (
-              <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 7,
-                  background: '#f0fdf4',
-                  border: '1.5px solid #bbf7d0',
-                  padding: '5px 12px',
-                  borderRadius: 12,
-                  maxWidth: 150
-                }}>
-                  <UserCheck size={14} style={{ color: '#15803d', flexShrink: 0 }} />
-                  <span style={{
-                    fontSize: 12.5,
-                    fontWeight: 800,
-                    color: '#14532d',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {farmer.name}
-                  </span>
-                </div>
-                <button
-                  onClick={onLogout}
-                  className="btn btn-secondary"
-                  style={{ padding: '6px 10px', height: 34, fontSize: 12, borderRadius: 10 }}
-                  title="Logout"
-                >
-                  <LogOut size={13} />
-                </button>
-              </div>
+              <button
+                onClick={onLogout}
+                className="btn btn-secondary hide-on-mobile"
+                style={{ padding: '6px 10px', height: 38, fontSize: 12, borderRadius: 12 }}
+                title="Logout"
+              >
+                <LogOut size={14} />
+              </button>
             )}
-
-            {/* Mobile Hamburger Drawer Button */}
-            <button
-              onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
-              className="btn btn-secondary show-on-mobile"
-              style={{ padding: '7px 11px', height: 36, borderRadius: 10 }}
-              aria-label="Open menu"
-            >
-              {mobileDrawerOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
           </div>
         </div>
 

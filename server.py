@@ -116,6 +116,20 @@ class DiseaseDetectRequest(BaseModel):
     language: str = "English"
 
 
+class CropExplanationRequest(BaseModel):
+    farmer_id: int
+    crop: str
+    nitrogen: float | None = 90.0
+    phosphorus: float | None = 42.0
+    potassium: float | None = 43.0
+    ph: float | None = 6.5
+    temperature: float | None = 25.0
+    humidity: float | None = 80.0
+    rainfall: float | None = 200.0
+    soil_moisture: float | None = 40.0
+    language: str = "English"
+
+
 # =========================================================
 # HEALTH CHECK
 # =========================================================
@@ -1088,6 +1102,457 @@ def predict_latest_crop(farmer_id: int):
             status_code=500,
             detail="Automatic crop prediction failed."
         )
+
+
+# =========================================================
+# AGRONOMIC REASONING & "WHY RECOMMENDED" ADVISORY
+# =========================================================
+
+CROP_NAMES_MULTILINGUAL = {
+    "rice": {
+        "English": "Rice / Paddy", "తెలుగు": "వరి (ధాన్యం)", "Telugu": "వరి (ధాన్యం)",
+        "हिंदी": "धान / चावल", "Hindi": "धान / चावल",
+        "தமிழ்": "நெல் (அரிசி)", "Tamil": "நெல் (அரிசி)",
+        "ಕನ್ನಡ": "ಭತ್ತ (ಅಕ್ಕಿ)", "Kannada": "ಭತ್ತ (ಅಕ್ಕಿ)",
+        "मराठी": "भात (तांदूळ)", "Marathi": "भात (तांदूळ)"
+    },
+    "cotton": {
+        "English": "Cotton", "తెలుగు": "పత్తి", "Telugu": "పత్తి",
+        "हिंदी": "कपास", "Hindi": "कपास",
+        "தமிழ்": "பருத்தி", "Tamil": "பருத்தி",
+        "ಕನ್ನಡ": "ಹತ್ತಿ", "Kannada": "ಹತ್ತಿ",
+        "मराठी": "कापूस", "Marathi": "कापूस"
+    },
+    "maize": {
+        "English": "Maize (Corn)", "తెలుగు": "మొక్కజొన్న", "Telugu": "మొక్కజొన్న",
+        "हिंदी": "मक्का", "Hindi": "मक्का",
+        "தமிழ்": "மக்காச்சோளம்", "Tamil": "மக்காச்சோளம்",
+        "ಕನ್ನಡ": "ಮೆಕ್ಕೆಜೋಳ", "Kannada": "ಮೆಕ್ಕೆಜೋಳ",
+        "मराठी": "मका", "Marathi": "मका"
+    },
+    "wheat": {
+        "English": "Wheat", "తెలుగు": "గోధుమ", "Telugu": "గోధుమ",
+        "हिंदी": "गेहूं", "Hindi": "गेहूं",
+        "தமிழ்": "கோதுமை", "Tamil": "கோதுமை",
+        "ಕನ್ನಡ": "ಗೋಧಿ", "Kannada": "ಗೋಧಿ",
+        "मराठी": "गहू", "Marathi": "गहू"
+    },
+    "chickpea": {
+        "English": "Chickpea (Bengal Gram)", "తెలుగు": "శనగలు", "Telugu": "శనగలు",
+        "हिंदी": "चना", "Hindi": "चना",
+        "தமிழ்": "கொண்டைக்கடலை", "Tamil": "கொண்டைக்கடலை",
+        "ಕನ್ನಡ": "ಕಡಲೆ", "Kannada": "ಕಡಲೆ",
+        "मराठी": "हरभरा (चना)", "Marathi": "हरभरा (चना)"
+    },
+    "kidneybeans": {
+        "English": "Kidney Beans (Rajma)", "తెలుగు": "రాజ్మా", "Telugu": "రాజ్మా",
+        "हिंदी": "राजमा", "Hindi": "राजमा",
+        "தமிழ்": "ராஜ்மா", "Tamil": "ராஜ்மா",
+        "ಕನ್ನಡ": "ರಾಜ್ಮಾ", "Kannada": "ರಾಜ್ಮಾ",
+        "मराठी": "राजमा", "Marathi": "राजमा"
+    },
+    "pigeonpeas": {
+        "English": "Pigeon Pea (Arhar / Tur)", "తెలుగు": "కందులు", "Telugu": "కందులు",
+        "हिंदी": "अरहर / तुअर", "Hindi": "अरहर / तुअर",
+        "தமிழ்": "துவரை", "Tamil": "துவரை",
+        "ಕನ್ನಡ": "ತೊಗರಿ", "Kannada": "ತೊಗರಿ",
+        "मराठी": "तूर", "Marathi": "तूर"
+    },
+    "mothbeans": {
+        "English": "Moth Bean", "తెలుగు": "బబ్బర్లు", "Telugu": "బబ్బర్లు",
+        "हिंदी": "मोठ", "Hindi": "मोठ",
+        "தமிழ்": "நரிப்பயறு", "Tamil": "நரிப்பயறு",
+        "ಕನ್ನಡ": "ಮಡಿಕೆ", "Kannada": "ಮಡಿಕೆ",
+        "मराठी": "मठ", "Marathi": "मठ"
+    },
+    "mungbean": {
+        "English": "Green Gram (Moong)", "తెలుగు": "పెసలు", "Telugu": "పెసలు",
+        "हिंदी": "मूंग दाल", "Hindi": "मूंग दाल",
+        "தமிழ்": "பாசிப்பயறு", "Tamil": "பாசிப்பயறு",
+        "ಕನ್ನಡ": "ಹೆಸರು ಕಾಳು", "Kannada": "ಹೆಸರು ಕಾಳು",
+        "मराठी": "मूग", "Marathi": "मूग"
+    },
+    "blackgram": {
+        "English": "Black Gram (Urad)", "తెలుగు": "మినుములు", "Telugu": "మినుములు",
+        "हिंदी": "उड़द", "Hindi": "उड़द",
+        "தமிழ்": "உளுந்து", "Tamil": "உளுந்து",
+        "ಕನ್ನಡ": "ಉದ್ದು", "Kannada": "ಉದ್ದು",
+        "मराठी": "उडीद", "Marathi": "उडीद"
+    },
+    "lentil": {
+        "English": "Lentil (Masoor)", "తెలుగు": "మసూర్ పప్పు", "Telugu": "మసూర్ పప్పు",
+        "हिंदी": "मसूर", "Hindi": "मसूर",
+        "தமிழ்": "மைசூர் பருப்பு", "Tamil": "மைசூர் பருப்பு",
+        "ಕನ್ನಡ": "ಮಸೂರ ಬೇಳೆ", "Kannada": "ಮಸೂರ ಬೇಳೆ",
+        "मराठी": "मसूर", "Marathi": "मसूर"
+    },
+    "pomegranate": {
+        "English": "Pomegranate", "తెలుగు": "దానిమ్మ", "Telugu": "దానిమ్మ",
+        "हिंदी": "अनार", "Hindi": "अनार",
+        "தமிழ்": "மாதுளை", "Tamil": "மாதுளை",
+        "ಕನ್ನಡ": "ದಾಳಿಂಬೆ", "Kannada": "ದಾಳಿಂಬೆ",
+        "मराठी": "डाळिंब", "Marathi": "डाळिंब"
+    },
+    "banana": {
+        "English": "Banana", "తెలుగు": "అరటి", "Telugu": "అరటి",
+        "हिंदी": "केला", "Hindi": "केला",
+        "தமிழ்": "வாழை", "Tamil": "வாழை",
+        "ಕನ್ನಡ": "ಬಾಳೆಹಣ್ಣು", "Kannada": "ಬಾಳೆಹಣ್ಣು",
+        "मराठी": "केळी", "Marathi": "केळी"
+    },
+    "mango": {
+        "English": "Mango", "తెలుగు": "మామిడి", "Telugu": "మామిడి",
+        "हिंदी": "आम", "Hindi": "आम",
+        "தமிழ்": "மாம்பழம்", "Tamil": "மாம்பழம்",
+        "ಕನ್ನಡ": "ಮಾವಿನಹಣ್ಣು", "Kannada": "ಮಾವಿನಹಣ್ಣು",
+        "मराठी": "आंबा", "Marathi": "आंबा"
+    },
+    "grapes": {
+        "English": "Grapes", "తెలుగు": "ద్రాక్ష", "Telugu": "ద్రాక్ష",
+        "हिंदी": "अंगूर", "Hindi": "अंगूर",
+        "தமிழ்": "திராட்சை", "Tamil": "திராட்சை",
+        "ಕನ್ನಡ": "ದ್ರಾಕ್ಷಿ", "Kannada": "ದ್ರಾಕ್ಷಿ",
+        "मराठी": "द्राक्षे", "Marathi": "द्राक्षे"
+    },
+    "watermelon": {
+        "English": "Watermelon", "తెలుగు": "పుచ్చకాయ", "Telugu": "పుచ్చకాయ",
+        "हिंदी": "तरबूज", "Hindi": "तरबूज",
+        "தமிழ்": "தர்பூசணி", "Tamil": "தர்பூசணி",
+        "ಕನ್ನಡ": "ಕಲ್ಲಂಗಡಿ", "Kannada": "ಕಲ್ಲಂಗಡಿ",
+        "मराठी": "कलिंगड", "Marathi": "कलिंगड"
+    },
+    "apple": {
+        "English": "Apple", "తెలుగు": "యాపిల్", "Telugu": "యాపిల్",
+        "हिंदी": "सेब", "Hindi": "सेब",
+        "தமிழ்": "ஆப்பிள்", "Tamil": "ஆப்பிள்",
+        "ಕನ್ನಡ": "ಸೇಬು", "Kannada": "ಸೇಬು",
+        "मराठी": "सफरचंद", "Marathi": "सफरचंद"
+    },
+    "orange": {
+        "English": "Orange", "తెలుగు": "నారింజ / బత్తాయి", "Telugu": "నారింజ / బత్తాయి",
+        "हिंदी": "संतरा / मौसमी", "Hindi": "संतरा / मौसमी",
+        "தமிழ்": "ஆரஞ்சு", "Tamil": "ஆரஞ்சு",
+        "ಕನ್ನಡ": "ಕಿತ್ತಳೆ", "Kannada": "ಕಿತ್ತಳೆ",
+        "मराठी": "संत्रे / मोसंबी", "Marathi": "संत्रे / मोसंबी"
+    },
+    "papaya": {
+        "English": "Papaya", "తెలుగు": "బొప్పాయి", "Telugu": "బొప్పాయి",
+        "हिंदी": "पपीता", "Hindi": "पपीता",
+        "தமிழ்": "பப்பாளி", "Tamil": "பப்பாளி",
+        "ಕನ್ನಡ": "ಪಪ್ಪಾಯಿ", "Kannada": "ಪಪ್ಪಾಯಿ",
+        "मराठी": "पपई", "Marathi": "पपई"
+    },
+    "coconut": {
+        "English": "Coconut", "తెలుగు": "కొబ్బరి", "Telugu": "కొబ్బరి",
+        "हिंदी": "नारियल", "Hindi": "नारियल",
+        "தமிழ்": "தென்னை", "Tamil": "தென்னை",
+        "ಕನ್ನಡ": "ತೆಂಗಿನಕಾಯಿ", "Kannada": "ತೆಂಗಿನಕಾಯಿ",
+        "मराठी": "नारळ", "Marathi": "नारळ"
+    },
+    "jute": {
+        "English": "Jute", "తెలుగు": "జనపనార", "Telugu": "జనపనార",
+        "हिंदी": "पटसन / जूट", "Hindi": "पटसन / जूट",
+        "தமிழ்": "சணல்", "Tamil": "சணல்",
+        "ಕನ್ನಡ": "ಸೆಣಬು", "Kannada": "ಸೆಣಬು",
+        "मराठी": "ताग", "Marathi": "ताग"
+    },
+    "coffee": {
+        "English": "Coffee", "తెలుగు": "కాఫీ", "Telugu": "కాఫీ",
+        "हिंदी": "कॉफी", "Hindi": "कॉफी",
+        "தமிழ்": "காபி", "Tamil": "காபி",
+        "ಕನ್ನಡ": "ಕಾಫಿ", "Kannada": "ಕಾಫಿ",
+        "मराठी": "कॉफी", "Marathi": "कॉफी"
+    }
+}
+
+
+def get_native_crop_name(crop: str, language: str) -> str:
+    crop_lower = crop.lower().strip()
+    table = CROP_NAMES_MULTILINGUAL.get(crop_lower)
+    if not table:
+        return crop.capitalize()
+    return table.get(language) or table.get("English") or crop.capitalize()
+
+
+def build_agronomic_explanation(
+    crop: str,
+    n: float,
+    p: float,
+    k: float,
+    ph: float,
+    temp: float,
+    hum: float,
+    rain: float,
+    moisture: float,
+    language: str,
+    farmer_name: str = "రైతు సోదరా"
+) -> dict:
+    crop_lower = crop.lower().strip()
+    native_crop = get_native_crop_name(crop_lower, language)
+
+    # Determine why other crops are less suitable
+    contrast_reason = ""
+    if rain > 150 or moisture > 60:
+        contrast_reason = "Cotton or Chickpea would suffer root-rot and boll shedding due to excessive water/rainfall."
+    elif rain < 90 or moisture < 35:
+        contrast_reason = "Rice or Sugarcane cannot thrive here because they require heavy standing water and high moisture."
+    elif ph < 6.0:
+        contrast_reason = "Alkaline-loving crops will suffer nutrient lockout in acidic soil."
+    elif ph > 7.5:
+        contrast_reason = "Acid-loving crops like tea/coffee will experience severe chlorosis in alkaline soil."
+    else:
+        contrast_reason = "Alternative crops have lower yield potential under this specific soil NPK balance."
+
+    # Language matching
+    is_te = "తెలుగు" in language or "telugu" in language.lower()
+    is_hi = "हिंदी" in language or "hindi" in language.lower()
+    is_ta = "தமிழ்" in language or "tamil" in language.lower()
+    is_kn = "ಕನ್ನಡ" in language or "kannada" in language.lower()
+    is_mr = "मराठी" in language or "marathi" in language.lower()
+
+    if is_te:
+        why_text = f"""🌾 **{native_crop} పంటను ఎందుకు ఎంచుకోవాలి? (AI శాస్త్రీయ కారణం):**
+
+1. **నేల పోషకాల అనుకూలత (Soil NPK Match):**
+   - మీ నేలలో నత్రజని (N) **{n:.0f} kg/ha**, భాస్వరం (P) **{p:.0f} kg/ha**, మరియు పొటాష్ (K) **{k:.0f} kg/ha** గా నమోదయ్యాయి. ఈ నిష్పత్తి {native_crop} పంట వేర్ల వ్యాప్తికి, పిలకలు/కొమ్మలు బలపడటానికి సంపూర్ణంగా అనుకూలం.
+   - నేల pH విలువ **{ph:.1f}** ఉంది, ఇది పోషకాలను వేర్లు సులభంగా పీల్చుకోవడానికి సరైన శ్రేణిలో ఉంది.
+
+2. **వాతావరణం & వర్షపాతం (Climate & Moisture Match):**
+   - ప్రస్తుత ఉష్ణోగ్రత **{temp:.1f}°C**, గాలిలో తేమ **{hum:.0f}%**, మరియు వర్షపాతం **{rain:.0f} mm**. నేల తేమ **{moisture:.0f}%** వద్ద ఉంది. ఈ పరిస్థితుల్లో {native_crop} పంట ఎటువంటి వాతావరణ ఒత్తిడికి గురికాకుండా అత్యధిక దిగుబడిని ఇస్తుంది.
+
+3. **ఇతర పంటల కంటే ఎందుకు మేలు? (Crop Contrast):**
+   - {'అధిక వర్షపాతం/తేమ వల్ల పత్తి లేదా పప్పుధాన్యాల పంటల్లో వేరుకుళ్లు తెగులు వచ్చే ప్రమాదం ఉంది. కానీ ఈ తేమ ' + native_crop + ' పంటకు వరం.' if (rain > 130 or moisture > 50) else 'తక్కువ వర్షపాతం ఉన్నప్పుడు ఎక్కువ నీరు కోరే పంటలు ఎండిపోతాయి, కానీ ' + native_crop + ' ఈ వాతావరణాన్ని తట్టుకుంటుంది.'}
+
+4. **రైతుకు వెంటనే చేయవలసిన 3 ముఖ్యమైన పనులు:**
+   - 1. **విత్తన శుద్ధి:** కిలో విత్తనానికి 2.5 గ్రాముల కార్బండజిమ్ లేదా 10 గ్రాముల ట్రైకోడెర్మా విరిడేతో విత్తన శుద్ధి చేయండి.
+   - 2. **ఎరువుల యాజమాన్యం:** ఆఖరి దుక్కిలో సింగిల్ సూపర్ ఫాస్ఫేట్ (SSP) లేదా DAP ని పూర్తి మోతాదులో వేయండి.
+   - 3. **నీటి తడులు:** నేల తేమ 35% కన్నా తగ్గినప్పుడు మాత్రమే ఉదయం వేళ తేలికపాటి తడి అందించండి."""
+
+        spoken_script = (
+            f"నమస్కారం {farmer_name}! మీ పొలం నేల పరీక్ష మరియు వాతావరణ పరిస్థితుల ఆధారంగా AgriSense AI {native_crop} పంటను ఉత్తమమైనదిగా సిఫార్సు చేసింది. "
+            f"మీ నేలలో నత్రజని {n:.0f}, pH {ph:.1f} మరియు వర్షపాతం {rain:.0f} మిల్లీమీటర్లు ఉన్నాయి. "
+            f"ఈ పరిస్థితుల్లో {native_crop} పంట అత్యధిక దిగుబడిని ఇస్తుంది. "
+            f"ఆఖరి దుక్కిలో సేంద్రియ ఎరువులు వేసి, విత్తన శుద్ధి చేసిన తర్వాత మాత్రమే విత్తుకోండి. "
+            f"మరిన్ని వివరాలు మరియు ఎరువుల ప్రణాళిక కోసం మెనూలోని ఫీచర్లను ఉపయోగించండి. AgriSense AI మీకు మంచి లాభాలను కోరుకుంటోంది!"
+        )
+
+        actionable = [
+            f"ఆఖరి దుక్కిలో ఎకరాకు 4-5 ట్రాలీల పశువుల ఎరువు వేయండి",
+            f"ట్రైకోడెర్మా విరిడేతో తప్పనిసరిగా విత్తన శుద్ధి చేసుకోండి",
+            f"నేల తేమ 35% కన్నా తగ్గినప్పుడు మాత్రమే ఉదయం పూట నీరు పెట్టండి"
+        ]
+
+    elif is_hi:
+        why_text = f"""🌾 **{native_crop} की ही सिफारिश क्यों? (AI कृषि वैज्ञानिक विश्लेषण):**
+
+1. **मृदा पोषक तत्वों की अनुकूलता (NPK & pH):**
+   - आपके खेत में नाइट्रोजन (N) **{n:.0f} kg/ha**, फॉस्फोरस (P) **{p:.0f} kg/ha**, और पोटाश (K) **{k:.0f} kg/ha** उपलब्ध है। यह संतुलन {native_crop} की जड़ों के विकास और बंपर पैदावार के लिए सर्वोत्तम है।
+   - मिट्टी का pH मान **{ph:.1f}** है, जो इस फसल में सूक्ष्म पोषक तत्वों के अवशोषण के लिए आदर्श है।
+
+2. **जलवायु व वर्षा की स्थिति (Weather & Moisture):**
+   - वर्तमान तापमान **{temp:.1f}°C**, हवा में आर्द्रता **{hum:.0f}%**, और वर्षा **{rain:.0f} mm** दर्ज हुई है। मिट्टी की नमी **{moisture:.0f}%** होने से फसल सूखे या अत्यधिक नमी के तनाव से सुरक्षित रहेगी।
+
+3. **अन्य फसलों की तुलना में श्रेष्ठता:**
+   - {'अधिक नमी व वर्षा में दलहनी व कपास जैसी फसलों में जड़ गलन की समस्या आती है, जबकि ' + native_crop + ' इस परिस्थिति में सर्वोत्तम परिणाम देगी।' if (rain > 130 or moisture > 50) else 'कम पानी में अधिक पानी चाहने वाली फसलें सूख जाती हैं, इसलिए ' + native_crop + ' सबसे सुरक्षित विकल्प है।'}
+
+4. **किसान भाइयों के लिए तुरंत करने योग्य 3 कार्य:**
+   - 1. **बीजोपचार:** बुवाई से पहले प्रति किलो बीज में 2.5 ग्राम थीरम या ट्राइकोडर्मा विरिडी मिलाकर बीजोपचार अवश्य करें।
+   - 2. **आधार खाद:** अंतिम जुताई के समय अनुशंसित फॉस्फोरस (DAP/SSP) की पूरी मात्रा खेत में मिला दें।
+   - 3. **सिंचाई प्रबंधन:** मिट्टी की नमी 35% से नीचे जाने पर ही सुबह के समय हल्की सिंचाई करें।"""
+
+        spoken_script = (
+            f"नमस्ते {farmer_name}! आपकी मिट्टी की जांच और मौसम के आधार पर AgriSense AI ने {native_crop} को आपकी पहली पसंद चुना है। "
+            f"आपकी मिट्टी में pH {ph:.1f}, नाइट्रोजन {n:.0f} और वर्षा {rain:.0f} मिलीमीटर है। "
+            f"इस स्थिति में {native_crop} फसल सबसे अधिक पैदावार और लाभ देगी। "
+            f"बुवाई से पहले बीजोपचार जरूर करें और संतुलित उर्वरक डालें। AgriSense AI की ओर से बंपर पैदावार की शुभकामनाएं!"
+        )
+
+        actionable = [
+            f"बुवाई पूर्व प्रति एकड़ 4-5 ट्रॉली गोबर की सड़ी खाद डालें",
+            f"ट्राइकोडर्मा विरिडी से अनिवार्य रूप से बीजोपचार करें",
+            f"मिट्टी की नमी 35% से कम होने पर ही सुबह हल्की सिंचाई करें"
+        ]
+
+    elif is_ta:
+        why_text = f"""🌾 **{native_crop} பயிர் ஏன் பரிந்துரைக்கப்படுகிறது? (AI வேளாண் அறிக்கை):**
+
+1. **மண் சத்துக்களின் பொருத்தம் (NPK & pH):**
+   - உங்கள் மண்ணில் தழைச்சத்து (N) **{n:.0f}**, மணிச்சத்து (P) **{p:.0f}**, சாம்பல்சத்து (K) **{k:.0f}** மற்றும் pH **{ph:.1f}** உள்ளது. இது {native_crop} பயிர் சிறப்பாக வளர முழுமையாக பொருந்துகிறது.
+2. **வானிலை மற்றும் மழைப்பொழிவு:**
+   - வெப்பநிலை **{temp:.1f}°C**, ஈரப்பதம் **{hum:.0f}%**, மழைப்பொழிவு **{rain:.0f} mm**. இதனால் பயிர் நோய்த்தொற்றின்றி செழிப்பாக வளரும்.
+3. **விவசாயி செய்ய வேண்டிய முக்கிய 3 பணிகள்:**
+   - 1. விதை நேர்த்தி: டிரைக்கோடெர்மா விரிடி கொண்டு விதை நேர்த்தி செய்யவும்.
+   - 2. உர மேலாண்மை: கடைசி உழவில் மக்கிய தொழு உரம் இடவும்.
+   - 3. பாசனம்: காலை வேளையில் தேவைப்படும் போது மட்டும் பாசனம் செய்யவும்."""
+
+        spoken_script = (
+            f"வணக்கம் {farmer_name}! உங்கள் பண்ணை மண் மற்றும் வானிலை நிலவரத்தின்படி AgriSense AI {native_crop} பயிரை பரிந்துரைத்துள்ளது. "
+            f"மண் pH {ph:.1f} மற்றும் தழைச்சத்து {n:.0f} உள்ளதால் இப்பயிர் நல்ல மகசூல் தரும். "
+            f"விதை நேர்த்தி செய்து விதைக்கவும். AgriSense AI உங்களுக்கு வாழ்த்துக்களை தெரிவிக்கிறது!"
+        )
+        actionable = ["விதை நேர்த்தி செய்யவும்", "கடைசி உழவில் தொழு உரம் இடவும்", "தேவைக்கேற்ப பாசனம் செய்யவும்"]
+
+    elif is_kn:
+        why_text = f"""🌾 **{native_crop} ಬೆಳೆಯನ್ನೇ ಏಕೆ ಆಯ್ಕೆ ಮಾಡಬೇಕು? (AI ಕೃಷಿ ವರದಿ):**
+
+1. **ಮಣ್ಣಿನ ಪೋಷಕಾಂಶಗಳ ಸಮತೋಲನ (NPK & pH):**
+   - ನಿಮ್ಮ ಮಣ್ಣಿನಲ್ಲಿ ಸಾರಜನಕ (N) **{n:.0f}**, ರಂಜಕ (P) **{p:.0f}**, ಪೊಟ್ಯಾಷ್ (K) **{k:.0f}** ಮತ್ತು pH **{ph:.1f}** ಇದೆ. ಇದು {native_crop} ಬೆಳೆಗೆ ಅತ್ಯುತ್ತಮವಾಗಿದೆ.
+2. **ಹವಾಮಾನ ಮತ್ತು ಮಳೆ:**
+   - ತಾಪಮಾನ **{temp:.1f}°C**, ಆರ್ದ್ರತೆ **{hum:.0f}%**, ಮಳೆ **{rain:.0f} mm** ಇದೆ.
+3. **ರೈತರು ತಕ್ಷಣ ಮಾಡಬೇಕಾದ 3 ಕಾರ್ಯಗಳು:**
+   - 1. ಬೀಜೋಪಚಾರ: ಟ್ರೈಕೋಡರ್ಮಾ ಮೂಲಕ ಬೀಜೋಪಚಾರ ಮಾಡಿ.
+   - 2. ರಸಗೊಬ್ಬರ: ಕೊನೆಯ ಉಳುಮೆಯಲ್ಲಿ ಕೊಟ್ಟಿಗೆ ಗೊಬ್ಬರ ಹಾಕಿ.
+   - 3. ನೀರಾವರಿ: ಬೆಳಗಿನ ಜಾವದಲ್ಲಿ ಮಾತ್ರ ನೀರು ಕೊಡಿ."""
+
+        spoken_script = (
+            f"ನಮಸ್ಕಾರ {farmer_name}! ನಿಮ್ಮ ಜಮೀನಿನ ಮಣ್ಣಿನ ಪರೀಕ್ಷೆಯ ಪ್ರಕಾರ AgriSense AI {native_crop} ಬೆಳೆಯು ಸೂಕ್ತವೆಂದು ಶಿಫಾರಸು ಮಾಡಿದೆ. "
+            f"ಮಣ್ಣಿನ pH {ph:.1f} ಮತ್ತು ಸಾರಜನಕ {n:.0f} ಇರುವುದರಿಂದ ಇದು ಅಧಿಕ ಇಳುವರಿ ನೀಡುತ್ತದೆ. "
+            f"ಉತ್ತಮ ಇಳುವರಿಗಾಗಿ AgriSense AI ಕಡೆಯಿಂದ ಹಾರ್ದಿಕ ಶುಭಾಶಯಗಳು!"
+        )
+        actionable = ["ಬೀಜೋಪಚಾರ ಮಾಡಿ ಬಿತ್ತನೆ ಮಾಡಿ", "ಕೊಟ್ಟಿಗೆ ಗೊಬ್ಬರ ಹಾಕಿ", "ಅಗತ್ಯವಿದ್ದಾಗ ನೀರು ಹಾಯಿಸಿ"]
+
+    elif is_mr:
+        why_text = f"""🌾 **{native_crop} पिकाचीच शिफारस का? (AI कृषी तज्ज्ञ सल्ला):**
+
+1. **मातीतील पोषक तत्वांचे प्रमाण (NPK & pH):**
+   - आपल्या शेतात नत्र (N) **{n:.0f}**, स्फुरद (P) **{p:.0f}**, पालाश (K) **{k:.0f}** आणि pH **{ph:.1f}** आहे. हे {native_crop} पिकासाठी परिपूर्ण आहे.
+2. **हवामान आणि पाऊस:**
+   - तापमान **{temp:.1f}°C**, आर्द्रता **{hum:.0f}%**, पाऊस **{rain:.0f} mm** आहे.
+3. **शेतकऱ्यांनी त्वरित करावयाच्या ३ गोष्टी:**
+   - १. बीजप्रक्रिया: ट्रायकोडर्मा विरिडीने बीजप्रक्रिया करा.
+   - २. खत व्यवस्थापन: शेवटच्या नांगरणीच्या वेळी शेणखत टाका.
+   - ३. पाणी व्यवस्थापन: सकाळी हलके पाणी द्या."""
+
+        spoken_script = (
+            f"नमस्कार {farmer_name}! आपल्या जमिनीच्या माती परीक्षणानुसार AgriSense AI ने {native_crop} पिकाची शिफारस केली आहे. "
+            f"मातीचा pH {ph:.1f} आणि नत्र {n:.0f} असल्याने हे पीक उत्तम उत्पादन देईल. "
+            f"चांगल्या उत्पादनासाठी AgriSense AI तर्फे शुभेच्छा!"
+        )
+        actionable = ["बीजप्रक्रिया करूनच पेरणी करा", "चांगले कुजलेले शेणखत वापरा", "सकाळच्या वेळी पाणी द्या"]
+
+    else:
+        why_text = f"""🌾 **Why {native_crop} is Highly Recommended for Your Soil:**
+
+1. **Optimal Soil Chemistry & NPK Match:**
+   - Your root-zone soil has Nitrogen (N) at **{n:.0f} kg/ha**, Phosphorus (P) at **{p:.0f} kg/ha**, and Potassium (K) at **{k:.0f} kg/ha** with a pH of **{ph:.1f}**. This balanced ratio creates an ideal metabolic environment for {native_crop} without nutrient lockup.
+
+2. **Favorable Climate & Moisture Thresholds:**
+   - Current ambient temperature of **{temp:.1f}°C**, atmospheric humidity of **{hum:.0f}%**, rainfall of **{rain:.0f} mm**, and root-zone moisture of **{moisture:.0f}%** provide the optimal growing degree days (GDD) for strong vegetative branching and heavy panicle/boll filling.
+
+3. **Why Non-Recommended Crops Fall Short:**
+   - {contrast_reason}
+
+4. **Actionable Farm Directives for Highest Yield:**
+   - 1. **Seed Treatment:** Inoculate seed lots with Trichoderma viride (10g/kg) or appropriate fungicide to prevent damping-off.
+   - 2. **Basal Dose:** Apply 100% of required single super phosphate (SSP) or DAP during the final land preparation.
+   - 3. **Irrigation Strategy:** Water only when soil moisture drops below 35% in early morning hours to conserve water and prevent foliar mildew."""
+
+        spoken_script = (
+            f"Hello {farmer_name}! Based on your farm's soil analysis and local climate telemetry, AgriSense AI strongly recommends {native_crop} as your highest yielding crop. "
+            f"Your soil pH of {ph:.1f} and nitrogen level of {n:.0f} kilograms per hectare provide ideal vegetative nutrition. "
+            f"Treat your seeds before sowing and apply basal compost during final land preparation for maximum yield. "
+            f"AgriSense AI wishes you a bountiful and profitable harvest!"
+        )
+        actionable = [
+            f"Apply 4-5 metric tons of well-rotted farmyard manure per acre during final plowing",
+            f"Treat seeds with Trichoderma viride or seed dressing agent to prevent seedling damping-off",
+            f"Irrigate during early morning hours only when root-zone moisture drops below 35%"
+        ]
+
+    # Close alternatives
+    alternatives = []
+    if crop_lower == "rice":
+        alternatives = [{"crop": "maize", "name": get_native_crop_name("maize", language), "match": 88}, {"crop": "jute", "name": get_native_crop_name("jute", language), "match": 82}]
+    elif crop_lower == "cotton":
+        alternatives = [{"crop": "pigeonpeas", "name": get_native_crop_name("pigeonpeas", language), "match": 89}, {"crop": "mungbean", "name": get_native_crop_name("mungbean", language), "match": 84}]
+    elif crop_lower == "maize":
+        alternatives = [{"crop": "cotton", "name": get_native_crop_name("cotton", language), "match": 86}, {"crop": "soybean", "name": get_native_crop_name("soybean", language), "match": 82}]
+    elif crop_lower == "wheat":
+        alternatives = [{"crop": "chickpea", "name": get_native_crop_name("chickpea", language), "match": 91}, {"crop": "lentil", "name": get_native_crop_name("lentil", language), "match": 85}]
+    elif crop_lower == "chickpea":
+        alternatives = [{"crop": "lentil", "name": get_native_crop_name("lentil", language), "match": 90}, {"crop": "wheat", "name": get_native_crop_name("wheat", language), "match": 84}]
+    else:
+        alternatives = [{"crop": "maize", "name": get_native_crop_name("maize", language), "match": 85}, {"crop": "mungbean", "name": get_native_crop_name("mungbean", language), "match": 81}]
+
+    return {
+        "status": "success",
+        "crop": crop,
+        "native_crop": native_crop,
+        "language": language,
+        "why_recommended": why_text,
+        "spoken_script": spoken_script,
+        "actionable_advice": actionable,
+        "alternatives": alternatives
+    }
+
+
+@app.post("/crop/explain")
+def explain_crop_recommendation(data: CropExplanationRequest):
+    """
+    Provide deep, structured agronomic explanation of WHY a specific crop
+    was recommended for this farmer's exact soil test and climate values.
+    Returns markdown explanation and native spoken script strictly in farmer's language.
+    """
+    conn = get_connection()
+    farmer_name = "Farmer"
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, language FROM farmers WHERE id = ?", (data.farmer_id,))
+        row = cursor.fetchone()
+        if row:
+            farmer_name = row["name"]
+    finally:
+        conn.close()
+
+    lang = data.language or "English"
+    n = float(data.nitrogen if data.nitrogen is not None else 90.0)
+    p = float(data.phosphorus if data.phosphorus is not None else 42.0)
+    k = float(data.potassium if data.potassium is not None else 43.0)
+    ph = float(data.ph if data.ph is not None else 6.5)
+    temp = float(data.temperature if data.temperature is not None else 25.0)
+    hum = float(data.humidity if data.humidity is not None else 80.0)
+    rain = float(data.rainfall if data.rainfall is not None else 200.0)
+    moisture = float(data.soil_moisture if data.soil_moisture is not None else 40.0)
+
+    # Base localized explanation
+    result = build_agronomic_explanation(
+        crop=data.crop,
+        n=n, p=p, k=k, ph=ph,
+        temp=temp, hum=hum, rain=rain, moisture=moisture,
+        language=lang,
+        farmer_name=farmer_name
+    )
+
+    # Optional Gemini enhancement if API key exists and responds within 4 seconds
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        try:
+            client = genai.Client(api_key=api_key)
+            prompt = f"""You are AgriSense AI expert Indian Agronomist.
+Farmer Name: {farmer_name}
+Selected Language: {lang}
+Recommended Crop: {data.crop}
+Soil Data: Nitrogen={n}, Phosphorus={p}, Potassium={k}, pH={ph}
+Climate Data: Temperature={temp}°C, Humidity={hum}%, Rainfall={rain}mm, Soil Moisture={moisture}%
+
+Provide a concise, inspiring explanation for the farmer in {lang}:
+1. Exactly WHY {data.crop} was chosen for these soil and climate values.
+2. Why contrasting crops would suffer (e.g. root rot in waterlogging or water stress).
+3. 3 practical immediate next steps (seed treatment, basal fertilizer, water depth).
+Write strictly in {lang} script. Do not write in English unless using scientific units."""
+
+            for cand in ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest"]:
+                try:
+                    res = client.models.generate_content(model=cand, contents=prompt)
+                    if res and res.text and len(res.text) > 100:
+                        result["why_recommended"] = res.text
+                        break
+                except Exception:
+                    continue
+        except Exception as ge:
+            print("Gemini explanation fallback:", ge)
+
+    return result
 
 
 # =========================================================

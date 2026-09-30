@@ -17,7 +17,9 @@ import {
   Droplets,
   Tractor,
   CreditCard,
-  HeartHandshake
+  HeartHandshake,
+  Volume2,
+  Square
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 import { api } from '../api';
@@ -172,6 +174,43 @@ export default function GovtSchemes({ farmer, language }) {
   const [primaryCrop, setPrimaryCrop] = useState("Cotton");
   const [aiChecking, setAiChecking] = useState(false);
   const [aiResult, setAiResult] = useState(null);
+  const [speakingSchemeId, setSpeakingSchemeId] = useState(null);
+
+  const handleSpeakSchemeText = (schemeId, text) => {
+    if (!('speechSynthesis' in window)) return;
+    if (speakingSchemeId === schemeId) {
+      window.speechSynthesis.cancel();
+      setSpeakingSchemeId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/[*#_`]/g, '').trim();
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const langMap = {
+      'తెలుగు': 'te-IN', 'Telugu': 'te-IN',
+      'हिंदी': 'hi-IN', 'Hindi': 'hi-IN',
+      'தமிழ்': 'ta-IN', 'Tamil': 'ta-IN',
+      'ಕನ್ನಡ': 'kn-IN', 'Kannada': 'kn-IN',
+      'मराठी': 'mr-IN', 'Marathi': 'mr-IN',
+      'English': 'en-IN'
+    };
+    const targetTag = langMap[language] || 'en-IN';
+    utterance.lang = targetTag;
+    utterance.rate = 0.92;
+
+    const voices = window.speechSynthesis.getVoices() || [];
+    const matchedVoice = voices.find(v => v.lang.toLowerCase() === targetTag.toLowerCase())
+      || voices.find(v => v.lang.toLowerCase().startsWith(targetTag.split('-')[0]))
+      || voices.find(v => v.name.toLowerCase().includes(language.toLowerCase()));
+
+    if (matchedVoice) utterance.voice = matchedVoice;
+
+    utterance.onend = () => setSpeakingSchemeId(null);
+    utterance.onerror = () => setSpeakingSchemeId(null);
+
+    setSpeakingSchemeId(schemeId);
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Filter schemes
   const filteredSchemes = NATIONAL_SCHEMES_DATA.filter(sc => {
@@ -455,6 +494,32 @@ export default function GovtSchemes({ farmer, language }) {
                         {scheme.name}
                       </h3>
                     </div>
+
+                    {/* 🔊 Speak Scheme Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleSpeakSchemeText(
+                        scheme.id,
+                        `Scheme: ${scheme.name}. Benefit: ${scheme.benefit}. Eligibility: ${scheme.eligibility}. Documents: ${scheme.documents}. Helpline: ${scheme.helpline}.`
+                      )}
+                      className="btn btn-secondary"
+                      style={{
+                        padding: '5px 10px',
+                        borderRadius: 10,
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        color: speakingSchemeId === scheme.id ? '#dc2626' : '#15803d',
+                        borderColor: speakingSchemeId === scheme.id ? '#fca5a5' : '#86efac',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        flexShrink: 0
+                      }}
+                      title="Listen to Scheme"
+                    >
+                      {speakingSchemeId === scheme.id ? <Square size={13} /> : <Volume2 size={13} />}
+                      <span>{speakingSchemeId === scheme.id ? 'Stop' : '🔊 Listen'}</span>
+                    </button>
                   </div>
 
                   <div style={{ background: scheme.badgeBg, color: scheme.badgeColor, padding: '10px 14px', borderRadius: 12, fontSize: 13, fontWeight: 700, marginBottom: 12 }}>
@@ -477,28 +542,31 @@ export default function GovtSchemes({ farmer, language }) {
                   </div>
                 </div>
 
-                <a 
-                  href={scheme.portal}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn"
-                  style={{
-                    background: scheme.badgeColor,
-                    color: 'white',
-                    fontWeight: 800,
-                    fontSize: 13,
-                    padding: '10px 16px',
-                    borderRadius: 12,
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 6
-                  }}
-                >
-                  <span>Apply on Official Portal</span>
-                  <ExternalLink size={14} />
-                </a>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <a 
+                    href={scheme.portal}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn"
+                    style={{
+                      flex: 1,
+                      background: scheme.badgeColor,
+                      color: 'white',
+                      fontWeight: 800,
+                      fontSize: 13,
+                      padding: '10px 14px',
+                      borderRadius: 12,
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6
+                    }}
+                  >
+                    <span>Apply on Portal</span>
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
               </div>
             ))}
           </div>
@@ -528,28 +596,55 @@ export default function GovtSchemes({ farmer, language }) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 16 }}>
-            {(STATE_SCHEMES_MAP[selectedState] || []).map((sc, i) => (
-              <div 
-                key={i}
-                className="agri-card"
-                style={{ padding: 20, borderRadius: 16, border: '1.5px solid #93c5fd' }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <Award size={20} color="#1e40af" />
-                  <h4 style={{ fontSize: 16, fontWeight: 800, color: '#1e40af', margin: 0 }}>
-                    {sc.name}
-                  </h4>
-                </div>
+            {(STATE_SCHEMES_MAP[selectedState] || []).map((sc, i) => {
+              const stateSchemeKey = `state_${selectedState}_${i}`;
+              const isSpeaking = speakingSchemeId === stateSchemeKey;
+              return (
+                <div 
+                  key={i}
+                  className="agri-card"
+                  style={{ padding: 20, borderRadius: 16, border: '1.5px solid #93c5fd' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Award size={20} color="#1e40af" />
+                      <h4 style={{ fontSize: 16, fontWeight: 800, color: '#1e40af', margin: 0 }}>
+                        {sc.name}
+                      </h4>
+                    </div>
 
-                <div style={{ background: '#eff6ff', color: '#1e3a8a', padding: '10px 12px', borderRadius: 10, fontSize: 13, fontWeight: 600, marginBottom: 12 }}>
-                  💰 {sc.benefit}
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSpeakSchemeText(stateSchemeKey, `State scheme: ${sc.name}. Benefit: ${sc.benefit}. Official Portal: ${sc.portal}`)}
+                      className="btn btn-secondary"
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: 8,
+                        fontSize: 11,
+                        fontWeight: 800,
+                        color: isSpeaking ? '#dc2626' : '#1e40af',
+                        borderColor: isSpeaking ? '#fca5a5' : '#bfdbfe',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4
+                      }}
+                      title="Listen to Scheme"
+                    >
+                      {isSpeaking ? <Square size={12} /> : <Volume2 size={12} />}
+                      <span>{isSpeaking ? 'Stop' : '🔊'}</span>
+                    </button>
+                  </div>
 
-                <div style={{ fontSize: 12, color: '#64748b' }}>
-                  Official Portal: <strong style={{ color: '#1e40af' }}>{sc.portal}</strong>
+                  <div style={{ background: '#eff6ff', color: '#1e3a8a', padding: '10px 12px', borderRadius: 10, fontSize: 13, fontWeight: 600, marginBottom: 12 }}>
+                    💰 {sc.benefit}
+                  </div>
+
+                  <div style={{ fontSize: 12, color: '#64748b' }}>
+                    Official Portal: <strong style={{ color: '#1e40af' }}>{sc.portal}</strong>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -634,11 +729,33 @@ export default function GovtSchemes({ farmer, language }) {
           {/* AI Output Card */}
           {aiResult && (
             <div className="agri-card" style={{ padding: 24, borderRadius: 20, background: '#faf5ff', border: '2px solid #d8b4fe' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <Sparkles size={20} color="#7c3aed" />
-                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#6b21a8', margin: 0 }}>
-                  🤖 Personalized Scheme & Subsidy Report
-                </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Sparkles size={20} color="#7c3aed" />
+                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#6b21a8', margin: 0 }}>
+                    🤖 Personalized Scheme & Subsidy Report
+                  </h3>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSpeakSchemeText('ai_report', aiResult)}
+                  className="btn btn-secondary"
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: speakingSchemeId === 'ai_report' ? '#dc2626' : '#7c3aed',
+                    borderColor: speakingSchemeId === 'ai_report' ? '#fca5a5' : '#d8b4fe',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                >
+                  {speakingSchemeId === 'ai_report' ? <Square size={14} /> : <Volume2 size={14} />}
+                  <span>{speakingSchemeId === 'ai_report' ? 'Stop Voice' : '🔊 Listen to Report'}</span>
+                </button>
               </div>
               <div style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.6, color: '#1e293b' }}>
                 {aiResult}

@@ -71,6 +71,7 @@ export default function CropRecommendation({
   const [loading,      setLoading]      = useState(false);
   const [selectedAlt,  setSelectedAlt]  = useState(null); // viewing an alternative
   const [isSpeaking,   setIsSpeaking]   = useState(false);
+  const [localizedExplanation, setLocalizedExplanation] = useState(null);
 
   const displayCrop = selectedAlt || prediction;
   const cropKey     = displayCrop?.toLowerCase();
@@ -80,8 +81,23 @@ export default function CropRecommendation({
   useEffect(() => {
     if (prediction) {
       setAlternatives(computeAlternatives(prediction, formData));
+      api.explainCropRecommendation({
+        farmer_id: farmer?.id || 1,
+        crop: prediction,
+        nitrogen: parseFloat(formData.nitrogen),
+        phosphorus: parseFloat(formData.phosphorus),
+        potassium: parseFloat(formData.potassium),
+        ph: parseFloat(formData.ph),
+        temperature: parseFloat(formData.temperature),
+        humidity: parseFloat(formData.humidity),
+        rainfall: parseFloat(formData.rainfall),
+        soil_moisture: 40.0,
+        language: language
+      }).then(res => {
+        if (res && res.spoken_script) setLocalizedExplanation(res);
+      }).catch(() => {});
     }
-  }, [prediction]);
+  }, [prediction, language]);
 
   const handleAutofill = () => {
     if (!farmData) {
@@ -137,12 +153,29 @@ export default function CropRecommendation({
   const speakCropAdvice = () => {
     if (!('speechSynthesis' in window)) return;
     if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); return; }
-    if (!cropDetails) return;
-    const langMap = { 'తెలుగు': 'te-IN', 'हिंदी': 'hi-IN', 'தமிழ்': 'ta-IN', 'ಕನ್ನಡ': 'kn-IN', 'मराठी': 'mr-IN', 'English': 'en-IN' };
-    const script = `The recommended crop is ${displayCrop}. ${cropDetails.description} Sowing season: ${cropDetails.season}. Expected yield: ${cropDetails.yield}. ${cropDetails.tips}`;
-    const u = new SpeechSynthesisUtterance(script);
-    u.lang = langMap[language] || 'en-IN'; u.rate = 0.95;
+    const langMap = {
+      'తెలుగు': 'te-IN', 'Telugu': 'te-IN',
+      'हिंदी': 'hi-IN', 'Hindi': 'hi-IN',
+      'தமிழ்': 'ta-IN', 'Tamil': 'ta-IN',
+      'ಕನ್ನಡ': 'kn-IN', 'Kannada': 'kn-IN',
+      'मराठी': 'mr-IN', 'Marathi': 'mr-IN',
+      'English': 'en-IN'
+    };
+    const script = localizedExplanation?.spoken_script ||
+      (language === 'తెలుగు'
+        ? `మీ నేల పరీక్ష ప్రకారం ${displayCrop} పంట ఉత్తమమైనదిగా సిఫార్సు చేయబడింది. అధిక దిగుబడి కోసం సమతుల్య ఎరువులు వేయండి.`
+        : `The recommended crop is ${displayCrop}. High yield expected based on your soil and climate.`);
+    const u = new SpeechSynthesisUtterance(script.replace(/[*#_`]/g, '').trim());
+    const targetTag = langMap[language] || 'en-IN';
+    u.lang = targetTag;
+    u.rate = 0.92;
+    const voices = window.speechSynthesis.getVoices() || [];
+    const matched = voices.find(v => v.lang.toLowerCase() === targetTag.toLowerCase())
+      || voices.find(v => v.lang.toLowerCase().startsWith(targetTag.split('-')[0]))
+      || voices.find(v => v.name.toLowerCase().includes(language.toLowerCase()));
+    if (matched) u.voice = matched;
     u.onend = () => setIsSpeaking(false);
+    u.onerror = () => setIsSpeaking(false);
     setIsSpeaking(true);
     window.speechSynthesis.speak(u);
   };

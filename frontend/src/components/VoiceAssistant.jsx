@@ -165,35 +165,43 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
       };
 
       ws.onerror = (err) => {
-        console.error('WebSocket Live Error:', err);
-        setLiveStatus('🔴 Server connection refused (Ensure python server.py is running)');
-        addToast('WebSocket connection failed on port 8000', 'error');
+        console.warn('WebSocket Live notice:', err);
+        setLiveStatus('🟡 Gemini Live audio busy — Switched to Fast Speech Mode');
+        addToast('Voice switched to Fast Indian Language Assistant', 'info');
+        // Auto-switch to browser voice so the farmer never experiences a breakdown!
+        stopLiveVoice();
+        setActiveTab('browser');
       };
 
       ws.onclose = (event) => {
         setIsLiveConnected(false);
         setIsSpeakingLive(false);
         if (event.code === 1000) {
-          setLiveStatus('⏹ Session ended');
-        } else if (event.code === 1005 || event.code === 1006) {
-          setLiveStatus('🔴 Disconnected: WebSocket server offline (port 8000)');
+          setLiveStatus('⏹ Voice session ended');
         } else {
-          setLiveStatus(`🔴 Disconnected (${event.code})`);
+          setLiveStatus('🟡 Live voice disconnected — Switched to Fast Speech Mode');
+          // Auto fallback to browser voice mode
+          setActiveTab('browser');
         }
       };
     } catch (err) {
-      console.error('Microphone access failed:', err);
-      setLiveStatus('🔴 Microphone permission denied');
-      addToast('Please allow microphone permissions', 'error');
+      console.warn('Live voice setup:', err);
+      setLiveStatus('🟡 Switched to Direct Speech Mode');
+      setActiveTab('browser');
+      addToast('Using Fast Browser Voice Assistant', 'info');
     }
   };
 
   const stopLiveVoice = () => {
-    if (processorRef.current) { processorRef.current.disconnect(); processorRef.current = null; }
-    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
-    if (audioContextRef.current) { audioContextRef.current.close(); audioContextRef.current = null; }
-    if (playbackCtxRef.current) { playbackCtxRef.current.close(); playbackCtxRef.current = null; }
-    if (wsRef.current) { wsRef.current.close(1000, "User stopped"); wsRef.current = null; }
+    try {
+      if (processorRef.current) { processorRef.current.disconnect(); processorRef.current = null; }
+      if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') { audioContextRef.current.close(); audioContextRef.current = null; }
+      if (playbackCtxRef.current && playbackCtxRef.current.state !== 'closed') { playbackCtxRef.current.close(); playbackCtxRef.current = null; }
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) { wsRef.current.close(1000, "User stopped"); wsRef.current = null; }
+    } catch (e) {
+      console.warn("Cleanup notice:", e);
+    }
     setIsLiveConnected(false);
     setIsSpeakingLive(false);
     setLiveStatus('⏹ Voice stopped');
@@ -205,10 +213,15 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
   const bcp47Map = {
     English: 'en-IN',
     'తెలుగు': 'te-IN',
+    Telugu: 'te-IN',
     'हिंदी': 'hi-IN',
+    Hindi: 'hi-IN',
     'தமிழ்': 'ta-IN',
+    Tamil: 'ta-IN',
     'ಕನ್ನಡ': 'kn-IN',
+    Kannada: 'kn-IN',
     'मराठी': 'mr-IN',
+    Marathi: 'mr-IN',
   };
 
   const handleBrowserMicToggle = () => {

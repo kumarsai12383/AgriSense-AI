@@ -187,6 +187,16 @@ pred_r = http_post(f"{BASE}/crop/predict", {
 pred_ok = pred_r.get("status") == "success"
 check("POST /crop/predict",  pred_ok,                   f"crop={pred_r.get('crop')} | {pred_r if not pred_ok else ''}")
 
+# Crop explanation in farmer language
+explain_r = http_post(f"{BASE}/crop/explain", {
+    "farmer_id": farmer_id, "crop": "rice",
+    "nitrogen": 90, "phosphorus": 42, "potassium": 43,
+    "ph": 6.5, "temperature": 25.0, "humidity": 80.0,
+    "rainfall": 200.0, "soil_moisture": 50.0, "language": "తెలుగు"
+})
+explain_ok = explain_r.get("status") == "success"
+check("POST /crop/explain",  explain_ok,                f"native_crop={explain_r.get('native_crop')} | why_len={len(explain_r.get('why_recommended',''))}")
+
 # Latest crop
 lc = http_get(f"{BASE}/crop/latest/{farmer_id}")
 check("GET /crop/latest/{id}","_error" not in lc,       f"crop={lc.get('data',{}).get('crop','no_data') if lc.get('data') else lc.get('status')}")
