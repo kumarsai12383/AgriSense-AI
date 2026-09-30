@@ -51,77 +51,91 @@ export default function Navbar({
 
   return (
     <>
+      {/* ── OFFICIAL GOVT OF INDIA TRICOLOR & MINISTRY BANNER ── */}
+      <div className="govt-tricolor-bar" />
+      <div className="govt-top-strip">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span style={{ fontSize: 13 }}>🇮🇳</span>
+          <span>भारत सरकार | कृषि एवं किसान कल्याण मंत्रालय (Ministry of Agriculture & Farmers Welfare)</span>
+        </div>
+        <div className="govt-top-strip-right hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span>डिजिटल कृषि मिशन</span>
+          <span style={{ color: '#86efac' }}>•</span>
+          <span style={{ color: '#fef08a', fontWeight: 800 }}>📞 किसान कॉल सेंटर: 1551 (Toll-Free 24×7)</span>
+        </div>
+      </div>
+
       {/* ── TOP BAR ── */}
       <header className="navbar" style={{
-        background: 'rgba(255, 255, 255, 0.94)',
+        background: 'rgba(255, 255, 255, 0.96)',
         backdropFilter: 'blur(20px) saturate(180%)',
-        borderBottom: '1px solid rgba(21, 128, 61, 0.15)',
-        boxShadow: '0 4px 20px -5px rgba(0, 0, 0, 0.05)'
+        borderBottom: '1px solid rgba(21, 128, 61, 0.18)',
+        boxShadow: '0 2px 14px rgba(0, 0, 0, 0.04)'
       }}>
-        <div className="navbar-top" style={{ padding: '10px 24px' }}>
+        <div className="navbar-top" style={{ padding: '8px 16px' }}>
           {/* Brand */}
           <div
             className="nav-brand"
             onClick={() => setCurrentTab('dashboard')}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', minWidth: 0 }}
           >
             <div style={{
-              width: 44,
-              height: 44,
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, #15803d 0%, #22c55e 100%)',
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, #0f5132 0%, #15803d 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              boxShadow: '0 6px 16px rgba(21, 128, 61, 0.35)',
-              border: '1px solid rgba(255, 255, 255, 0.4)'
+              boxShadow: '0 4px 12px rgba(15, 81, 50, 0.3)',
+              border: '1.5px solid rgba(255, 255, 255, 0.5)',
+              flexShrink: 0
             }}>
-              <Sprout size={24} />
+              <Sprout size={22} />
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span style={{
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 900,
                   color: '#0f172a',
-                  letterSpacing: '-0.5px',
-                  fontFamily: 'Outfit, sans-serif'
+                  letterSpacing: '-0.4px',
+                  fontFamily: 'Outfit, sans-serif',
+                  whiteSpace: 'nowrap'
                 }}>
                   {t.appName || 'AgriSense AI'}
                 </span>
                 <span style={{
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: 900,
-                  padding: '2px 8px',
+                  padding: '2px 6px',
                   borderRadius: 99,
-                  background: 'linear-gradient(135deg, #15803d, #16a34a)',
+                  background: '#0f5132',
                   color: '#ffffff',
-                  letterSpacing: '0.5px',
-                  boxShadow: '0 2px 6px rgba(21,128,61,0.25)'
+                  letterSpacing: '0.4px'
                 }}>
-                  PRO 2.0
+                  GOVT
                 </span>
               </div>
-              <div className="hide-on-mobile" style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
-                {t.tagline || 'Smart Precision Agricultural Intelligence'}
+              <div style={{ fontSize: 10.5, color: '#15803d', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                राष्ट्रीय किसान पोर्टल • National Portal
               </div>
             </div>
           </div>
 
           {/* Right Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Live API status */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {/* Live API status (Desktop only) */}
             <div
-              className={`badge ${serverOnline ? 'badge-green' : 'badge-amber'}`}
+              className="badge badge-green hide-on-mobile"
               title={serverOnline ? 'FastAPI Backend Online' : 'Connecting to API'}
               style={{
                 cursor: 'default',
                 fontSize: 11,
-                padding: '4px 10px',
+                padding: '4px 9px',
                 borderRadius: 99,
                 fontWeight: 800,
-                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 5
               }}
@@ -133,27 +147,26 @@ export default function Navbar({
                 background: serverOnline ? '#22c55e' : '#f59e0b',
                 display: 'inline-block'
               }} />
-              <span className="hide-on-small-mobile">{serverOnline ? 'API Live' : 'API Sync'}</span>
+              <span>{serverOnline ? 'API Live' : 'API Sync'}</span>
             </div>
 
-            {/* IoT Telemetry status */}
+            {/* IoT Telemetry status (Desktop only) */}
             <div
-              className={`badge ${sensorOnline ? 'badge-green' : 'badge-amber'}`}
+              className={`badge ${sensorOnline ? 'badge-green' : 'badge-amber'} hide-on-mobile`}
               title={sensorOnline ? '7-in-1 Soil Sensor Online' : 'Manual Telemetry Mode'}
               style={{
                 cursor: 'pointer',
                 fontSize: 11,
-                padding: '4px 10px',
+                padding: '4px 9px',
                 borderRadius: 99,
                 fontWeight: 800,
-                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 5
               }}
               onClick={() => setCurrentTab('sensors')}
             >
               {sensorOnline ? <Wifi size={12} className="pulse-glow" /> : <WifiOff size={12} />}
-              <span className="hide-on-small-mobile">{sensorOnline ? 'IoT Probe Live' : 'Manual Mode'}</span>
+              <span>{sensorOnline ? 'IoT Live' : 'Manual Mode'}</span>
             </div>
 
             {/* Language Selector Dropdown (High-Contrast & Touch Friendly) */}

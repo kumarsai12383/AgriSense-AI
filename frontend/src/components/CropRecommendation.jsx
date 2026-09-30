@@ -209,10 +209,10 @@ export default function CropRecommendation({
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 24 }}>
+      <div className="crop-form-layout">
 
         {/* ── LEFT: INPUT FORM ── */}
-        <div className="agri-card" style={{ padding: 24 }}>
+        <div className="agri-card" style={{ padding: 22 }}>
           <div className="agri-card-header">
             <div className="agri-card-title">
               <FlaskConical size={19} style={{ color: '#15803d' }} />

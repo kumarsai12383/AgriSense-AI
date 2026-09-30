@@ -366,7 +366,7 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
 
         {/* 4 Pillars Info Grid */}
         <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: 8 }}>
             {pillars.map((p, idx) => {
               const Icon = p.icon;
               return (

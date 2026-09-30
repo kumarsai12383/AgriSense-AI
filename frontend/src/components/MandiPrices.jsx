@@ -223,7 +223,7 @@ export default function MandiPrices({ farmer, language, setCurrentTab }) {
               🔍 Select State & Crop for Mandi Intelligence
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 14 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
                   {mandiT.stateSelect}
@@ -310,7 +310,7 @@ export default function MandiPrices({ farmer, language, setCurrentTab }) {
               </h3>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: 12 }}>
               <div style={{ background: '#f8fafc', padding: 14, borderRadius: 12, border: '1px solid #e2e8f0' }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>GOVERNMENT MSP</span>
                 <div style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', marginTop: 4 }}>{currentFallback.msp}</div>
@@ -350,7 +350,7 @@ export default function MandiPrices({ farmer, language, setCurrentTab }) {
           )}
 
           {/* Official Government Portals Footer */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 16 }}>
             <div className="agri-card" style={{ padding: 20, borderRadius: 16, textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: '#1e40af', marginBottom: 4 }}>🌐 e-NAM Portal</div>
               <p style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>National Agriculture Market (Pan-India electronic trade)</p>
@@ -405,7 +405,7 @@ export default function MandiPrices({ farmer, language, setCurrentTab }) {
               💰 Farm Input Investment & Profit Forecast
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 14 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
                   {mandiT.costCrop}
@@ -481,7 +481,7 @@ export default function MandiPrices({ farmer, language, setCurrentTab }) {
               </h3>
 
               {/* Profit Summary Hero */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: 12, marginBottom: 20 }}>
                 <div style={{ background: '#fef2f2', border: '1.5px solid #fca5a5', padding: 16, borderRadius: 14 }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: '#dc2626' }}>TOTAL INVESTMENT</span>
                   <div style={{ fontSize: 22, fontWeight: 800, color: '#991b1b', marginTop: 4 }}>

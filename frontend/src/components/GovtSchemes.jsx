@@ -432,7 +432,7 @@ export default function GovtSchemes({ farmer, language }) {
           </div>
 
           {/* Scheme Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
             {filteredSchemes.map(scheme => (
               <div 
                 key={scheme.id}
@@ -527,7 +527,7 @@ export default function GovtSchemes({ farmer, language }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 16 }}>
             {(STATE_SCHEMES_MAP[selectedState] || []).map((sc, i) => (
               <div 
                 key={i}
@@ -562,7 +562,7 @@ export default function GovtSchemes({ farmer, language }) {
               🎯 Instant AI Scheme Eligibility & Subsidy Advisor
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
                   Farm Size (Acres)

@@ -43,7 +43,7 @@ def http_get(url, timeout=5):
     except Exception as e:
         return {"_error": str(e)}
 
-def http_post(url, data, timeout=8):
+def http_post(url, data, timeout=25):
     try:
         body = json.dumps(data).encode()
         req = urllib.request.Request(url, data=body, headers={

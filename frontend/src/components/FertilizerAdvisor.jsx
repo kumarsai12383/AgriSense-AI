@@ -121,7 +121,7 @@ export default function FertilizerAdvisor({ farmData, language, latestCrop }) {
             <span className="badge badge-green">Custom Plan</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, margin: '14px 0 20px 0' }}>
+          <div className="grid-responsive-3" style={{ margin: '14px 0 20px 0' }}>
             {/* Urea */}
             <div style={{ background: '#ecfdf5', padding: 14, borderRadius: 14, border: '1px solid #a7f3d0', textAlign: 'center' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#065f46' }}>Urea (46% N)</div>

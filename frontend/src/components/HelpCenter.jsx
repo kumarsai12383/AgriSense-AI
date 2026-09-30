@@ -298,7 +298,7 @@ export default function HelpCenter({ language, setCurrentTab }) {
           {hT.colorsTitle}
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 14 }}>
           {COLOR_GUIDES.map((cg, i) => (
             <div 
               key={i}
@@ -327,7 +327,7 @@ export default function HelpCenter({ language, setCurrentTab }) {
       </div>
 
       {/* Dos & Don'ts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 18 }}>
         <div className="agri-card" style={{ padding: 22, borderRadius: 20, border: '1.5px solid #86efac' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <CheckCircle2 size={20} color="#15803d" />

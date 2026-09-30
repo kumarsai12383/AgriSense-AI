@@ -152,61 +152,60 @@ export default function Dashboard({
         />
         <div className="hero-pattern" />
 
-        <div className="hero-content">
+        <div className="hero-content" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Welcome pill */}
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
-            background: 'rgba(255,255,255,0.18)', border: '1.5px solid rgba(255,255,255,0.30)',
-            padding: '5px 14px', borderRadius: 99, fontSize: 12, fontWeight: 800,
-            color: 'rgba(255,255,255,0.92)', marginBottom: 14, backdropFilter: 'blur(6px)',
-            textTransform: 'uppercase', letterSpacing: '0.5px'
+            background: 'rgba(255,255,255,0.20)', border: '1.5px solid rgba(255,255,255,0.35)',
+            padding: '5px 14px', borderRadius: 99, fontSize: 11.5, fontWeight: 800,
+            color: 'rgba(255,255,255,0.95)', marginBottom: 12, backdropFilter: 'blur(6px)',
+            letterSpacing: '0.4px', maxWidth: '100%', boxSizing: 'border-box'
           }}>
             <Sparkles size={13} />
-            AgriSense AI v2.0 — {t.tagline || "Smart Agricultural Decision Support & Farm Intelligence"}
+            डिजिटल कृषि मिशन • राष्ट्रीय कृषि निर्णय मंच 2.0
           </div>
 
           <h1 style={{
-            color: 'white', fontSize: 'clamp(22px, 4vw, 36px)',
-            fontWeight: 900, marginBottom: 8, lineHeight: 1.2, fontFamily: 'Outfit, sans-serif'
+            color: 'white', fontSize: 'clamp(20px, 4vw, 34px)',
+            fontWeight: 900, marginBottom: 8, lineHeight: 1.25, fontFamily: 'Outfit, sans-serif'
           }}>
-            {t.dashboard?.welcome || 'Welcome back'}, {farmerName}! 🌾
+            {t.dashboard?.welcome || 'Welcome'}, {farmerName}! 🌾
           </h1>
 
-          <p style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15, fontWeight: 500, marginBottom: 20, maxWidth: 600 }}>
-            {t.dashboard?.greeting || 'Your AI-powered farm intelligence platform for better yields, smarter decisions, and higher profits.'}
+          <p style={{ color: 'rgba(255,255,255,0.92)', fontSize: 14.5, fontWeight: 500, marginBottom: 18, maxWidth: 620, lineHeight: 1.5 }}>
+            {t.dashboard?.greeting || 'मृदा परीक्षण, वैज्ञानिक फसल चयन एवं न्यूनतम समर्थन मूल्य (MSP) आधारित किसान मार्गदर्शन मंच।'}
           </p>
 
           {/* Workflow Step Buttons */}
-          <div className="workflow-steps">
+          <div className="workflow-steps" style={{ width: '100%', maxWidth: 640 }}>
             <button className={`workflow-step ${!farmData ? 'active' : ''}`} onClick={() => setCurrentTab('sensors')}>
-              <span>📡</span> {steps.step1 || '1. Soil Test'}
+              <span>📡</span> 1. {steps.step1 || 'मृदा परीक्षण (Soil Test)'}
             </button>
             <span className="workflow-arrow">›</span>
             <button className={`workflow-step ${farmData && !latestCrop ? 'active' : ''}`} onClick={() => setCurrentTab('crop')}>
-              <span>🌾</span> {steps.step2 || '2. AI Recommendation'}
+              <span>🌾</span> 2. {steps.step2 || 'फसल सिफारिश (Crop AI)'}
             </button>
             <span className="workflow-arrow">›</span>
             <button className={`workflow-step ${latestCrop ? 'active' : ''}`} onClick={() => setCurrentTab('crop')}>
-              <span>📋</span> {steps.step3 || '3. Advice & Economics'}
-            </button>
-            <span className="workflow-arrow">›</span>
-            <button className="workflow-step" onClick={() => setCurrentTab('irrigation')}>
-              <span>💧</span> {t.nav?.irrigation || 'Irrigation'}
+              <span>📋</span> 3. {steps.step3 || 'सलाह व मंडी भाव (Advice)'}
             </button>
           </div>
 
           {/* Quick CTA buttons */}
-          <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
             <button
               id="btn-start-soil-test"
               onClick={() => setCurrentTab('sensors')}
               className="btn"
               style={{
                 background: '#ffffff',
-                color: '#15803d',
+                color: '#0f5132',
                 fontWeight: 900,
                 fontSize: 14,
-                boxShadow: '0 6px 16px rgba(0,0,0,0.15)'
+                padding: '12px 20px',
+                borderRadius: 14,
+                boxShadow: '0 6px 16px rgba(0,0,0,0.18)',
+                minHeight: 46
               }}
             >
               <Cpu size={16} />
@@ -217,12 +216,15 @@ export default function Dashboard({
               onClick={() => setCurrentTab('crop')}
               className="btn"
               style={{
-                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                background: 'linear-gradient(135deg, #15803d, #16a34a)',
                 color: '#ffffff',
                 fontWeight: 900,
                 fontSize: 14,
-                border: '1px solid rgba(255,255,255,0.4)',
-                boxShadow: '0 6px 16px rgba(22,163,74,0.35)'
+                padding: '12px 20px',
+                borderRadius: 14,
+                border: '1.5px solid rgba(255,255,255,0.4)',
+                boxShadow: '0 6px 16px rgba(21,128,61,0.35)',
+                minHeight: 46
               }}
             >
               <Wheat size={16} />
@@ -233,12 +235,15 @@ export default function Dashboard({
               onClick={() => setCurrentTab('voice')}
               className="btn btn-ghost"
               style={{
-                background: 'rgba(255,255,255,0.20)',
+                background: 'rgba(255,255,255,0.22)',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: 14,
-                border: '1px solid rgba(255,255,255,0.35)',
-                backdropFilter: 'blur(8px)'
+                padding: '12px 18px',
+                borderRadius: 14,
+                border: '1.5px solid rgba(255,255,255,0.4)',
+                backdropFilter: 'blur(8px)',
+                minHeight: 46
               }}
             >
               <Mic size={16} />
@@ -246,29 +251,25 @@ export default function Dashboard({
             </button>
           </div>
 
-          {/* Live Telemetry Ribbon (Pro Agro-Tech Header) */}
-          <div className="telemetry-ribbon">
+          {/* Live Telemetry Ribbon */}
+          <div className="telemetry-ribbon" style={{ width: '100%', maxWidth: 700, boxSizing: 'border-box' }}>
             <div className="telemetry-ribbon-item">
-              <span className="telemetry-ribbon-label">🌡️ Soil Temp</span>
+              <span className="telemetry-ribbon-label">🌡️ मृदा तापमान</span>
               <span className="telemetry-ribbon-value">{temp}°C</span>
             </div>
             <div className="telemetry-ribbon-item">
-              <span className="telemetry-ribbon-label">💧 Moisture</span>
+              <span className="telemetry-ribbon-label">💧 मिट्टी नमी</span>
               <span className="telemetry-ribbon-value" style={{ color: isMoistureLow ? '#f87171' : '#4ade80' }}>
-                {soilMoisture}% {isMoistureLow ? '⚠️ Low' : '✅ Optimal'}
+                {soilMoisture}% {isMoistureLow ? '⚠️ Low' : '✅ Ok'}
               </span>
             </div>
             <div className="telemetry-ribbon-item">
-              <span className="telemetry-ribbon-label">🧪 Soil pH</span>
+              <span className="telemetry-ribbon-label">🧪 pH मान</span>
               <span className="telemetry-ribbon-value">{ph} pH</span>
             </div>
             <div className="telemetry-ribbon-item">
-              <span className="telemetry-ribbon-label">🌱 Soil Health</span>
+              <span className="telemetry-ribbon-label">🌱 स्वास्थ्य स्कोर</span>
               <span className="telemetry-ribbon-value" style={{ color: '#4ade80' }}>{healthScore}/100</span>
-            </div>
-            <div className="telemetry-ribbon-item">
-              <span className="telemetry-ribbon-label">🛰️ Sensor Status</span>
-              <span className="telemetry-ribbon-value">{sensorStatus ? '🟢 7-in-1 IoT Live' : '🔵 Manual Telemetry'}</span>
             </div>
           </div>
         </div>

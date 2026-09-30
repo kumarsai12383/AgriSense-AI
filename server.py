@@ -1603,6 +1603,24 @@ async def live(websocket: WebSocket):
         except Exception:
             pass
 
+# =========================================================
+# REACT SPA FALLBACK & STATIC SERVING
+# =========================================================
+if os.path.isdir(FRONTEND_DIST):
+    @app.get("/{full_path:path}")
+    async def serve_spa_frontend(full_path: str):
+        api_prefixes = ("farm", "crop", "ai", "sensor", "disease", "farmer", "farmers", "health", "docs", "openapi.json", "live", "dashboard", "voice-chat")
+        first_segment = full_path.split("/")[0]
+        if first_segment in api_prefixes:
+            raise HTTPException(status_code=404, detail="API route not found")
+        file_path = os.path.join(FRONTEND_DIST, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file, media_type="text/html")
+        raise HTTPException(status_code=404, detail="Frontend build index not found")
+
 
 if __name__ == "__main__":
     import uvicorn
