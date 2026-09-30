@@ -58,7 +58,7 @@ export default function SoilHealth({ farmData, language }) {
 
           {/* Nitrogen Bar */}
           <div style={{ marginBottom: 18 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
                 Nitrogen (N) — Vegetative Growth
               </span>
@@ -72,7 +72,7 @@ export default function SoilHealth({ farmData, language }) {
 
           {/* Phosphorus Bar */}
           <div style={{ marginBottom: 18 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
                 Phosphorus (P) — Root Establishment
               </span>
@@ -86,7 +86,7 @@ export default function SoilHealth({ farmData, language }) {
 
           {/* Potassium Bar */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
                 Potassium (K) — Disease & Drought Resistance
               </span>
@@ -109,7 +109,7 @@ export default function SoilHealth({ farmData, language }) {
             <span className={`badge ${phStat.badge}`}>{phStat.label}</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, margin: '12px 0 20px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 16, margin: '12px 0 20px 0' }}>
             <div style={{
               width: 76,
               height: 76,
@@ -121,11 +121,12 @@ export default function SoilHealth({ farmData, language }) {
               color: 'white',
               fontSize: 26,
               fontWeight: 800,
-              boxShadow: '0 8px 18px rgba(217, 119, 6, 0.3)'
+              boxShadow: '0 8px 18px rgba(217, 119, 6, 0.3)',
+              flexShrink: 0
             }}>
               {ph}
             </div>
-            <div>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
                 {ph < 6.0 ? "Acidic Medium" : ph > 7.8 ? "Alkaline / Calcareous" : "Near-Neutral Sweet Zone"}
               </div>

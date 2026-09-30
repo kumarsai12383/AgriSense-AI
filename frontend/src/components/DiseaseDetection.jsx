@@ -176,11 +176,11 @@ export default function DiseaseDetection({ farmer, language, latestCrop, addToas
                 }}
               >
                 {imagePreview ? (
-                  <div style={{ textAlign: 'center' }}>
+                  <div style={{ textAlign: 'center', width: '100%' }}>
                     <img 
                       src={imagePreview} 
                       alt="Leaf Preview" 
-                      style={{ maxHeight: 120, borderRadius: 10, marginBottom: 8 }} 
+                      style={{ maxHeight: 120, maxWidth: '100%', objectFit: 'contain', borderRadius: 10, marginBottom: 8 }} 
                     />
                     <div style={{ fontSize: 12, color: '#15803d', fontWeight: 700 }}>
                       ✓ Photo Loaded (Click to replace)
@@ -189,7 +189,7 @@ export default function DiseaseDetection({ farmer, language, latestCrop, addToas
                 ) : (
                   <>
                     <Upload size={24} style={{ color: '#64748b', marginBottom: 6 }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#334155', textAlign: 'center' }}>
                       Click to upload leaf photo or drop here
                     </span>
                     <span style={{ fontSize: 11, color: '#94a3b8' }}>PNG, JPG up to 5MB</span>
@@ -240,7 +240,9 @@ export default function DiseaseDetection({ farmer, language, latestCrop, addToas
               fontSize: 14,
               lineHeight: 1.6,
               color: '#1e293b',
-              whiteSpace: 'pre-wrap'
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere'
             }}>
               {diagnosis}
             </div>

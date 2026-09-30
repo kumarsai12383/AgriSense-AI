@@ -353,7 +353,7 @@ export default function Navbar({
             </div>
 
             {/* 12 Modules Grid in Drawer */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))', gap: 10 }}>
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentTab === item.id;

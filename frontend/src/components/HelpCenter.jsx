@@ -228,7 +228,7 @@ export default function HelpCenter({ language, setCurrentTab }) {
                 gap: 12
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 260 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '1 1 200px', minWidth: 0 }}>
                 <div style={{
                   width: 38,
                   height: 38,
@@ -239,11 +239,12 @@ export default function HelpCenter({ language, setCurrentTab }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 800,
-                  fontSize: 16
+                  fontSize: 16,
+                  flexShrink: 0
                 }}>
                   {step.num}
                 </div>
-                <div>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 15, color: '#1e293b' }}>
                     {step.title}
                   </div>
@@ -253,7 +254,7 @@ export default function HelpCenter({ language, setCurrentTab }) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <button
                   onClick={() => speakText(step.speech, idx)}
                   className="btn"

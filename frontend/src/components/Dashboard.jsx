@@ -290,7 +290,7 @@ export default function Dashboard({
       {/* ══════════════════════════════════════════════
           REAL-TIME METRIC CARDS
           ══════════════════════════════════════════════ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 16 }}>
         {/* Soil Score */}
         <div className="agri-card-pro" style={{ padding: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -443,7 +443,7 @@ export default function Dashboard({
 
           {/* Crop quick stats */}
           {cropInfo && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginTop: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: 10, marginTop: 16 }}>
               {[
                 { label: 'Duration', value: cropInfo.duration || '110-145 days', icon: '📅' },
                 { label: 'Water Need', value: cropInfo.water?.split('.')[0] || 'Moderate', icon: '💧' },
@@ -495,7 +495,7 @@ export default function Dashboard({
           {t.dashboard?.quickActions || 'All Farm Features'}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 16 }}>
           {featureGrid.map((f) => (
             <div
               key={f.id}

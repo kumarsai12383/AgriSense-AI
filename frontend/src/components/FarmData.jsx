@@ -127,16 +127,18 @@ export default function FarmData({ farmer, language, farmData, onDataUpdated, ad
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 8, background: '#f1f5f9', padding: 6, borderRadius: 14, width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 8, background: '#f1f5f9', padding: 6, borderRadius: 14, width: '100%', maxWidth: 420, flexWrap: 'wrap', boxSizing: 'border-box' }}>
         <button
           onClick={() => setActiveTab('manual')}
           style={{
-            padding: '10px 18px',
+            flex: '1 1 100px',
+            padding: '10px 14px',
             borderRadius: 10,
             border: 'none',
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
+            textAlign: 'center',
             background: activeTab === 'manual' ? '#ffffff' : 'transparent',
             color: activeTab === 'manual' ? '#15803d' : '#64748b',
             boxShadow: activeTab === 'manual' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
@@ -148,12 +150,14 @@ export default function FarmData({ farmer, language, farmData, onDataUpdated, ad
         <button
           onClick={() => setActiveTab('iot')}
           style={{
-            padding: '10px 18px',
+            flex: '1 1 100px',
+            padding: '10px 14px',
             borderRadius: 10,
             border: 'none',
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
+            textAlign: 'center',
             background: activeTab === 'iot' ? '#ffffff' : 'transparent',
             color: activeTab === 'iot' ? '#15803d' : '#64748b',
             boxShadow: activeTab === 'iot' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
@@ -165,12 +169,14 @@ export default function FarmData({ farmer, language, farmData, onDataUpdated, ad
         <button
           onClick={() => setActiveTab('history')}
           style={{
-            padding: '10px 18px',
+            flex: '1 1 100px',
+            padding: '10px 14px',
             borderRadius: 10,
             border: 'none',
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
+            textAlign: 'center',
             background: activeTab === 'history' ? '#ffffff' : 'transparent',
             color: activeTab === 'history' ? '#15803d' : '#64748b',
             boxShadow: activeTab === 'history' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
@@ -340,8 +346,8 @@ export default function FarmData({ farmer, language, farmData, onDataUpdated, ad
           </div>
 
           {history.length > 0 ? (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <div className="table-responsive-container">
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 500 }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', textAlign: 'left' }}>
                     <th style={{ padding: '10px 12px' }}>Timestamp</th>

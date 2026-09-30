@@ -334,16 +334,18 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
       </div>
 
       {/* Mode Selector Tabs */}
-      <div style={{ display: 'flex', gap: 8, background: '#f1f5f9', padding: 6, borderRadius: 14, width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 8, background: '#f1f5f9', padding: 6, borderRadius: 14, width: '100%', maxWidth: 380, margin: '0 auto', boxSizing: 'border-box' }}>
         <button
           onClick={() => setActiveTab('browser')}
           style={{
-            padding: '10px 18px',
+            flex: 1,
+            padding: '10px 14px',
             borderRadius: 10,
             border: 'none',
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
+            textAlign: 'center',
             background: activeTab === 'browser' ? '#ffffff' : 'transparent',
             color: activeTab === 'browser' ? '#15803d' : '#64748b',
             boxShadow: activeTab === 'browser' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
@@ -355,12 +357,14 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
         <button
           onClick={() => setActiveTab('live')}
           style={{
-            padding: '10px 18px',
+            flex: 1,
+            padding: '10px 14px',
             borderRadius: 10,
             border: 'none',
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
+            textAlign: 'center',
             background: activeTab === 'live' ? '#ffffff' : 'transparent',
             color: activeTab === 'live' ? '#15803d' : '#64748b',
             boxShadow: activeTab === 'live' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
@@ -402,12 +406,12 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
 
           <div style={{ textAlign: 'left', background: '#f8fafc', padding: 16, borderRadius: 14, border: '1px solid #e2e8f0', marginBottom: 14 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>👨‍🌾 You Asked:</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', minHeight: 24 }}>{browserUserSpeech}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', minHeight: 24, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{browserUserSpeech}</div>
           </div>
 
           <div style={{ textAlign: 'left', background: '#f0fdf4', padding: 16, borderRadius: 14, border: '1px solid #bbf7d0' }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#15803d', marginBottom: 4 }}>🤖 AgriSense AI Response:</div>
-            <div style={{ fontSize: 14, color: '#14532d', lineHeight: 1.6, minHeight: 48, whiteSpace: 'pre-wrap' }}>
+            <div style={{ fontSize: 14, color: '#14532d', lineHeight: 1.6, minHeight: 48, whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
               {browserAiReply}
             </div>
           </div>
@@ -418,7 +422,7 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
       {activeTab === 'live' && (
         <div className="agri-card" style={{ maxWidth: 680, margin: '0 auto', width: '100%', textAlign: 'center' }}>
           {!serverOnline && (
-            <div style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: 14, padding: 14, textAlign: 'left', color: '#9a3412', marginBottom: 16, fontSize: 13 }}>
+            <div style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: 14, padding: 14, textAlign: 'left', color: '#9a3412', marginBottom: 16, fontSize: 13, wordBreak: 'break-word' }}>
               <strong>⚠️ WebSocket Server Offline:</strong> Live Voice streaming requires the backend on port 8000.<br />
               In terminal run: <code style={{ background: '#ffffff', padding: '2px 6px', borderRadius: 4 }}>python server.py</code>
             </div>
@@ -438,12 +442,12 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
             {liveStatus}
           </div>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', margin: '16px 0' }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', margin: '16px 0' }}>
             <button
               onClick={startLiveVoice}
               disabled={isLiveConnected}
               className="btn btn-primary"
-              style={{ flex: 1, maxWidth: 220 }}
+              style={{ flex: '1 1 140px', maxWidth: 220, minHeight: 46 }}
             >
               <Mic size={18} />
               <span>{t.voice.startBtn}</span>
@@ -453,7 +457,7 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
               onClick={stopLiveVoice}
               disabled={!isLiveConnected}
               className="btn btn-danger"
-              style={{ flex: 1, maxWidth: 220 }}
+              style={{ flex: '1 1 140px', maxWidth: 220, minHeight: 46 }}
             >
               <MicOff size={18} />
               <span>{t.voice.stopBtn}</span>
@@ -464,7 +468,7 @@ export default function VoiceAssistant({ farmer, language, addToast }) {
             <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>
               {t.voice.transcriptTitle}:
             </div>
-            <div style={{ fontSize: 14, color: '#0f172a', lineHeight: 1.6, minHeight: 60 }}>
+            <div style={{ fontSize: 14, color: '#0f172a', lineHeight: 1.6, minHeight: 60, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
               {liveTranscript}
             </div>
           </div>

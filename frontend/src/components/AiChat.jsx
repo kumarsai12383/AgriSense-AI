@@ -287,7 +287,8 @@ export default function AiChat({ farmer, language, farmData, latestCrop, addToas
                 display: 'flex',
                 gap: 10,
                 alignSelf: isUser ? 'flex-end' : 'flex-start',
-                maxWidth: '88%'
+                maxWidth: '94%',
+                minWidth: 0
               }}
             >
               {!isUser && (
@@ -295,7 +296,7 @@ export default function AiChat({ farmer, language, farmData, latestCrop, addToas
                   <Bot size={18} />
                 </div>
               )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
                 <div
                   style={{
                     background: isUser ? 'linear-gradient(135deg, #15803d, #16a34a)' : '#f8fafc',
@@ -306,6 +307,8 @@ export default function AiChat({ farmer, language, farmData, latestCrop, addToas
                     fontSize: 14,
                     lineHeight: 1.6,
                     whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'anywhere',
                     boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
                   }}
                 >

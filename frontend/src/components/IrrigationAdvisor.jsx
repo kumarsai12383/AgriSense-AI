@@ -57,7 +57,7 @@ export default function IrrigationAdvisor({ farmData, language, latestCrop }) {
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, margin: '14px 0 20px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 16, margin: '14px 0 20px 0' }}>
             <div style={{
               width: 80,
               height: 80,
@@ -69,11 +69,12 @@ export default function IrrigationAdvisor({ farmData, language, latestCrop }) {
               color: 'white',
               fontSize: 26,
               fontWeight: 800,
-              boxShadow: '0 8px 20px rgba(2, 132, 199, 0.3)'
+              boxShadow: '0 8px 20px rgba(2, 132, 199, 0.3)',
+              flexShrink: 0
             }}>
               {Math.round(moisture)}%
             </div>
-            <div>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a' }}>
                 {isDry ? "Soil Moisture Depleted" : "Optimal Field Capacity"}
               </div>
@@ -151,7 +152,7 @@ export default function IrrigationAdvisor({ farmData, language, latestCrop }) {
           </div>
 
           <div style={{ background: '#e0f2fe', padding: 14, borderRadius: 12, border: '1px solid #bae6fd', marginTop: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
               <div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#0369a1' }}>Calculated Water Budget</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: '#0c4a6e' }}>{totalLiters.toLocaleString()} Liters</div>

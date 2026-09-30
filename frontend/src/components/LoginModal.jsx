@@ -227,7 +227,7 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
             <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Zero typing needed</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))', gap: 8 }}>
             {DEMO_FARMERS.map((d, i) => (
               <button
                 key={i}

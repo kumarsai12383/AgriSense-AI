@@ -499,7 +499,7 @@ export default function CropRecommendation({
           ══════════════════════════════════════════════ */}
       {prediction && (
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
           gap: 12
         }}>
           {[

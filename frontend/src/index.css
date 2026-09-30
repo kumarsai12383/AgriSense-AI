@@ -1033,13 +1033,189 @@ h1,h2,h3,h4,h5,h6 {
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
 }
 
-/* Mobile Touch Optimization */
-@media (max-width: 640px) {
-  .hero-content {
-    padding: 22px 18px;
+/* =========================================================
+   MOBILE-FIRST RESPONSIVE ARCHITECTURE & BREAKPOINT SYSTEM
+   ========================================================= */
+
+/* Universal Overflow & Touch Protection */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.agri-card, .agri-card-pro, .hero-banner {
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Touch Targets: Minimum 44px height for finger tapping */
+.btn, .input-field, select.input-field, .mobile-nav-item {
+  min-height: 44px;
+}
+
+/* Tablet & Mobile Breakpoint (<= 768px) */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 14px 12px calc(80px + env(safe-area-inset-bottom, 12px));
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
+  
+  .navbar-top {
+    padding: 8px 12px;
+  }
+
+  .navbar-bottom {
+    display: none; /* Replaced by bottom nav dock + slide-up drawer */
+  }
+
+  .hero-banner {
+    min-height: 290px;
+    border-radius: 20px;
+  }
+
+  .hero-content {
+    padding: 20px 14px;
+    text-align: center;
+  }
+
+  .workflow-steps {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .workflow-step {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .agri-card, .agri-card-pro {
+    padding: 16px 14px;
+    border-radius: 18px;
+  }
+
+  .grid-2, .grid-3, .grid-4, .grid-responsive-2, .crop-form-layout {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
   .telemetry-ribbon {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 84px;
+    align-items: center;
+  }
+
+  .toast {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Standard Mobile Breakpoint (376px – 430px) */
+@media (max-width: 430px) {
+  .hero-content h1 {
+    font-size: 22px !important;
+  }
+
+  .hero-content p {
+    font-size: 13px !important;
+  }
+
+  .section-title {
+    font-size: 17px;
+  }
+
+  .telemetry-ribbon-value {
+    font-size: 13px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Small Mobile Breakpoint (320px – 375px: iPhone SE, older Android) */
+@media (max-width: 375px) {
+  .main-content {
+    padding: 10px 8px calc(76px + env(safe-area-inset-bottom, 8px));
+  }
+
+  .agri-card, .agri-card-pro {
+    padding: 14px 10px;
+    border-radius: 14px;
+  }
+
+  .hero-banner {
+    min-height: 270px;
+    border-radius: 16px;
+  }
+
+  .hero-content {
+    padding: 16px 10px;
+  }
+
+  .hero-content h1 {
+    font-size: 19px !important;
+  }
+
+  .hero-content p {
+    font-size: 12px !important;
+  }
+
+  .workflow-step {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .telemetry-ribbon {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .telemetry-ribbon-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 9px 12px;
+    font-size: 12.5px;
+  }
+
+  .input-field {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .mobile-nav-item span {
+    font-size: 9.5px;
+  }
+
+  .mobile-nav-item {
+    padding: 4px 6px;
+  }
+
+  .crop-alt-item {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .crop-alt-item img {
+    width: 40px !important;
+    height: 40px !important;
   }
 }
