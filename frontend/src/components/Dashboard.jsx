@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Wheat, Cpu, Wifi, WifiOff, Sparkles, Volume2, Square,
-  CheckCircle2, ArrowRight, RefreshCw, Layers, Droplets,
-  FlaskConical, TrendingUp, Building2, PhoneCall, ChevronRight,
-  ShieldCheck, AlertCircle, Award, Sun, Calendar, Clock
+  Wheat, Cpu, Wifi, Volume2, Square,
+  RefreshCw, Droplets, FlaskConical, TrendingUp,
+  Building2, PhoneCall, Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { TRANSLATIONS } from '../translations';
@@ -88,7 +87,6 @@ export default function Dashboard({
   farmer, language, farmData, latestCrop,
   setCurrentTab, sensorStatus, onDataUpdated, addToast
 }) {
-  const t = TRANSLATIONS[language] || TRANSLATIONS.English;
   const resultRef = useRef(null);
 
   // Input Mode: 'iot' vs 'manual'
@@ -249,7 +247,7 @@ export default function Dashboard({
       } else {
         addToast('No new IoT packet found. Showing cached reading.', 'info');
       }
-    } catch (err) {
+    } catch (_err) {
       addToast('Sensor sync in progress...', 'info');
     }
   };

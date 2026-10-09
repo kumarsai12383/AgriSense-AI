@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Wheat, Sparkles, Zap, CheckCircle2, Calendar, Droplets,
+  Sparkles, Zap, Calendar, Droplets,
   FlaskConical, TrendingUp, Clock, Thermometer, CloudRain,
   ChevronRight, Volume2, Square, Info, Leaf, AlertTriangle, ArrowRight
 } from 'lucide-react';
@@ -140,7 +140,7 @@ export default function CropRecommendation({
         addToast(`Best crop: ${res.crop.toUpperCase()}!`, 'success');
         confetti({ particleCount: 80, spread: 65, origin: { y: 0.55 } });
       }
-    } catch (err) {
+    } catch (_err) {
       const fallback = formData.rainfall > 150 ? 'rice' : formData.nitrogen > 100 ? 'cotton' : 'maize';
       setPrediction(fallback);
       setAlternatives(computeAlternatives(fallback, formData));

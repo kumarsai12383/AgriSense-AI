@@ -4,11 +4,14 @@ __pycache__/
 *$py.class
 *.pyc
 
-# Distribution / packaging
+# Distribution & Dependencies
 build/
 dist/
 !frontend/dist/
 *.egg-info/
+node_modules/
+frontend/node_modules/
+.pytest_cache/
 
 # Environments & Secret Keys
 .env

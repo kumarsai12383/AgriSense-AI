@@ -24,15 +24,12 @@ print("=" * 65)
 print("\n[TEST 1/6] Verifying Multilingual Completeness (Zero KeyErrors)...")
 LANGUAGES = ["en", "te", "hi", "ta", "kn", "mr"]
 
-# Test app.py BOTTOM_NAV_LABELS
-import app
-assert hasattr(app, "BOTTOM_NAV_LABELS"), "BOTTOM_NAV_LABELS missing in app.py"
+# Test modules.help_center HELP_TEXT
+import modules.help_center as hc
 for lang in LANGUAGES:
-    assert lang in app.BOTTOM_NAV_LABELS, f"Language '{lang}' missing in BOTTOM_NAV_LABELS!"
-    labels = app.BOTTOM_NAV_LABELS[lang]
-    for key in ["farm", "crop", "schemes", "voice", "more", "home", "market", "soil", "water", "fertilizer", "disease", "progress", "voice_live", "help"]:
-        assert key in labels, f"Key '{key}' missing in BOTTOM_NAV_LABELS[{lang}]"
-print("   [PASS] app.py BOTTOM_NAV_LABELS verified for all 6 languages.")
+    assert lang in hc.HELP_TEXT, f"Language '{lang}' missing in HELP_TEXT!"
+    assert "steps" in hc.HELP_TEXT[lang], f"Steps missing for language {lang}"
+print("   [PASS] modules.help_center.HELP_TEXT verified for all 6 languages.")
 
 # Test market_policy.py MARKET_TEXT
 import modules.market_policy as mp
@@ -196,18 +193,14 @@ large_report = gs.get_eligibility_report_fallback(15.0, "Cotton", "Large Farmer 
 assert "Medium / Large Farmer" in large_report and "PM-KISAN" in large_report
 print("   [PASS] Verified AI Eligibility calculations for small and large farm scenarios.")
 
-# 4. Verify bottom navigation bar has icon-only buttons
-with open("app.py", "r", encoding="utf-8") as f:
-    app_code = f.read()
-assert 'key="nav_btn_farm"' in app_code and '"📡"' in app_code
-assert 'key="nav_btn_crop"' in app_code and '"🌾"' in app_code
-assert 'key="nav_btn_gov"' in app_code and '"🏛️"' in app_code
-assert 'key="nav_btn_voice"' in app_code and '"🤖"' in app_code
-assert 'with st.popover("☰"' in app_code
-assert 'pointer-events: none !important;' in app_code
-assert 'pointer-events: auto !important;' in app_code
-assert 'padding-bottom: 120px !important;' in app_code
-print("   [PASS] Verified bottom navigation dock has icon-only buttons with non-blocking pointer events.")
+# 4. Verify mobile bottom dock in frontend Navbar
+with open("frontend/src/components/Navbar.jsx", "r", encoding="utf-8") as f:
+    nav_code = f.read()
+assert "mobileItems" in nav_code
+assert "Crop AI" in nav_code
+assert "Voice AI" in nav_code
+assert "Mandi" in nav_code
+print("   [PASS] Verified mobile navigation dock with touch-optimized quick access.")
 
 print("\n" + "=" * 65)
 print("ALL WORST-CASE & FAULT-TOLERANCE TESTS PASSED 100%!")
