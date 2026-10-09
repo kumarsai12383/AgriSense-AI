@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import {
   Sprout, Phone, User, ArrowRight, ShieldCheck, Cpu, Droplets,
-  Wheat, Sparkles, CheckCircle2, Zap, Lock
+  Wheat, Sparkles, CheckCircle2, Lock
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 import { api } from '../api';
-
-const DEMO_FARMERS = [
-  { name: 'Ramesh Reddy', phone: '9876543210', lang: 'తెలుగు', state: 'Telangana', crops: 'Paddy / Cotton' },
-  { name: 'Priya Sharma', phone: '9123456780', lang: 'हिंदी', state: 'Punjab', crops: 'Wheat / Mustard' },
-  { name: 'Anand Patil',  phone: '9988776655', lang: 'मराठी', state: 'Maharashtra', crops: 'Sugarcane / Grapes' },
-];
 
 export default function LoginModal({ language, setLanguage, onLoginSuccess, addToast }) {
   const [name, setName] = useState('');
@@ -49,13 +43,6 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
   const handleSubmit = (e) => {
     e.preventDefault();
     handleLogin(name, phone);
-  };
-
-  const handleQuickDemo = (demo) => {
-    setName(demo.name);
-    setPhone(demo.phone);
-    setLanguage(demo.lang);
-    handleLogin(demo.name, demo.phone, demo.lang);
   };
 
   const pillars = [
@@ -207,72 +194,8 @@ export default function LoginModal({ language, setLanguage, onLoginSuccess, addT
           </div>
         </div>
 
-        {/* 1-Tap Quick Demo Farmers (Pro Feature) */}
-        <div style={{
-          background: '#f8fafc',
-          border: '1.5px solid #e2e8f0',
-          borderRadius: 18,
-          padding: '14px 16px',
-          marginBottom: 20
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 10
-          }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Zap size={13} /> 1-Tap Quick Demo Access
-            </span>
-            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Zero typing needed</span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))', gap: 8 }}>
-            {DEMO_FARMERS.map((d, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => handleQuickDemo(d)}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: 12,
-                  padding: '9px 10px',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  transition: 'all 0.18s ease',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#15803d';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 4px 10px rgba(21,128,61,0.12)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#cbd5e1';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
-                }}
-              >
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a' }}>{d.name}</div>
-                <div style={{ fontSize: 11, color: '#15803d', fontWeight: 700 }}>{d.crops}</div>
-                <div style={{ fontSize: 10, color: '#64748b' }}>{d.state} • {d.lang}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '14px 0 18px 0' }}>
-          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            or enter mobile number
-          </span>
-          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-        </div>
-
         {/* Login Form */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
           <div className="input-group" style={{ marginBottom: 14 }}>
             <label className="input-label" style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
