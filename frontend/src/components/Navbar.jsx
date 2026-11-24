@@ -50,7 +50,7 @@ export default function Navbar({
   };
 
   return (
-    <>
+    <div style={{padding:'22px'}}>
       {/* ── OFFICIAL GOVT OF INDIA TRICOLOR & MINISTRY BANNER ── */}
       <div className="govt-tricolor-bar" />
       <div className="govt-top-strip">
@@ -508,6 +508,6 @@ export default function Navbar({
           );
         })}
       </nav>
-    </>
+    <div/>
   );
 }
