@@ -103,7 +103,16 @@
     border-bottom: 1px solid var(--border);
   }
 }
+.mobile-only-element {
+  display: block; /* Or flex, inline-block, etc., depending on your element */
+}
 
+/* Hidden on medium screens and up (768px and larger) */
+@media (min-width: 768px) {
+  .mobile-only-element {
+    display: none;
+  }
+}
 #next-steps ul {
   list-style: none;
   padding: 0;

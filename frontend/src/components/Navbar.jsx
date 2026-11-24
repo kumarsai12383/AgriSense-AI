@@ -50,7 +50,7 @@ export default function Navbar({
   };
 
   return (
-    <>
+    <div style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
       {/* ── OFFICIAL GOVT OF INDIA TRICOLOR & MINISTRY BANNER ── */}
       <div className="govt-tricolor-bar" />
       <div className="govt-top-strip">
@@ -104,48 +104,7 @@ export default function Navbar({
               <span style={{ fontWeight: 800 }}>{t.nav?.menu || 'Menu'}</span>
             </button>
 
-            {/* Top-Left Farmer Profile Badge */}
-            {farmer && (
-              <div
-                id="btn-farmer-profile"
-                onClick={() => setMobileDrawerOpen(true)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 7,
-                  background: '#f0fdf4',
-                  border: '1.5px solid #bbf7d0',
-                  padding: '5px 11px',
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  maxWidth: 145,
-                  height: 38,
-                  boxSizing: 'border-box',
-                  flexShrink: 0
-                }}
-                title="Farmer Profile & Settings"
-              >
-                <div style={{
-                  width: 22, height: 22, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #15803d, #22c55e)',
-                  color: 'white', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', fontSize: 11, fontWeight: 900,
-                  flexShrink: 0
-                }}>
-                  {farmer.name ? farmer.name.charAt(0).toUpperCase() : '👨‍🌾'}
-                </div>
-                <span style={{
-                  fontSize: 12.5,
-                  fontWeight: 800,
-                  color: '#14532d',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {farmer.name}
-                </span>
-              </div>
-            )}
+            
 
             {/* Portal Brand Emblem */}
             <div
@@ -167,17 +126,17 @@ export default function Navbar({
               }}>
                 <Sprout size={20} />
               </div>
-              <div className="hide-on-mobile" style={{ minWidth: 0 }}>
+              <div className="" style={{ minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <span style={{
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                     color: '#0f172a',
                     letterSpacing: '-0.3px',
                     fontFamily: 'Outfit, sans-serif',
                     whiteSpace: 'nowrap'
                   }}>
-                    {t.appName || 'AgriSense AI'}
+                    {'AgriSense AI'}
                   </span>
                   <span style={{
                     fontSize: 8.5,
@@ -199,29 +158,7 @@ export default function Navbar({
 
           {/* ── TOP-RIGHT CONTROLS: STATUS + LANGUAGE + LOGOUT ── */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-            {/* Live API status (Desktop only) */}
-            <div
-              className="badge badge-green hide-on-mobile"
-              title={serverOnline ? 'FastAPI Backend Online' : 'Connecting to API'}
-              style={{
-                cursor: 'default',
-                fontSize: 11,
-                padding: '4px 9px',
-                borderRadius: 99,
-                fontWeight: 800,
-                alignItems: 'center',
-                gap: 5
-              }}
-            >
-              <span style={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: serverOnline ? '#22c55e' : '#f59e0b',
-                display: 'inline-block'
-              }} />
-              <span>{serverOnline ? 'API Live' : 'API Sync'}</span>
-            </div>
+            
 
             {/* IoT Telemetry status (Desktop only) */}
             <div
@@ -243,7 +180,7 @@ export default function Navbar({
             </div>
 
             {/* Language Selector Dropdown (High-Contrast & Touch Friendly) */}
-            <div style={{
+            <div className='hide-on-mobile' style={{
               display: 'flex',
               alignItems: 'center',
               background: '#f8fafc',
@@ -282,10 +219,10 @@ export default function Navbar({
               <button
                 onClick={onLogout}
                 className="btn btn-secondary hide-on-mobile"
-                style={{ padding: '6px 10px', height: 38, fontSize: 12, borderRadius: 12 }}
+                style={{ padding: '6px 10px',width: 58,background: 'red',color: 'white', border: '1.5px solid #cbd5e1', height: 38, fontSize: 12, borderRadius: 12 }}
                 title="Logout"
               >
-                <LogOut size={14} />
+                <LogOut size={19} />
               </button>
             )}
           </div>
@@ -508,6 +445,6 @@ export default function Navbar({
           );
         })}
       </nav>
-    </>
+    </div>
   );
 }
