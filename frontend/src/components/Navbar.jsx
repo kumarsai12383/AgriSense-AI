@@ -54,8 +54,8 @@ export default function Navbar({
       {/* ── OFFICIAL GOVT OF INDIA TRICOLOR & MINISTRY BANNER ── */}
       <div className="govt-tricolor-bar" />
       <div className="govt-top-strip">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <span style={{ fontSize: 13 }}>🇮🇳</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 ,paddingLeft: 12, paddingRight: 12,paddingTop: 2, paddingBottom: 2,  fontSize: 11, fontWeight: 700 }}>
+          <span style={{ fontSize: 12 }}>🇮🇳</span>
           <span>भारत सरकार | कृषि एवं किसान कल्याण मंत्रालय (Ministry of Agriculture & Farmers Welfare)</span>
         </div>
         <div className="govt-top-strip-right hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
