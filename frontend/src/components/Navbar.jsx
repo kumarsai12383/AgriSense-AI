@@ -50,7 +50,7 @@ export default function Navbar({
   };
 
   return (
-    <div style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
+    <div style={{ position: 'fixed',margin: 0, top: 0, zIndex: 1000, width: '100%',height: 'auto', boxSizing: 'border-box' }}>
       {/* ── OFFICIAL GOVT OF INDIA TRICOLOR & MINISTRY BANNER ── */}
       <div className="govt-tricolor-bar" />
       <div className="govt-top-strip">
