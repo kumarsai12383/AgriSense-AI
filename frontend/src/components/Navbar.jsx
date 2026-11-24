@@ -180,7 +180,7 @@ export default function Navbar({
             </div>
 
             {/* Language Selector Dropdown (High-Contrast & Touch Friendly) */}
-            <div className='hide-on-mobile' style={{
+            <div  style={{
               display: 'flex',
               alignItems: 'center',
               background: '#f8fafc',
