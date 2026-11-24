@@ -27,7 +27,7 @@ export default function SoilHealth({ farmData, language }) {
   const phStat = getPhStatus(ph);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24,paddingTop: 125, margin: '0 auto', width: '100%' }}>
       {/* Banner */}
       <div 
         className="agri-card"

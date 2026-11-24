@@ -139,7 +139,7 @@ export default function HelpCenter({ language, setCurrentTab }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24,paddingTop: 125, margin: '0 auto', width: '100%' }}>
       {/* Hero Banner */}
       <div 
         className="agri-card"

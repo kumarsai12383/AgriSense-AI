@@ -17,14 +17,14 @@ export default function Navbar({
   const navItems = [
     { id: 'dashboard',  label: t.nav?.dashboard || 'Dashboard',      icon: LayoutDashboard },
     { id: 'sensors',    label: t.nav?.sensors || 'Soil Test',         icon: Cpu },
-    { id: 'crop',       label: t.nav?.crop || 'Crop AI',              icon: Wheat,          highlight: true },
+    { id: 'crop',       label: t.nav?.crop || 'Crop AI',              icon: Wheat,          },
     { id: 'soil',       label: t.nav?.soil || 'Soil Health',          icon: Activity },
     { id: 'irrigation', label: t.nav?.irrigation || 'Irrigation',     icon: Droplets },
     { id: 'fertilizer', label: t.nav?.fertilizer || 'Fertilizer',     icon: FlaskConical },
     { id: 'disease',    label: t.nav?.disease || 'Plant Doctor',      icon: Stethoscope },
     { id: 'mandi',      label: t.nav?.mandi || 'Mandi Prices',        icon: TrendingUp },
     { id: 'schemes',    label: t.nav?.schemes || 'Govt Schemes',      icon: Building2 },
-    { id: 'voice',      label: t.nav?.voice || 'Voice AI',            icon: Mic,            highlight: true },
+    { id: 'voice',      label: t.nav?.voice || 'Voice AI',            icon: Mic,             },
     { id: 'chat',       label: t.nav?.chat || 'AI Chat',              icon: MessageSquareCode },
     { id: 'help',       label: t.nav?.help || 'Help Guide',           icon: HelpCircle },
   ];
@@ -101,7 +101,7 @@ export default function Navbar({
               title="All Modules & Tools"
             >
               {mobileDrawerOpen ? <X size={18} /> : <Menu size={18} />}
-              <span style={{ fontWeight: 800 }}>{t.nav?.menu || 'Menu'}</span>
+              <span style={{ fontWeight: 800 }}>{'Modules'}</span>
             </button>
 
             
@@ -402,7 +402,8 @@ export default function Navbar({
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px) saturate(180%)',
         borderTop: '1px solid rgba(21, 128, 61, 0.18)',
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)'
+        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
+   
       }}>
         {mobileItems.map((item) => {
           const Icon = item.icon;

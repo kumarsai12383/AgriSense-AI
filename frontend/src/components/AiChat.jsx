@@ -205,7 +205,7 @@ export default function AiChat({ farmer, language, farmData, latestCrop, addToas
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16,paddingTop: 125, margin: '0 auto', width: '100%' }}>
       {/* Header Banner */}
       <div 
         className="agri-card"

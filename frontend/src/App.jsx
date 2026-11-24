@@ -120,7 +120,9 @@ export default function App() {
       )}
 
       {/* Main Navbar */}
-      <Navbar
+      {
+        farmer && (
+          <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         language={language}
@@ -130,6 +132,8 @@ export default function App() {
         sensorOnline={sensorOnline}
         serverOnline={serverOnline}
       />
+        )
+      }
 
       {/* Main Content Area */}
       <main className="main-content">
