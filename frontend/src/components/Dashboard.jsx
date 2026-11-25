@@ -308,11 +308,11 @@ export default function Dashboard({
   const farmerName = farmer?.name || 'Farmer';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 960, margin: '0 auto', width: '100%' }}>
+    <div className='nav-bottom-padding' style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 960,paddingTop:125, margin: 'auto', width: '100%' }}>
 
       {/* ══════════════════════════════════════════════════
           1. CLEAN FARMER WELCOME HEADER (GOVT TRICOLOR TOUCH)
-          ══════════════════════════════════════════════════ */}
+          ════════════════════════════════════════════════ */}
       <div
         className="agri-card"
         style={{

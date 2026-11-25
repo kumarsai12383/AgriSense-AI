@@ -25,7 +25,7 @@ export default function IrrigationAdvisor({ farmData, language, latestCrop }) {
   const isDry = moisture < 35;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 ,paddingTop: 125, margin: '0 auto', width: '100%' }}>
       {/* Banner */}
       <div 
         className="agri-card"
